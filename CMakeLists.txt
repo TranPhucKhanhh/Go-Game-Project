@@ -12,6 +12,14 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp)
-target_compile_features(main PRIVATE cxx_std_17)
-target_link_libraries(main PRIVATE SFML::Graphics)
+add_executable(GoGame 
+                       src/main.cpp
+                       src/Game.cpp
+                       src/Board.cpp
+                       src/UI.cpp
+                       src/AI.cpp
+)
+
+target_compile_features(GoGame PRIVATE cxx_std_17)
+target_link_libraries(GoGame PRIVATE SFML::Graphics)
+target_include_directories(GoGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
