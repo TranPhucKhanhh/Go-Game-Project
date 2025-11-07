@@ -11,7 +11,7 @@ public:
 
     void SetupUI();
 private:
-    Game game;
+    Game& game;
     sf::RenderWindow window;
 
     Player cur_player;
