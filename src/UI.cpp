@@ -14,6 +14,11 @@ void UI::setupUI() {
    
 }
 
+void UI::drawMenu() {
+    window.clear(sf::Color(255, 204, 153));
+
+}
+
 void UI::run() {
     int weight = game.windowHeight();
     int height = game.windowWeight();
@@ -25,7 +30,10 @@ void UI::run() {
             if (event->is<sf::Event::Closed>()) window.close();
         }
 
-        window.clear();
+        if (game.getGameState() == GameState::Menu) {
+            drawMenu();
+        }
+
         window.display();
     }
 }
