@@ -3,7 +3,7 @@
 
 int main()
 {
-	Game game(700, 400); // Set the default screen 
+	Game game( 1280,720); // Set the default screen 
 
 	UI ui(game, "Go-Game");
 
