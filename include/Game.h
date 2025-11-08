@@ -48,6 +48,7 @@ public:
 	// Return value
 	unsigned int windowHeight() const { return game_config.height; };
 	unsigned int windowWeight() const { return game_config.weight; };
+	GameState getGameState() const { return game_config.state; };
 
 	Position currPos(int x, int y) const {
 		if (x >= 1 && x <= game_config.board_size && y >= 1 && y <= game_config.board_size) return board[x][y];

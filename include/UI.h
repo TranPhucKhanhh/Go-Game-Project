@@ -7,9 +7,12 @@
     public:
         UI(Game& game, std::string title);
 
+        // UI initialize
         void run();
-
         void setupUI();
+
+        // UI for menu
+        void drawMenu();
     private:
         Game& game;
         sf::RenderWindow window;
