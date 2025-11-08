@@ -15,7 +15,7 @@ void UI::setupUI() {
 }
 
 void UI::drawMenu() {
-    window.clear(sf::Color(255, 204, 153));
+    window.clear(sf::Color(240, 217, 181));
 
 }
 
