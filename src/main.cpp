@@ -7,6 +7,6 @@ int main()
 
 	UI ui(game, "Go-Game");
 
-	ui.Run();
+	ui.run();
 	return 0;
 }

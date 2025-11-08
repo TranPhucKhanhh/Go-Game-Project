@@ -46,11 +46,11 @@ public:
 	Game(int _weight, int _height);
 
 	// Return value
-	unsigned int WindowHeight() const { return cfg.height; };
-	unsigned int WindowWeight() const { return cfg.weight; };
+	unsigned int windowHeight() const { return game_config.height; };
+	unsigned int windowWeight() const { return game_config.weight; };
 
-	Position CurrPos(int x, int y) const {
-		if (x >= 1 && x <= cfg.board_size && y >= 1 && y <= cfg.board_size) return board[x][y];
+	Position currPos(int x, int y) const {
+		if (x >= 1 && x <= game_config.board_size && y >= 1 && y <= game_config.board_size) return board[x][y];
 		std::cerr << "The current position is out of board x: " << x << " y: " << y << std::endl;
 		return Position::Invalid;
 	};
@@ -66,6 +66,6 @@ public:
 
 private:
 	Player cur_player;
-	GameCfg cfg;
+	GameCfg game_config;
 	std::vector< std::vector<Position> > board;
 };
