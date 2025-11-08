@@ -9,26 +9,6 @@ Rule::Rule(Game& game) : game(game) {
 
 }
 
-std::vector<Move> Rule::checkCapture(const Move &current) {
-	 Position ally = current.player;
-	 Position enemy = (current.player == Position::White) ? Position::Black : Position::White;
-
-	 // Idea: check around the current stone 
-	 // If the near stones is enemy -> count number of liberties of the whole enemy group
-	 for (int i = 0; i < 4; i++) {
-		 int x = current.x + x_jump[i];
-		 int y = current.y + y_jump[i];
-
-		 if (game.currPos(x, y) == enemy) {
-			 std::vector<Move> enemy_group = getGroup(Move(x, y, enemy));
-			 if (countGroupLibery(enemy_group) == 0) {
-				 return enemy_group;
-			 }
-		 }
-	 }
-	 
-}
-
 static void DfsGetGroup(const Move &current, std::vector<Move> &vec, const Game& game) {
 	for (int i = 0; i < 4; i++) {
 		int x = current.x  + x_jump[i];
@@ -66,4 +46,27 @@ std::vector<Move> Rule::getGroup(const Move &current) const {
 	std::vector<Move> _tmp;
 	DfsGetGroup(current, _tmp, game);
 	return _tmp;
+}
+
+std::vector<Move> Rule::checkCapture(const Move& current) {
+	Position ally = current.player;
+	Position enemy = (current.player == Position::White) ? Position::Black : Position::White;
+
+	std::vector<Move> enemy_capture;
+
+	// Idea: check around the current stone 
+	// If the near stones is enemy -> count number of liberties of the whole enemy 
+	for (int i = 0; i < 4; i++) {
+		int x = current.x + x_jump[i];
+		int y = current.y + y_jump[i];
+
+		if (game.currPos(x, y) == enemy) {
+			std::vector<Move> enemy_group = getGroup(Move(x, y, enemy));
+			if (countGroupLibery(enemy_group) == 0) {
+				enemy_capture.insert(enemy_capture.begin(), enemy_group.begin(), enemy_group.end());
+			}
+		}
+	}
+		
+	return enemy_capture;
 }
