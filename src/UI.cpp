@@ -4,19 +4,19 @@
 #include<string>
 
 UI::UI(Game& game, std::string title) : game(game),
-    window(sf::VideoMode({ game.WindowWeight(), game.WindowHeight() }), title) {
+    window(sf::VideoMode({ game.windowWeight(), game.windowHeight() }), title) {
     
     window.setVerticalSyncEnabled(true);
-    SetupUI();
+    setupUI();
 }
 
-void UI::SetupUI() {
+void UI::setupUI() {
    
 }
 
-void UI::Run() {
-    int weight = game.WindowHeight();
-    int height = game.WindowWeight();
+void UI::run() {
+    int weight = game.windowHeight();
+    int height = game.windowWeight();
 
     while (window.isOpen())
     {

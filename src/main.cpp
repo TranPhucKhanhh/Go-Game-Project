@@ -3,11 +3,10 @@
 
 int main()
 {
-	GameCfg game_cfg(700, 400); // window size
-	Game game(game_cfg);
+	Game game(700, 400); // Set the default screen 
 
 	UI ui(game, "Go-Game");
 
-	ui.Run();
+	ui.run();
 	return 0;
 }
