@@ -6,10 +6,11 @@
 #include<iostream>
 #include<vector>
 
-UI::UI(Game& game, std::string title, sf::Vector2u window_size) : game(game), window_size(window_size),
+UI::UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min_size) : game(game), window_size(window_size),
     window(sf::VideoMode({ window_size.x, window_size.y}), title) {
 
     window.setVerticalSyncEnabled(true);
+    window.setMinimumSize(min_size);
     setupUI();
 }
 

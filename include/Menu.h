@@ -3,6 +3,7 @@
 #include<Component.h>
 #include<FontManager.h>
 #include<vector>
+#include<string>
 
 class Menu {
 public:
@@ -14,5 +15,5 @@ public:
     
     void draw(sf::RenderWindow& window);
 private:
-    std::vector<SimpleButton> buttons;
+    std::unordered_map<std::string, SimpleButton> buttons;
 };

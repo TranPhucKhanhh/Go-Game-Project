@@ -7,7 +7,7 @@
 
 class UI {
 public:
-    UI(Game& game, std::string title, sf::Vector2u window_size);
+    UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min_size);
 
     // UI initialize
     void run();
