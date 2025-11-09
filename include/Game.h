@@ -19,10 +19,6 @@ struct Move {
 
 namespace {				// using namspace without name to avoid other files accessing this struct
 	struct GameCfg {
-		// Window size
-		int height = -1;
-		int weight = -1;
-
 		// Initial set up
 		GameState state = GameState::Menu;
 		int board_size = 13;
@@ -35,19 +31,13 @@ namespace {				// using namspace without name to avoid other files accessing thi
 		// On/Off state of the game audio
 		bool background_music = 1;
 		bool placing_stone = 1, capturing_stone = 1, end_game_sound = 1; // Sound effect
-
-		GameCfg(int _w, int _h) : weight(_w), height(_h) {}
 	};
 }
 
 
 class Game {
 public:
-	Game(int _weight, int _height);
-
 	// Return value
-	unsigned int windowHeight() const { return game_config.height; };
-	unsigned int windowWeight() const { return game_config.weight; };
 	GameState getGameState() const { return game_config.state; };
 
 	Position currPos(int x, int y) const {
