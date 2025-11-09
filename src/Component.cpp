@@ -12,8 +12,6 @@ SimpleButton::SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::
 
 	sf::FloatRect textBounds = text.getLocalBounds();
 
-	std::cerr << "Create a button on " << position.x << " " << position.y << std::endl;
-
 	text.setOrigin({ textBounds.position.x + textBounds.size.x / 2.f,
 						textBounds.position.y + textBounds.size.y / 2.f });
 
@@ -36,7 +34,7 @@ void SimpleButton::draw(sf::RenderWindow& window) const {
 	window.draw(text);
 }
 
-void SimpleButton::updatePos(sf::Vector2f position, sf::Vector2f size) {
+void SimpleButton::update() {
 	button.setPosition(position);
 
 	sf::FloatRect textBounds = text.getLocalBounds();

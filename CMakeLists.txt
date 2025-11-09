@@ -14,13 +14,14 @@ FetchContent_MakeAvailable(SFML)
 
 
 add_executable(GoGame 
-                       src/main.cpp
-                       src/Game.cpp
-                       src/Board.cpp
-                       src/AI.cpp
-                       src/Component.cpp
-                       src/UI.cpp
- "src/menu.cpp")
+                        src/main.cpp
+                        src/Game.cpp
+                        src/Board.cpp
+                        src/AI.cpp
+                        src/Component.cpp
+                        src/UI.cpp
+                        src/Menu.cpp
+)
 
 
 target_compile_features(GoGame PRIVATE cxx_std_17)

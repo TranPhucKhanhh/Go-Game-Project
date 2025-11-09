@@ -42,16 +42,22 @@ void UI::run() {
 
                 window.setView(uiView);
 
-                if (game.getGameState() == GameState::Menu) {
-                    menu.resize(window_size);
+                GameState current_state = game.getGameState();
+                switch (current_state) {
+                    case GameState::Menu:
+                        menu.resize(window_size);
+                        break;
                 }
             }
 
             if (const auto* e = event->getIf<sf::Event::MouseMoved>()) {
                 mouse_pos = e->position;
 
-                if (game.getGameState() == GameState::Menu) {
-                    menu.checkHover(mouse_pos);
+                GameState current_state = game.getGameState();
+                switch (current_state) {
+                    case GameState::Menu:
+                        menu.checkHover(mouse_pos);
+                        break;
                 }
             }
 
@@ -63,8 +69,11 @@ void UI::run() {
             }
         }
 
-        if (game.getGameState() == GameState::Menu) {
-            menu.draw(window);
+        GameState current_state = game.getGameState();
+        switch (current_state) {
+            case GameState::Menu:
+                menu.draw(window);
+                break;
         }
 
         window.display();   
