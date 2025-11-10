@@ -3,7 +3,6 @@
 #include<Game.h>
 #include<Component.h>
 #include<Menu.h>
-#include<FontManager.h>
 
 class UI {
 public:

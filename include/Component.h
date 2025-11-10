@@ -1,31 +1,54 @@
 #pragma once
 #include<SFML/Graphics.hpp>
+#include<iostream>
+
+
+class FontManager {
+public:
+	bool load(const std::string& name, std::string path);
+
+	const sf::Font& get(const std::string& name) const;
+
+	bool has(const std::string& name) const;
+
+private:
+	std::unordered_map<std::string, sf::Font> fonts;
+};
 
 class SimpleButton {
 public:
 
 	SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::string& text, unsigned int text_size, const sf::Font& font);
 
-	// Return value
+	// Return valuef::Font& f
 	const sf::Vector2f getPos() const { return position; };
 	const sf::Vector2f getSize() const { return size; };
 
 	// Update value
 	void updatePos(const sf::Vector2f& _position) { position = _position; };
 	void updateSize(const sf::Vector2f& _size) { size = _size; };
+	void updateTextSize(unsigned int text_size) { text_size = text_size; };
 
-	void setButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
-	void setTextColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_text_color = norm_c, hover_text_color = hover_c; }
-
+	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
+	void updateTextColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_text_color = norm_c, hover_text_color = hover_c; }
 	// Event check and update
 
 	void checkHover(const sf::Vector2i& mouse_pos);
 
-	void handleEvent(const sf::Event& e, const sf::RenderWindow& window);
+	void eventHandle(const sf::Event& event, const sf::Vector2i& mouse_pos);
 
 	void update();
 
 	void draw(sf::RenderWindow& window) const;
+
+	// Function for modifying outside the class
+	void onIdle();
+
+	void onHover();
+
+	void onClick();
+
+	void onMouseHold();
 
 private:
 	sf::RectangleShape button;
@@ -35,6 +58,8 @@ private:
 	sf::Vector2f size;
 
 	bool hovered = false;
+	bool mouseHold = false;
+	unsigned int text_size;
 
 	// Color for button
 	sf::Color normal_button_color{ 100, 100, 200 };

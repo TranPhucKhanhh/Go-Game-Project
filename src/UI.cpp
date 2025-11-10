@@ -31,6 +31,8 @@ void UI::run() {
         {
             if (event->is<sf::Event::Closed>()) window.close();
 
+            if (const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) mouse_pos = mouse_move->position;
+
             if (const auto* resized = event->getIf<sf::Event::Resized>()) {
                 window_size = window.getSize();
                 std::cerr << "Window resize: " << window_size.x << " " << window_size.y << std::endl;
@@ -42,24 +44,6 @@ void UI::run() {
                 uiView.setViewport(sf::FloatRect({ 0.f, 0.f }, { 1.f, 1.f }));
 
                 window.setView(uiView);
-
-                GameState current_state = game.getGameState();
-                switch (current_state) {
-                    case GameState::Menu:
-                        menu.resize(window_size);
-                        break;
-                }
-            }
-
-            if (const auto* e = event->getIf<sf::Event::MouseMoved>()) {
-                mouse_pos = e->position;
-
-                GameState current_state = game.getGameState();
-                switch (current_state) {
-                    case GameState::Menu:
-                        menu.checkHover(mouse_pos);
-                        break;
-                }
             }
 
             // For debugging mouse position
@@ -67,6 +51,14 @@ void UI::run() {
                 if (mouseButtonPressed->button == sf::Mouse::Button::Right) {
                     std::cerr << "mouse pos: " << mouse_pos.x << " " << mouse_pos.y << std::endl;
                 }
+            }
+
+            // Handle the event for GameState
+            GameState current_state = game.getGameState();
+            switch (current_state) {
+            case GameState::Menu:
+                menu.eventHandle(*event, mouse_pos, window_size);
+                break;
             }
         }
 
