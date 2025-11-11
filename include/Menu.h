@@ -10,10 +10,9 @@ public:
 
     void eventHandle(const sf::Event &event, const sf::Vector2i &mouse_pos, const sf::Vector2u &window_size);
 
+    void draw(sf::RenderWindow& window);
 private:
     std::unordered_map<std::string, SimpleButton> buttons;
 
-    void resize(const sf::Vector2u& window_size);
-    
-    void draw(sf::RenderWindow& window);
+    void resize(const sf::Vector2u& window_size);  
 };

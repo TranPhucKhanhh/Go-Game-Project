@@ -16,7 +16,12 @@ UI::UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min
 
 void UI::setupUI() {
     // Load fonts
-    font_manager.load("arial", "/fonts/ARIAL.TTF");
+    font_manager.load("StackSansNotch-Bold", "/fonts/Stack_Sans_Notch/static/StackSansNotch-Bold.ttf");
+    font_manager.load("StackSansNotch-Regular", "/fonts/Stack_Sans_Notch/static/StackSansNotch-Regular.ttf");
+    
+    font_manager.load("Rubik", "/fonts/Rubik_80s_Fade/Rubik80sFade-Regular.ttf");
+
+    font_manager.load("Roboto-Slab-Bold", "/fonts/Roboto_Slab/static/RobotoSlab-Bold.ttf");
 
     menu.build(window_size, font_manager);
 }

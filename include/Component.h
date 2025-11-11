@@ -42,13 +42,19 @@ public:
 	void draw(sf::RenderWindow& window) const;
 
 	// Function for modifying outside the class
-	void onIdle();
+	void onIdle() { button.setFillColor(normal_button_color); };
 
-	void onHover();
+	void onHover() { button.setFillColor(hover_button_color); };
 
-	void onClick();
+	void onClick() { 
+		std::cerr << "Button Click!" << std::endl; 
+		sf::FloatRect b = text.getLocalBounds();
+		std::cerr << b.position.x << " " << b.position.y << " " << b.size.x << " " << b.size.y << std::endl;
+		b = text.getGlobalBounds();
+		std::cerr << b.position.x << " " << b.position.y << " " << b.size.x << " " << b.size.y << std::endl;
+	}
 
-	void onMouseHold();
+	void onMouseHold() { button.setFillColor(press_button_color); };
 
 private:
 	sf::RectangleShape button;
@@ -58,12 +64,13 @@ private:
 	sf::Vector2f size;
 
 	bool hovered = false;
-	bool mouseHold = false;
+	bool mouse_hold = false;
 	unsigned int text_size;
 
 	// Color for button
 	sf::Color normal_button_color{ 100, 100, 200 };
-	sf::Color hover_button_color{ 150, 150, 250 };
+	sf::Color hover_button_color{ 90, 90, 150 };
+	sf::Color press_button_color{ 62, 62, 89 };
 
 	// Color for text
 	sf::Color normal_text_color{ 255, 255, 255 };

@@ -18,7 +18,7 @@ const sf::Font& FontManager::get(const std::string& name) const {
 }
 
 bool FontManager::has(const std::string& name) const {
-		return fonts.find(name) != fonts.end();
+	return fonts.find(name) != fonts.end();
 }
 
 SimpleButton::SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::string& str,
@@ -32,7 +32,6 @@ void SimpleButton::checkHover(const sf::Vector2i &mouse_pos)  {
 
 	if (shape_bound.contains((sf::Vector2f)mouse_pos)) {
 		hovered = true;
-		onHover();
 	}
 	else {
 		hovered = false;
@@ -45,31 +44,39 @@ void SimpleButton::draw(sf::RenderWindow& window) const {
 }
 
 void SimpleButton::update() {
-	button.setFillColor(normal_button_color);
-	text.setFillColor(normal_text_color);
+	if (mouse_hold && hovered) {
+		onMouseHold();
+	}
+	else if (hovered) {
+		onHover();
+	}
+	else {
+		onIdle();
+	}
 
 	button.setPosition(position);
+	button.setSize(size);
 
-	sf::FloatRect textBounds = text.getLocalBounds();
-	text.setOrigin({ textBounds.position.x + textBounds.size.x / 2.f,
-						textBounds.position.y + textBounds.size.y / 2.f });
-	text.setPosition({ position.x + size.x / 2.f, position.y + size.y / 2.f });
+	sf::FloatRect text_bound = text.getLocalBounds();
+	//text.setOrigin({ textBounds.position.x + textBounds.size.x / 2.f,
+	//					textBounds.position.y + textBounds.size.y / 2.f });
+	text.setPosition({ position.x, position.y });
+	// 	text.setPosition({ position.x + (size.x - text_bound.size.x) / 2.f, position.y + (size.y - text_bound.size.y) / 2.f });
+
 }
 
 void SimpleButton::eventHandle(const sf::Event& event, const sf::Vector2i& mouse_pos) {
 	if (event.is<sf::Event::MouseMoved>()) {
 		checkHover(mouse_pos);
 	}
-	else if (event.is<sf::Event::MouseButtonPressed>()) {
-		mouseHold = true;
-		if (hovered) {
-			onMouseHold();	
-		}
+	else if (const auto* button = event.getIf<sf::Event::MouseButtonPressed>()) {
+		if (button->button == sf::Mouse::Button::Left)
+		mouse_hold = true;
 	}
 	else if (event.is<sf::Event::MouseButtonReleased>()) {
-		if (hovered && mouseHold) {
+		if (hovered && mouse_hold) {
 			onClick();
 		}
-		mouseHold = false;
+		mouse_hold = false;
 	}
 }
