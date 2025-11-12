@@ -22,6 +22,8 @@ void UI::setupUI() {
     font_manager.load("Rubik", "/fonts/Rubik_80s_Fade/Rubik80sFade-Regular.ttf");
 
     font_manager.load("Roboto-Slab-Bold", "/fonts/Roboto_Slab/static/RobotoSlab-Bold.ttf");
+    
+    font_manager.load("Momo", "/fonts/Momo_Trust_Display/MomoTrustDisplay-Regular.ttf");
 
     menu.build(window_size, font_manager);
 }

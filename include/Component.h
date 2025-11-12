@@ -26,7 +26,7 @@ public:
 
 	// Update value
 	void updatePos(const sf::Vector2f& _position) { position = _position; };
-	void updateSize(const sf::Vector2f& _size) { size = _size; };
+	void updateSize(const sf::Vector2f& _size) { size = _size, button.setOrigin(size / 2.f); };
 	void updateTextSize(unsigned int text_size) { text_size = text_size; };
 
 	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }

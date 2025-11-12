@@ -3,12 +3,9 @@
 #include<iostream>
 
 bool FontManager::load(const std::string& name, std::string path) {
-	sf::Font font;
 	path = std::string(ASSET_DIR) + path;
-	if (!font.openFromFile(path)) {
-		std::cerr << "ERROR: Can't load font from " << path << "\n";
-		return false;
-	}
+	sf::Font font;
+	font.openFromFile(path);
 	fonts[name] = std::move(font);
 	return true;
 }
@@ -24,6 +21,10 @@ bool FontManager::has(const std::string& name) const {
 SimpleButton::SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::string& str,
 	unsigned int text_size, const sf::Font& font) : button(size), text(font, str, text_size), size(size), position(position), text_size(text_size) {
 	
+	sf::FloatRect text_bound = text.getLocalBounds();
+	text.setOrigin({ text_bound.position.x + text_bound.size.x / 2.f,
+						text_bound.position.y + text_bound.size.y / 2.f });
+	button.setOrigin(size / 2.f);
 	update();
 }
 
@@ -57,12 +58,7 @@ void SimpleButton::update() {
 	button.setPosition(position);
 	button.setSize(size);
 
-	sf::FloatRect text_bound = text.getLocalBounds();
-	//text.setOrigin({ textBounds.position.x + textBounds.size.x / 2.f,
-	//					textBounds.position.y + textBounds.size.y / 2.f });
-	text.setPosition({ position.x, position.y });
-	// 	text.setPosition({ position.x + (size.x - text_bound.size.x) / 2.f, position.y + (size.y - text_bound.size.y) / 2.f });
-
+	text.setPosition(position);
 }
 
 void SimpleButton::eventHandle(const sf::Event& event, const sf::Vector2i& mouse_pos) {

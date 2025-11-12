@@ -1,6 +1,5 @@
 #include<SFML/Graphics.hpp>
 #include<Menu.h>
-#include<UI.h>
 #include<Component.h>
 #include<algorithm>
 
@@ -8,12 +7,19 @@ sf::Vector2f button_size = { 300,100 };
 int margin = 50;
 
 void Menu::build(const sf::Vector2u& window_size, const FontManager& font_manager) {
-    SimpleButton start_button({ window_size.x / 2.f - button_size.x / 2.f, window_size.y / 2.f }, button_size, "START", 50, font_manager.get("Roboto-Slab-Bold"));
-    SimpleButton setting_button({ window_size.x / 2.f - button_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin)}, button_size, "SETTING", 50, font_manager.get("Roboto-Slab-Bold"));
-    //sf::Text title(font_manager.get("Rubik"), "Go Game", 75);
-
+    SimpleButton start_button({ window_size.x / 2.f, window_size.y / 2.f }, button_size, "START", 50, font_manager.get("Roboto-Slab-Bold"));
+    SimpleButton setting_button({ window_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f)}, button_size, "SETTING", 50, font_manager.get("Roboto-Slab-Bold"));
+   
     buttons.emplace("Start", std::move(start_button));
     buttons.emplace("Setting", std::move(setting_button));
+
+    sf::Text title(font_manager.get("Momo"), "Go Game", 100);
+    title.setFillColor(sf::Color(0,0,0));
+    sf::FloatRect title_bound = title.getLocalBounds();
+    title.setOrigin({title_bound.position.x + title_bound.size.x / 2.f, title_bound.position.y + title_bound.size.y / 2.f });
+    title.setPosition({ window_size.x / 2.f, window_size.y / 2.f - (button_size.y + margin + title_bound.size.y) });
+
+    texts.emplace("Title", std::move(title));
 }
 
 void Menu::eventHandle(const sf::Event &event, const sf::Vector2i &mouse_pos, const sf::Vector2u &window_size) {
@@ -33,6 +39,9 @@ void Menu::draw(sf::RenderWindow& window) {
         button.update();
         button.draw(window);
     }
+    for (auto& [label, text] : texts) {
+        window.draw(text);
+    }
 }
 
 void Menu::resize(const sf::Vector2u& window_size) {
@@ -46,6 +55,13 @@ void Menu::resize(const sf::Vector2u& window_size) {
 
     start_button.updateSize(button_size);
     setting_button.updateSize(button_size);
-    start_button.updatePos({ window_size.x / 2.f - button_size.x / 2.f, window_size.y / 2.f});
-    setting_button.updatePos({ window_size.x / 2.f - button_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin) });
+    start_button.updatePos({ window_size.x / 2.f, window_size.y / 2.f});
+    setting_button.updatePos({ window_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f) });
+
+    sf::Text& title = texts.at("Title");
+    title.setCharacterSize(std::min(window_size.x, window_size.y) / 7);
+    
+    sf::FloatRect title_bound = title.getLocalBounds();
+    title.setOrigin({ title_bound.position.x + title_bound.size.x / 2.f, title_bound.position.y + title_bound.size.y / 2.f });
+    title.setPosition({ window_size.x / 2.f, window_size.y / 2.f - (button_size.y + margin + title_bound.size.y) });
 }
