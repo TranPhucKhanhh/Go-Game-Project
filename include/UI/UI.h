@@ -1,8 +1,9 @@
 #pragma once
 #include<SFML/Graphics.hpp>
 #include<Game.h>
-#include<Component.h>
-#include<Menu.h>
+#include<UI/Component.h>
+#include<UI/Menu.h>
+#include<UI/InGame.h>
 
 class UI {
 public:
@@ -15,10 +16,11 @@ public:
 private:
     Game& game;
     Menu menu;
-    Player cur_player;
+    InGame in_game;
 
     sf::RenderWindow window;
-    FontManager font_manager;
+    AssetManager asset_manager;
+
     sf::Vector2i mouse_pos;
     sf::Vector2u window_size;
 };

@@ -1,13 +1,12 @@
 #include<SFML/Graphics.hpp>
-#include<Component.h>
-#include<UI.h>
+#include<UI/Component.h>
+#include<UI/UI.h>
 #include<Game.h>
 #include<string>
 #include<iostream>
 #include<vector>
 
-UI::UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min_size) : game(game), window_size(window_size),
-    window(sf::VideoMode({ window_size.x, window_size.y}), title) {
+UI::UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min_size) : game(game), window_size(window_size), window(sf::VideoMode(window_size), title), in_game(asset_manager, game.getGameCfg()) {
 
     window.setVerticalSyncEnabled(true);
     window.setMinimumSize(min_size);
@@ -16,16 +15,17 @@ UI::UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min
 
 void UI::setupUI() {
     // Load fonts
-    font_manager.load("StackSansNotch-Bold", "/fonts/Stack_Sans_Notch/static/StackSansNotch-Bold.ttf");
-    font_manager.load("StackSansNotch-Regular", "/fonts/Stack_Sans_Notch/static/StackSansNotch-Regular.ttf");
-    
-    font_manager.load("Rubik", "/fonts/Rubik_80s_Fade/Rubik80sFade-Regular.ttf");
+    asset_manager.loadFont("StackSansNotch-Bold", "/fonts/Stack_Sans_Notch/static/StackSansNotch-Bold.ttf");
+    asset_manager.loadFont("StackSansNotch-Regular", "/fonts/Stack_Sans_Notch/static/StackSansNotch-Regular.ttf");
+    asset_manager.loadFont("Rubik", "/fonts/Rubik_80s_Fade/Rubik80sFade-Regular.ttf");
+    asset_manager.loadFont("Roboto-Slab-Bold", "/fonts/Roboto_Slab/static/RobotoSlab-Bold.ttf");
+    asset_manager.loadFont("Momo", "/fonts/Momo_Trust_Display/MomoTrustDisplay-Regular.ttf");
 
-    font_manager.load("Roboto-Slab-Bold", "/fonts/Roboto_Slab/static/RobotoSlab-Bold.ttf");
-    
-    font_manager.load("Momo", "/fonts/Momo_Trust_Display/MomoTrustDisplay-Regular.ttf");
+    // Load texture
+    asset_manager.loadTexture("board-minimal", "/board-background/board-minimal.png");
 
-    menu.build(window_size, font_manager);
+    menu.build(window_size, asset_manager);
+    in_game.build(window_size);
 }
 
 void UI::run() {
@@ -66,6 +66,8 @@ void UI::run() {
             case GameState::Menu:
                 menu.eventHandle(*event, mouse_pos, window_size);
                 break;
+            case GameState::Playing:
+                in_game.eventHandle(*event, mouse_pos, window_size);
             }
         }
 
@@ -73,6 +75,9 @@ void UI::run() {
         switch (current_state) {
             case GameState::Menu:
                 menu.draw(window);
+                break;
+            case GameState::Playing:
+                in_game.draw(window);
                 break;
         }
 

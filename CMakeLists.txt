@@ -12,17 +12,22 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-
 add_executable(GoGame 
-                        src/main.cpp
-                        src/Game.cpp
-                        src/Board.cpp
-                        src/AI.cpp
-                        src/Component.cpp
-                        src/UI.cpp
-                        src/Menu.cpp
-)
+                        src/component/Board.cpp
+                        src/component/Button.cpp
+                        src/component/Stone.cpp
 
+                        src/core/AssetManager.cpp
+
+                        src/UI/InGame.cpp
+                        src/UI/Menu.cpp
+                        src/UI/UI.cpp
+
+                        src/AI.cpp
+                        src/Board.cpp
+                        src/Game.cpp
+                        src/main.cpp
+)
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics)

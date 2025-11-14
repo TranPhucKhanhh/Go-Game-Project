@@ -17,23 +17,20 @@ struct Move {
 	Move(int _x, int _y, Position _p) : x(_x), y(_y), player(_p) {}
 };
 
-namespace {				// using namspace without name to avoid other files accessing this struct
-	struct GameCfg {
-		// Initial set up
-		GameState state = GameState::Menu;
-		int board_size = 13;
+struct GameCfg {
+	// Initial set up
+	GameState state = GameState::Menu;
+	int board_size = 13;
 
-		// Design selection
-		SoundTheme sound_theme = SoundTheme::Minimal;  // temporarily set to minimal
-		BoardDesign board_design = BoardDesign::Minimal;
-		StoneDesign stone_design = StoneDesign::Minimal;
+	// Design selection
+	SoundTheme sound_theme = SoundTheme::Minimal;  // temporarily set to minimal
+	BoardDesign board_design = BoardDesign::Minimal;
+	StoneDesign stone_design = StoneDesign::Minimal;
 
-		// On/Off state of the game audio
-		bool background_music = 1;
-		bool placing_stone = 1, capturing_stone = 1, end_game_sound = 1; // Sound effect
-	};
-}
-
+	// On/Off state of the game audio
+	bool background_music = 1;
+	bool placing_stone = 1, capturing_stone = 1, end_game_sound = 1; // Sound effect
+};
 
 class Game {
 public:
@@ -54,6 +51,7 @@ public:
 
 	// Helper function
 	Player getCurrentPlayer() const { return cur_player; };
+	GameCfg getGameCfg() const { return game_config; };
 
 private:
 	Player cur_player;

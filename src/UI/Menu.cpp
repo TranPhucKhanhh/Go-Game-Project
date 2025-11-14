@@ -1,19 +1,28 @@
 #include<SFML/Graphics.hpp>
-#include<Menu.h>
-#include<Component.h>
+#include<UI/Menu.h>
+#include<UI/Component.h>
+#include<core/AssetManager.h>
 #include<algorithm>
+#include<iostream>
 
 sf::Vector2f button_size = { 300,100 };
 int margin = 50;
 
-void Menu::build(const sf::Vector2u& window_size, const FontManager& font_manager) {
-    SimpleButton start_button({ window_size.x / 2.f, window_size.y / 2.f }, button_size, "START", 50, font_manager.get("Roboto-Slab-Bold"));
-    SimpleButton setting_button({ window_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f)}, button_size, "SETTING", 50, font_manager.get("Roboto-Slab-Bold"));
+static void testClickFunction() {
+    std::cerr << "Click button" << std::endl;
+}
+
+void Menu::build(const sf::Vector2u& window_size, const AssetManager& asset_manager) {
+    SimpleButton start_button({ window_size.x / 2.f, window_size.y / 2.f }, button_size, "START", 50, asset_manager.getFont("Roboto-Slab-Bold"));
+    SimpleButton setting_button({ window_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f)}, button_size, "SETTING", 50, asset_manager.getFont("Roboto-Slab-Bold"));
    
+    start_button.updateOnClick(testClickFunction);
+    setting_button.updateOnClick(testClickFunction);
+
     buttons.emplace("Start", std::move(start_button));
     buttons.emplace("Setting", std::move(setting_button));
 
-    sf::Text title(font_manager.get("Momo"), "Go Game", 100);
+    sf::Text title(asset_manager.getFont("Momo"), "Go Game", 100);
     title.setFillColor(sf::Color(0,0,0));
     sf::FloatRect title_bound = title.getLocalBounds();
     title.setOrigin({title_bound.position.x + title_bound.size.x / 2.f, title_bound.position.y + title_bound.size.y / 2.f });

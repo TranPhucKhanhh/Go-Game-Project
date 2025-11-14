@@ -1,6 +1,7 @@
 #pragma once
 #include<SFML/Graphics.hpp>
-#include<Component.h>
+#include<UI/Component.h>
+#include<core/AssetManager.h>
 #include<vector>
 #include<string>
 
@@ -8,7 +9,7 @@ class Menu {
 public:
     Menu() = default;
 
-    void build(const sf::Vector2u& window_size, const FontManager& font_manager);
+    void build(const sf::Vector2u& window_size, const AssetManager& asset_manager);
 
     void eventHandle(const sf::Event &event, const sf::Vector2i &mouse_pos, const sf::Vector2u &window_size);
 

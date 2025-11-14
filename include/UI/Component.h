@@ -1,19 +1,6 @@
 #pragma once
 #include<SFML/Graphics.hpp>
-#include<iostream>
-
-
-class FontManager {
-public:
-	bool load(const std::string& name, std::string path);
-
-	const sf::Font& get(const std::string& name) const;
-
-	bool has(const std::string& name) const;
-
-private:
-	std::unordered_map<std::string, sf::Font> fonts;
-};
+#include<functional>
 
 class SimpleButton {
 public:
@@ -31,6 +18,7 @@ public:
 
 	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
 	void updateTextColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_text_color = norm_c, hover_text_color = hover_c; }
+	void updateOnClick(std::function<void()> func) { onClick = func; }
 	// Event check and update
 
 	void checkHover(const sf::Vector2i& mouse_pos);
@@ -46,14 +34,6 @@ public:
 
 	void onHover() { button.setFillColor(hover_button_color); };
 
-	void onClick() { 
-		std::cerr << "Button Click!" << std::endl; 
-		sf::FloatRect b = text.getLocalBounds();
-		std::cerr << b.position.x << " " << b.position.y << " " << b.size.x << " " << b.size.y << std::endl;
-		b = text.getGlobalBounds();
-		std::cerr << b.position.x << " " << b.position.y << " " << b.size.x << " " << b.size.y << std::endl;
-	}
-
 	void onMouseHold() { button.setFillColor(press_button_color); };
 
 private:
@@ -62,6 +42,8 @@ private:
 
 	sf::Vector2f position;
 	sf::Vector2f size;
+
+	std::function<void()> onClick;
 
 	bool hovered = false;
 	bool mouse_hold = false;
@@ -75,4 +57,30 @@ private:
 	// Color for text
 	sf::Color normal_text_color{ 255, 255, 255 };
 	sf::Color hover_text_color{ 255, 255, 255 };
+
+};
+
+class Stone {
+public:
+	Stone(float size, unsigned int edge);
+	void draw(sf::RenderWindow& window) const;
+	void reSize(float size) { size = size; };
+
+	void updatePos(const sf::Vector2f& position) { stone.setPosition(position); };
+
+private:
+	sf::CircleShape stone;
+	sf::Color color = sf::Color(0, 0, 0);
+	float size;
+
+	sf::Vector2u position;
+};
+
+class Board {
+public:
+	void resize(float size);
+	void draw(sf::RenderWindow& window);
+private:
+	sf::RectangleShape canvas;
+	std::vector<Stone> stone_placement;
 };

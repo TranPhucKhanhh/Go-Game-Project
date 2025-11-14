@@ -1,5 +1,5 @@
 #include <Game.h>
-#include<UI.h>
+#include<UI/UI.h>
 
 const unsigned int WINDOW_START_WIDTH = 1280u;
 const unsigned int WINDOW_START_HEIGHT = 720u;
