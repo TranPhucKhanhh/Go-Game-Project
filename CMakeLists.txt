@@ -18,7 +18,7 @@ add_executable(GoGame
                        src/Board.cpp
                        src/UI.cpp
                        src/AI.cpp
- "include/Component.h" "src/Component.cpp")
+ "include/Component.h" "src/Component.cpp" "src/History.cpp" "include/InGameState.h"  "include/Move.h" "include/CellState.h"  "include/Cell.h" "include/GameState.h")
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics)
