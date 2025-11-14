@@ -1,7 +1,7 @@
 #include<SFML/Graphics.hpp>
 #include<UI/InGame.h>
 #include<UI/Component.h>
-#include<game.h>
+#include<Game.h>
 #include<algorithm>
 #include<iostream>
 
