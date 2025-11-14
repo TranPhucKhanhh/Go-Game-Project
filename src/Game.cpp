@@ -1,5 +1,70 @@
+#pragma once
 #include<Game.h>
+#include<vector>
+#include<iostream>
 
 Game::Game(int _weight, int _height) : game_config(_weight, _height) {
 
 };
+
+void Game::start() {
+	//Init first state with board_size size, black to move
+	state.initializer(game_config.board_size);
+	std::cout << "Game initializer\n";
+}
+
+void Game::pass() {
+	Move move(-1, -1, state.current_player, 1);
+	std::vector<Cell> capture;
+	state.setNextPlayer();
+	history.addMove(move, state.current_board, capture);
+	if (history.checkConsecutivePass()) end();
+}
+
+void Game::undo() {
+	history.undoMove(state.current_board, state.current_player);
+}
+
+void Game::redo() {
+	history.redoMove(state.current_board, state.current_player);
+}
+
+void Game::reset() {
+	//Init same as the start of the game
+	state.initializer(game_config.board_size);
+	//Clear all undo, redo, and board history
+	history.clear();   
+}
+
+void Game::placeStone(int x, int y) {
+	Move move(x, y, state.current_player, 0);
+	std::vector<Cell> capture;
+	if (state.validateMove(move, capture) == 0) return;
+	for (auto i : capture) {
+		//std::cout << i.x << " " << i.y << " " << (i.state == CellState::Black ? "Black" : "White") << "\n";
+		state.current_board[i.x][i.y] = CellState::Empty;
+	}
+	if (history.checkSuperKO(state.current_board)) {
+		state.current_board[x][y] = CellState::Empty;
+		for (auto i : capture) {
+			state.current_board[i.x][i.y] = i.state;
+		}
+		return;
+	}
+	history.addMove(move, state.current_board, capture);
+	state.setNextPlayer();
+	//std::cout << "Placing stone in: " << x << " " << y << "\n";
+	//state.printPlayer();
+}
+
+void Game::end() {
+	int black_score = 0;
+	int white_score = game_config.komi;
+	state.current_board.calculateScore(state.current_board,black_score, white_score);
+	std::cout << black_score << " " << white_score << "\n";
+}
+
+void Game::print() {
+	state.printPlayer();
+	state.current_board.printBoard(state.current_board);
+}

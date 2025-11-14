@@ -1,21 +1,14 @@
 #pragma once
-#include<vector>
 #include<iostream>
+#include<InGameState.h>
+#include<History.h>
+#include<Move.h>
+#include<CellState.h>
+#include<GameState.h>
 
-enum class GameState { Menu, Setting, Playing, Paused, GameOver };
 enum class SoundTheme { Default, Minimal };
 enum class BoardDesign { Default, Minimal };
 enum class StoneDesign { Default, Minimal };
-enum class Player { White, Black };
-enum class Position { Invalid, Empty, Black, White };
-
-struct Move {
-	int x, y;
-	Position player;
-
-	Move() {};
-	Move(int _x, int _y, Position _p) : x(_x), y(_y), player(_p) {}
-};
 
 namespace {				// using namspace without name to avoid other files accessing this struct
 	struct GameCfg {
@@ -26,6 +19,7 @@ namespace {				// using namspace without name to avoid other files accessing thi
 		// Initial set up
 		GameState state = GameState::Menu;
 		int board_size = 13;
+		int komi = 7;
 
 		// Design selection
 		SoundTheme sound_theme = SoundTheme::Minimal;  // temporarily set to minimal
@@ -36,13 +30,13 @@ namespace {				// using namspace without name to avoid other files accessing thi
 		bool background_music = 1;
 		bool placing_stone = 1, capturing_stone = 1, end_game_sound = 1; // Sound effect
 
-		GameCfg(int _w, int _h) : weight(_w), height(_h) {}
+		GameCfg(int w, int h) : weight(w), height(h) {}
 	};
 }
 
-
 class Game {
 public:
+	//Initial state for the game
 	Game(int _weight, int _height);
 
 	// Return value
@@ -50,23 +44,32 @@ public:
 	unsigned int windowWeight() const { return game_config.weight; };
 	GameState getGameState() const { return game_config.state; };
 
-	Position currPos(int x, int y) const {
-		if (x >= 1 && x <= game_config.board_size && y >= 1 && y <= game_config.board_size) return board[x][y];
+	CellState currPos(int x, int y) const {
+		if (x >= 1 && x <= game_config.board_size && y >= 1 && y <= game_config.board_size) return state.current_board[x][y];
 		std::cerr << "The current position is out of board x: " << x << " y: " << y << std::endl;
-		return Position::Invalid;
+		return CellState::Invalid;
 	};
 
 	// Player's input
+	void start();
 	void pass();
 	void undo();
 	void redo();
 	void reset();
+	void placeStone(int x, int y);
+	void end();
+	void print();
 
 	// Helper function
-	Player getCurrentPlayer() const { return cur_player; };
+	CellState getCurrentPlayer() const { return state.current_player; };
 
 private:
-	Player cur_player;
+	//Game configuration
 	GameCfg game_config;
-	std::vector< std::vector<Position> > board;
+
+	//Current game state
+	InGameState state;
+
+	//Current game history
+	GameHistory history;
 };
