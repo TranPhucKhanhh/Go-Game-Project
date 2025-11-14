@@ -15,7 +15,7 @@ FetchContent_MakeAvailable(SFML)
 add_executable(GoGame 
                         src/component/Board.cpp
                         src/component/Button.cpp
-                        src/component/Stone.cpp
+                        src/component/TextBox.cpp
 
                         src/core/AssetManager.cpp
 

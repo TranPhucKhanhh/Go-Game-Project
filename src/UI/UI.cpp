@@ -22,7 +22,9 @@ void UI::setupUI() {
     asset_manager.loadFont("Momo", "/fonts/Momo_Trust_Display/MomoTrustDisplay-Regular.ttf");
 
     // Load texture
+    asset_manager.loadTexture("board-default", "/board-background/board-default.png");
     asset_manager.loadTexture("board-minimal", "/board-background/board-minimal.png");
+    asset_manager.loadTexture("stone-default", "/stone/stone-default.png");
 
     menu.build(window_size, asset_manager);
     in_game.build(window_size);
@@ -30,7 +32,6 @@ void UI::setupUI() {
 
 void UI::run() {
     sf::View uiView(sf::FloatRect( { 0.f, 0.f }, (sf::Vector2f) window.getSize()));
-    uiView.setViewport(sf::FloatRect({ 0.f, 0.f }, { 1.f, 1.f }));
 
     while (window.isOpen())
     {
@@ -57,6 +58,7 @@ void UI::run() {
             if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonReleased>()) {
                 if (mouseButtonPressed->button == sf::Mouse::Button::Right) {
                     std::cerr << "mouse pos: " << mouse_pos.x << " " << mouse_pos.y << std::endl;
+                    std::cerr << "mous pos2: " << sf::Mouse::getPosition(window).x << " " << sf::Mouse::getPosition(window).y << std::endl;
                 }
             }
 

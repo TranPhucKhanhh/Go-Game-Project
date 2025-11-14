@@ -27,6 +27,16 @@ private:
     void resize(const sf::Vector2u& window_size);
 
     // Screen UI value
-    float margin;
-    float canva_size;
+    float padding;
+    float inner_padding;
+    sf::Vector2f canvas_size;
+    float side_panel_size_x;
+    float board_size;
+    float status_bar_size_y;
+
+    // Debug shape
+    sf::RectangleShape debug;
+    sf::RectangleShape side_panel;
+    sf::RectangleShape header_bar;
+    sf::RectangleShape footer_bar;
 };

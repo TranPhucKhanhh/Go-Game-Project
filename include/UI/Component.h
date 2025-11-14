@@ -7,13 +7,13 @@ public:
 
 	SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::string& text, unsigned int text_size, const sf::Font& font);
 
-	// Return valuef::Font& f
+	// Return value
 	const sf::Vector2f getPos() const { return position; };
 	const sf::Vector2f getSize() const { return size; };
 
 	// Update value
 	void updatePos(const sf::Vector2f& _position) { position = _position; };
-	void updateSize(const sf::Vector2f& _size) { size = _size, button.setOrigin(size / 2.f); };
+	void updateSize(const sf::Vector2f& _size) { size = _size; };
 	void updateTextSize(unsigned int text_size) { text_size = text_size; };
 
 	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
@@ -42,12 +42,12 @@ private:
 
 	sf::Vector2f position;
 	sf::Vector2f size;
+	unsigned int text_size;
 
 	std::function<void()> onClick;
 
 	bool hovered = false;
 	bool mouse_hold = false;
-	unsigned int text_size;
 
 	// Color for button
 	sf::Color normal_button_color{ 100, 100, 200 };
@@ -60,27 +60,74 @@ private:
 
 };
 
-class Stone {
-public:
-	Stone(float size, unsigned int edge);
-	void draw(sf::RenderWindow& window) const;
-	void reSize(float size) { size = size; };
-
-	void updatePos(const sf::Vector2f& position) { stone.setPosition(position); };
-
-private:
-	sf::CircleShape stone;
-	sf::Color color = sf::Color(0, 0, 0);
-	float size;
-
-	sf::Vector2u position;
-};
-
 class Board {
 public:
-	void resize(float size);
 	void draw(sf::RenderWindow& window);
+
+	// Return value
+	sf::Vector2f getPos() const { return position; }
+	
+	// Update the board UI 
+	void updateCellNumber(const int& size) { board_cell_number = size; }
+	void updatePos(const sf::Vector2f& _position) { position = _position; }
+	void updateSize(const float& _size);
+	void updateTexture(const sf::Texture& texure) { board_background = texure; }
+
+	// update stone
+	void updateStoneTexture(const sf::Texture& texture) { stone.setTexture(&texture); };
+
+	// React to mouse click
+	void hoverStone(const sf::Vector2i& mouse_pos);
+
+	// Apply all changes to the board before draw
+	void update();
 private:
 	sf::RectangleShape canvas;
-	std::vector<Stone> stone_placement;
+	sf::RectangleShape board;
+	sf::Texture board_background;
+
+	sf::Vector2f position;
+	sf::Vector2f start_position;
+	float canvas_size;
+	float board_size;
+	float canvas_padding;
+	float board_padding;
+	float grid_size;
+	float inner_percent = 0.45;
+
+	int board_cell_number = 0;
+
+	sf::CircleShape stone;
+	sf::Vector2i pos = { -1,-1 };
+
+	float stone_size;
+};
+
+class TextBox {
+public:
+
+	TextBox(sf::Vector2f position, sf::Vector2f size, const std::string& text, unsigned int text_size, const sf::Font& font);
+
+	// Return valuef::Font& f
+	const sf::Vector2f getPos() const { return position; };
+	const sf::Vector2f getSize() const { return size; };
+
+	// Update value
+	void updatePos(const sf::Vector2f& _position) { position = _position; };
+	void updateSize(const sf::Vector2f& _size) { size = _size;  };
+	void updateTextSize(unsigned int _text_size) { text_size = _text_size; };
+
+	void updateButtonColor(const sf::Color& color) { box.setFillColor(color); }
+	void updateTextColor(const sf::Color& color) { text.setFillColor(color); }
+	void update();
+
+	void draw(sf::RenderWindow& window) const;
+
+private:
+	sf::RectangleShape box;
+	sf::Text text;
+
+	sf::Vector2f position;
+	sf::Vector2f size;
+	unsigned int text_size;
 };

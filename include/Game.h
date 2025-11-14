@@ -19,13 +19,13 @@ struct Move {
 
 struct GameCfg {
 	// Initial set up
-	GameState state = GameState::Menu;
+	GameState state = GameState::Playing;
 	int board_size = 13;
 
 	// Design selection
-	SoundTheme sound_theme = SoundTheme::Minimal;  // temporarily set to minimal
-	BoardDesign board_design = BoardDesign::Minimal;
-	StoneDesign stone_design = StoneDesign::Minimal;
+	SoundTheme sound_theme = SoundTheme::Default;  // temporarily set to minimal
+	BoardDesign board_design = BoardDesign::Default;
+	StoneDesign stone_design = StoneDesign::Default;
 
 	// On/Off state of the game audio
 	bool background_music = 1;

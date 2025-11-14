@@ -4,11 +4,6 @@
 
 SimpleButton::SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::string& str,
 	unsigned int text_size, const sf::Font& font) : button(size), text(font, str, text_size), size(size), position(position), text_size(text_size) {
-
-	sf::FloatRect text_bound = text.getLocalBounds();
-	text.setOrigin({ text_bound.position.x + text_bound.size.x / 2.f,
-						text_bound.position.y + text_bound.size.y / 2.f });
-	button.setOrigin(size / 2.f);
 	update();
 }
 
@@ -39,9 +34,12 @@ void SimpleButton::update() {
 		onIdle();
 	}
 
-	button.setPosition(position);
 	button.setSize(size);
+	button.setOrigin(size / 2.f);
+	button.setPosition(position);
 
+	text.setCharacterSize(text_size);
+	text.setOrigin(text.getLocalBounds().getCenter());
 	text.setPosition(position);
 }
 
