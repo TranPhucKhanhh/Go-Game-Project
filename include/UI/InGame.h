@@ -3,7 +3,7 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Component.h>
 #include<core/AssetManager.h>
-#include<game.h>
+#include<Game.h>
 #include<vector>
 #include<string>
 
