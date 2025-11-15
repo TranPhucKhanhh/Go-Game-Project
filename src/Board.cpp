@@ -1,72 +1,135 @@
-#include<Board.h> 
-#include<Game.h>
-#include<vector>
+#pragma once
+#include <Board.h>
+#include <Move.h>
+#include <vector>
+#include <Cell.h>
+#include <iostream>
 
-static int x_jump[4] = { 0, 0, 1, -1 };
-static int y_jump[4] = { 1, -1, 0, 0 };
+//Direction arrays, used in dfs and bfs
+static int dx[4] = { 1,-1,0,0 };
+static int dy[4] = { 0,0,1,-1 };
+//Visited array, used in dfs and bfs
+static std::vector<std::vector<bool>> visited;
+static std::vector<std::vector<bool>> captured_cell;
 
-Rule::Rule(Game& game) : game(game) {
-
+static bool isOutOfRange(const Move& move, int board_size) {
+	return move.x < 0 || move.y < 0 || move.x >= board_size || move.y >= board_size;
 }
 
-static void DfsGetGroup(const Move &current, std::vector<Move> &vec, const Game& game) {
+static bool isOutOfRange(int x, int y, int board_size) {
+	return x < 0 || y < 0 || x >= board_size || y >= board_size;
+}
+
+static bool isOccupied(const Move& move,const Board& board) {
+	return board[move.x][move.y] != CellState::Empty;
+}
+
+static int countLiberty(int x, int y,const Board& board,const CellState& type) {
+	if (isOutOfRange(x, y, board.size())) return 0;
+	if (board[x][y] == CellState::Empty) return 1;
+	if (board[x][y] != type) return 0;
+	if (visited[x][y]) return 0;
+	visited[x][y] = 1;
+	int liberty = 0;
 	for (int i = 0; i < 4; i++) {
-		int x = current.x  + x_jump[i];
-		int y = current.y  + y_jump[i];
-
-		if (game.currPos(x, y) == Position::Empty) {
-			vec.push_back(Move(x, y, current.player));
-		}
-		else if (game.currPos(x, y) == current.player) {
-			DfsGetGroup(Move(x, y, current.player), vec, game);
-		}
+		int u = x + dx[i];
+		int v = y + dy[i];
+		liberty += countLiberty(u, v, board, type);
 	}
+	return liberty;
 }
 
-int Rule::countStoneLiberty(const Move &stone) const {
-	int cnt = 0;
+static int countLiberty(const Move& move,const Board& board) {
+	visited.assign(board.size(), std::vector<bool>(board.size(), 0));
+	int x = move.x;
+	int y = move.y;
+	CellState type = move.player;
+	int liberty = countLiberty(x, y, board, type);
+	return liberty;
+}
+
+static void getCapture(int x, int y, const Board& board, const CellState& type, std::vector<Cell>& capture) {
+	if (isOutOfRange(x, y, board.size())) return;
+	if (board[x][y] != type) return;
+	if (captured_cell[x][y]) return;
+	captured_cell[x][y] = 1;
+	capture.push_back(Cell(x, y, board[x][y]));
 	for (int i = 0; i < 4; i++) {
-		int x = stone.x + x_jump[i];
-		int y = stone.y + y_jump[i];
-
-		if (game.currPos(x, y) == Position::Empty) cnt++;
+		int u = x + dx[i];
+		int v = y + dy[i];
+		getCapture(u, v, board, type, capture);
 	}
-	return cnt;
 }
 
-int Rule::countGroupLibery(const std::vector<Move> &group) const {
-	int cnt = 0;
-	for (int i = 0; i < group.size(); i++) {
-		cnt += countStoneLiberty(group[i]);
-	}
-	return cnt;
-}
-
-std::vector<Move> Rule::getGroup(const Move &current) const {
-	std::vector<Move> _tmp;
-	DfsGetGroup(current, _tmp, game);
-	return _tmp;
-}
-
-std::vector<Move> Rule::checkCapture(const Move& current) {
-	Position ally = current.player;
-	Position enemy = (current.player == Position::White) ? Position::Black : Position::White;
-
-	std::vector<Move> enemy_capture;
-
-	// Idea: check around the current stone 
-	// If the near stones is enemy -> count number of liberties of the whole enemy 
+static void getCapture(const Move& move, const Board& board, std::vector<Cell>& capture) {
+	visited.assign(board.size(), std::vector<bool>(board.size(), 0));
+	captured_cell.assign(board.size(), std::vector<bool>(board.size(), 0));
+	int x = move.x;
+	int y = move.y;
+	CellState type = move.player;
+	if (type == CellState::Black) type = CellState::White;
+	else type = CellState::Black;
 	for (int i = 0; i < 4; i++) {
-		int x = current.x + x_jump[i];
-		int y = current.y + y_jump[i];
+		int u = x + dx[i];
+		int v = y + dy[i];
+		if (isOutOfRange(u, v, board.size())) continue;
+		int tmp = countLiberty(u, v, board, type);
+		if (tmp > 0 || captured_cell[u][v]) continue;
+		//std::cout << u << " " << v << " " << tmp << "\n";
+		getCapture(u, v, board, type, capture);
+	}
+}
 
-		if (game.currPos(x, y) == enemy) {
-			std::vector<Move> enemy_group = getGroup(Move(x, y, enemy));
-			if (countGroupLibery(enemy_group) == 0) {
-				enemy_capture.insert(enemy_capture.begin(), enemy_group.begin(), enemy_group.end());
-			}
+static bool canCapture(const Move& move,const Board& board, std::vector<Cell>& capture) {
+	getCapture(move, board, capture);
+	return capture.size() > 0;
+}
+
+bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture) {
+	if (isOutOfRange(move, board.size())) return 0;
+	if (isOccupied(move, board)) return 0;
+
+	//Temporary add move to board
+	//Will be removed if it is invalid, and keep if it is valid
+	//Super-KO will be checked later
+	board[move.x][move.y] = move.player;
+	//Self-suicide check
+	int liberty = countLiberty(move, board);
+	if (liberty != 0) return 1;
+	//Place in no liberty but can capture is also valid
+	if (canCapture(move, board, capture)) return 1;
+	board[move.x][move.y] = CellState::Empty;
+	return 0;
+}
+
+static int getScore(const Board& board, int x, int y, int& mask) {
+	if (isOutOfRange(x, y, board.size())) return 0;
+	if (board[x][y] != CellState::Empty) {
+		if (board[x][y] == CellState::Black) mask |= 1;
+		else mask |= 2;
+		return 0;
+	}
+	if (visited[x][y]) return 0;
+	visited[x][y] = 1;
+	int res = 1;
+	for (int i = 0; i < 4; i++) {
+		int u = x + dx[i];
+		int v = y + dy[i];
+		res += getScore(board, u, v, mask);
+	}
+	return res;
+}
+
+void Board::calculateScore(const Board& board, int& black_score, int& white_score) {
+	visited.assign(board.size(), std::vector<bool>(board.size(), 0));
+	for (int i = 0; i < (*this).size(); i++) {
+		for (int j = 0; j < board.size(); j++) {
+			if (visited[i][j]) continue;
+			int mask = 0;
+			int score = getScore(board, i, j, mask);
+			if (mask == 3) continue;
+			if (mask == 1) black_score += score;
+			if (mask == 2) white_score += score;
 		}
 	}
-		
-	return enemy_capture;
 }
