@@ -13,9 +13,10 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_executable(GoGame 
-                        src/component/Board.cpp
+                        src/main.cpp
                         src/component/Button.cpp
                         src/component/TextBox.cpp
+                        src/component/BoardUI.cpp
 
                         src/core/AssetManager.cpp
 
@@ -23,10 +24,11 @@ add_executable(GoGame
                         src/UI/Menu.cpp
                         src/UI/UI.cpp
 
-                        src/AI.cpp
-                        src/Board.cpp
-                        src/Game.cpp
-                        src/main.cpp
+                        src/AI/AI.cpp
+
+                        src/game/Board.cpp
+                        src/game/Game.cpp
+                        src/game/History.cpp
 )
 
 target_compile_features(GoGame PRIVATE cxx_std_17)

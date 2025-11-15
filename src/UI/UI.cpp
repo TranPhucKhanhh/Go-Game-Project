@@ -1,12 +1,13 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Component.h>
 #include<UI/UI.h>
-#include<Game.h>
+#include<game/Game.h>
 #include<string>
 #include<iostream>
 #include<vector>
 
-UI::UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min_size) : game(game), window_size(window_size), window(sf::VideoMode(window_size), title), in_game(asset_manager, game.getGameCfg()) {
+UI::UI(Game& game, std::string title, sf::Vector2u window_size, sf::Vector2u min_size) : game(game), window_size(window_size), window(sf::VideoMode(window_size), title), 
+    menu(game.getGameCfg()), in_game(asset_manager, game) {
 
     window.setVerticalSyncEnabled(true);
     window.setMinimumSize(min_size);
@@ -24,7 +25,8 @@ void UI::setupUI() {
     // Load texture
     asset_manager.loadTexture("board-default", "/board-background/board-default.png");
     asset_manager.loadTexture("board-minimal", "/board-background/board-minimal.png");
-    asset_manager.loadTexture("stone-default", "/stone/stone-default.png");
+    asset_manager.loadTexture("white-stone-default", "/stone/white-stone-default.png");
+    asset_manager.loadTexture("black-stone-default", "/stone/black-stone-default.png");
 
     menu.build(window_size, asset_manager);
     in_game.build(window_size);
@@ -70,6 +72,7 @@ void UI::run() {
                 break;
             case GameState::Playing:
                 in_game.eventHandle(*event, mouse_pos, window_size);
+                break;
             }
         }
 

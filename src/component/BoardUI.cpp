@@ -1,21 +1,23 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Component.h>
-#include<Game.h>
+#include<model/CellState.h>
+#include<game/Game.h>
 #include<iostream>
 #include<cmath>
 
-// debug
-int board_state[21][21];
-
-void Board::updateSize(const float& size) {
+void BoardUI::updateSize(const float& size) {
     canvas_size = size;
     canvas_padding = canvas_size / 20;
     board_size = canvas_size - canvas_padding * 2;
     grid_size = board_size / (board_cell_number + 1);
     board_padding = grid_size;
+
+    sf::Color c = predict_stone.getFillColor();
+    c.a = 200;
+    predict_stone.setFillColor(c);
 }
 
-void Board::draw(sf::RenderWindow& window) {
+void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {
     window.draw(canvas);
     window.draw(board);
     
@@ -37,29 +39,25 @@ void Board::draw(sf::RenderWindow& window) {
         window.draw(line);
     }
 
-    if (pos.x != -1) {
-        sf::Color c = stone.getFillColor();
-        c.a = 200; 
-        stone.setFillColor(c);
-
-        stone.setPosition({ start_position.x + grid_size * (pos.x - 1), start_position.y + grid_size * (pos.y - 1) });
-        window.draw(stone);
-
-        c.a = 255;
-        stone.setFillColor(c);
+    if (hoverOnStone) {
+        window.draw(predict_stone);
     }
 
-    for (int i = 1; i <= board_cell_number; i++) {
-        for (int j = 1; j <= board_cell_number; j++) {
-            if (board_state[i][j]) {
-                stone.setPosition({start_position.x + grid_size * (i-1), start_position.y + grid_size * (j-1) });
+    for (int i = 0; i < board_cell_number; i++) {
+        for (int j = 0; j < board_cell_number; j++) {
+            if (current_board[i][j] != CellState::Empty) {
+                stone.setPosition({start_position.x + grid_size * i, start_position.y + grid_size * j });
+                
+                if (current_board[i][j] == CellState::White) stone.setTexture(&white_texture);
+                else stone.setTexture(&black_texture);
+
                 window.draw(stone);
             }
         }
     }
 }
 
-void Board::hoverStone(const sf::Vector2i& mouse_pos) {
+void BoardUI::hoverStone(const sf::Vector2i& mouse_pos, const Game& game) {
     if (board.getGlobalBounds().contains((sf::Vector2f)mouse_pos)) {
         sf::Vector2f _tmp = { mouse_pos.x - start_position.x + board_padding - grid_size / 2, mouse_pos.y - start_position.y + board_padding - grid_size / 2};
         _tmp = { std::max(0.f, _tmp.x), std::max(0.f, _tmp.y) };        
@@ -67,21 +65,38 @@ void Board::hoverStone(const sf::Vector2i& mouse_pos) {
         float _y = abs(_tmp.y - (std::floor(_tmp.y / grid_size) * grid_size + grid_size / 2));
         
         if (_x > grid_size * inner_percent || _y > grid_size * inner_percent) {
-            pos.x = -1;
+            hoverOnStone = 0;
             return;
         }
         
-        pos.x = std::min(19, (int) std::floor(_tmp.x / grid_size) + 1);
-        pos.y = std::min(19, (int) std::floor(_tmp.y / grid_size) + 1);
-        if (board_state[pos.x][pos.y]) pos.x = -1;
+        int max_board_size = game.getBoardSize();
+
+        pos.x = std::min(max_board_size-1, (int) std::floor(_tmp.x / grid_size));
+        pos.y = std::min(max_board_size-1, (int) std::floor(_tmp.y / grid_size));
+        if (game.getCurrentBoard()[pos.x][pos.y] != CellState::Empty) {
+            hoverOnStone = 0;
+            return;
+        }
+
+        if (game.getCurrentPlayer() == CellState::White) predict_stone.setTexture(&white_texture);
+        else predict_stone.setTexture(&black_texture);
+
+        predict_stone.setPosition({ start_position.x + grid_size * pos.x, start_position.y + grid_size * pos.y });
+        hoverOnStone = 1;
     }
     else {
-        pos.x = -1;
+        hoverOnStone = 0;
     }
     
 }
 
-void Board::update() {
+void BoardUI::placeStone(const sf::Vector2i& mouse_pos, Game& game) {
+    if (hoverOnStone) {
+        game.placeStone(pos.x, pos.y);
+    }
+}
+
+void BoardUI::update() {
     start_position = { position.x - board_size / 2.f + board_padding, position.y - board_size / 2.f + board_padding };
     
     canvas.setFillColor(sf::Color(242, 176, 109));
@@ -96,6 +111,9 @@ void Board::update() {
     //board.setTexture(&board_background);
     board.setFillColor(sf::Color::White);
 
-    stone.setRadius(grid_size * 0.6);
+    stone.setRadius(grid_size * 0.45);
     stone.setOrigin(stone.getLocalBounds().getCenter());
+
+    predict_stone.setRadius(grid_size * 0.45);
+    predict_stone.setOrigin(stone.getLocalBounds().getCenter());
 }

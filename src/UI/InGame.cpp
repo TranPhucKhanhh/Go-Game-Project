@@ -1,11 +1,11 @@
 #include<SFML/Graphics.hpp>
 #include<UI/InGame.h>
 #include<UI/Component.h>
-#include<Game.h>
+#include<game/Game.h>
 #include<algorithm>
 #include<iostream>
 
-InGame::InGame(const AssetManager& _asset_manager, const GameCfg& _game_config) : asset_manager(_asset_manager), game_config(_game_config) {
+InGame::InGame(const AssetManager& _asset_manager, Game& _game) : asset_manager(_asset_manager), game(_game) {
 
 }
 
@@ -18,17 +18,19 @@ void InGame::eventHandle(const sf::Event& event, const sf::Vector2i& mouse_pos, 
         resize(window_size);
     }
     if (event.is<sf::Event::MouseMoved>()) {
-        board.hoverStone(mouse_pos);
+        board.hoverStone(mouse_pos, game);
+    }
+    if (event.is<sf::Event::MouseButtonReleased>()) {
+        board.placeStone(mouse_pos, game);
     }
 }
 
 void InGame::draw(sf::RenderWindow& window) {
     window.clear(sf::Color(240, 217, 181));
-    window.draw(debug);
     window.draw(side_panel);
     window.draw(header_bar);
     window.draw(footer_bar);
-    board.draw(window);
+    board.draw(window, game.getCurrentBoard());
 }
 
 void InGame::resize(const sf::Vector2u& window_size) {
@@ -42,20 +44,13 @@ void InGame::resize(const sf::Vector2u& window_size) {
     board_size = std::min(canvas_size.y - (status_bar_size_y+inner_padding) * 2, canvas_size.x - inner_padding - side_panel_size_x);
 
     float _tmp = (window_size.x - board_size - inner_padding - side_panel_size_x) / 2;
-    std::cerr << "board_size: " << board_size << " inner_padding; " << inner_padding << std::endl;
-    std::cerr << "board x: " << _tmp + board_size / 2.f << " board y: " << window_size.y / 2.f << std::endl;
 
-    board.updateCellNumber(19);
+    board.updateCellNumber(game.getGameCfg().board_size);
     board.updateSize( board_size );
     board.updatePos({_tmp + board_size / 2, window_size.y / 2.f});
-    board.updateStoneTexture(asset_manager.getTexture("stone-default"));
+    board.updateStoneTexture(asset_manager.getTexture("white-stone-default"), asset_manager.getTexture("black-stone-default"));
     board.updateTexture(asset_manager.getTexture("board-minimal"));
     board.update();
-
-    debug.setSize(canvas_size);
-    debug.setFillColor(sf::Color::White);
-    debug.setOrigin(debug.getLocalBounds().getCenter());
-    debug.setPosition({window_size.x/2.f,window_size.y/2.f});
 
     side_panel.setSize({ side_panel_size_x, status_bar_size_y * 2 + inner_padding * 2 + board_size });
     side_panel.setFillColor(sf::Color(242, 176, 109));

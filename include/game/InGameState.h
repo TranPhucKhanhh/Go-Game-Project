@@ -1,7 +1,7 @@
 #pragma once
-#include <Board.h>
-#include <Cell.h>
-#include <CellState.h>
+#include <game/Board.h>
+#include <model/Cell.h>
+#include <model/CellState.h>
 #include <iostream>
 
 struct InGameState {

@@ -3,13 +3,13 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Component.h>
 #include<core/AssetManager.h>
-#include<Game.h>
+#include<game/Game.h>
 #include<vector>
 #include<string>
 
 class InGame {
 public:
-    InGame(const AssetManager& asset_manager, const GameCfg& game_config);
+    InGame(const AssetManager& asset_manager, Game& game);
 
     void build(const sf::Vector2u& window_size);
 
@@ -17,11 +17,15 @@ public:
 
     void draw(sf::RenderWindow& window);
 private:
-    Board board;
+    BoardUI board;
+    sf::RectangleShape side_panel;
+    sf::RectangleShape header_bar;
+    sf::RectangleShape footer_bar;
+
     std::unordered_map<std::string, SimpleButton> buttons;
     std::unordered_map<std::string, sf::Text> texts;
 
-    const GameCfg& game_config;
+    Game& game;
     const AssetManager& asset_manager;
 
     void resize(const sf::Vector2u& window_size);
@@ -33,10 +37,4 @@ private:
     float side_panel_size_x;
     float board_size;
     float status_bar_size_y;
-
-    // Debug shape
-    sf::RectangleShape debug;
-    sf::RectangleShape side_panel;
-    sf::RectangleShape header_bar;
-    sf::RectangleShape footer_bar;
 };

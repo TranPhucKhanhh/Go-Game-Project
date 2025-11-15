@@ -1,6 +1,6 @@
 #pragma once
 #include<SFML/Graphics.hpp>
-#include<Game.h>
+#include<game/Game.h>
 #include<UI/Component.h>
 #include<UI/Menu.h>
 #include<UI/InGame.h>

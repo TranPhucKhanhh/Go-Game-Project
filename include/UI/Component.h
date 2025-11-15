@@ -1,5 +1,7 @@
 #pragma once
 #include<SFML/Graphics.hpp>
+#include<game/Board.h>
+#include<game/Game.h>
 #include<functional>
 
 class SimpleButton {
@@ -60,9 +62,9 @@ private:
 
 };
 
-class Board {
+class BoardUI {
 public:
-	void draw(sf::RenderWindow& window);
+	void draw(sf::RenderWindow& window, const Board& current_board);
 
 	// Return value
 	sf::Vector2f getPos() const { return position; }
@@ -74,10 +76,12 @@ public:
 	void updateTexture(const sf::Texture& texure) { board_background = texure; }
 
 	// update stone
-	void updateStoneTexture(const sf::Texture& texture) { stone.setTexture(&texture); };
+	void updateStoneTexture(const sf::Texture& b_texture, const sf::Texture& w_texture) { white_texture = w_texture, black_texture = b_texture; };
 
-	// React to mouse click
-	void hoverStone(const sf::Vector2i& mouse_pos);
+	// React to mouse event
+	void hoverStone(const sf::Vector2i& mouse_pos, const Game& game);
+
+	void placeStone(const sf::Vector2i& mouse_pos, Game& game);
 
 	// Apply all changes to the board before draw
 	void update();
@@ -98,9 +102,14 @@ private:
 	int board_cell_number = 0;
 
 	sf::CircleShape stone;
+	sf::CircleShape predict_stone;
 	sf::Vector2i pos = { -1,-1 };
 
 	float stone_size;
+	bool hoverOnStone = 0;
+
+	sf::Texture white_texture;
+	sf::Texture black_texture;
 };
 
 class TextBox {

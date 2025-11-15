@@ -1,13 +1,13 @@
-#include<Game.h>
+#pragma once
+#include<model/CellState.h>
+#include<model/Cell.h>
+#include<model/Move.h>
 #include<vector>
-#include<CellState.h>
-#include<Cell.h>
-#include<Move.h>
 #include<iostream>
 
 class Board {
 public:
-	Board() {}
+	Board() = default;
 	Board(int board_size) :
 		grid(std::vector<std::vector<CellState>>(board_size, std::vector<CellState>(board_size, CellState::Empty))) {
 	}

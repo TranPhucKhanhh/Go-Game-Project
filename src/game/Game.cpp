@@ -1,11 +1,7 @@
 #pragma once
-#include<Game.h>
+#include<game/Game.h>
 #include<vector>
 #include<iostream>
-
-Game::Game(int _weight, int _height) : game_config(_weight, _height) {
-
-};
 
 void Game::start() {
 	//Init first state with board_size size, black to move

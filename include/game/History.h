@@ -1,8 +1,8 @@
 #pragma once
-#include<Board.h>
-#include<CellState.h>
-#include<Move.h>
-#include<Cell.h>
+#include<game/Board.h>
+#include<model/CellState.h>
+#include<model/Move.h>
+#include<model/Cell.h>
 
 class GameHistory {
 public:

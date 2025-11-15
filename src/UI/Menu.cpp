@@ -12,11 +12,18 @@ static void testClickFunction() {
     std::cerr << "Click button" << std::endl;
 }
 
+
 void Menu::build(const sf::Vector2u& window_size, const AssetManager& asset_manager) {
     SimpleButton start_button({ window_size.x / 2.f, window_size.y / 2.f }, button_size, "START", 50, asset_manager.getFont("Roboto-Slab-Bold"));
     SimpleButton setting_button({ window_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f)}, button_size, "SETTING", 50, asset_manager.getFont("Roboto-Slab-Bold"));
    
-    start_button.updateOnClick(testClickFunction);
+
+    auto startButtonClick = [this]() {
+        this -> game_config.state = GameState::Playing;
+        std::cerr << "clciked" << std::endl;
+    };
+
+    start_button.updateOnClick(startButtonClick);
     setting_button.updateOnClick(testClickFunction);
 
     buttons.emplace("Start", std::move(start_button));
