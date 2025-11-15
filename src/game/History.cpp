@@ -1,4 +1,4 @@
-#include<History.h>
+#include<game/History.h>
 #include<iostream>
 
 bool GameHistory::checkSuperKO(const Board& current) {

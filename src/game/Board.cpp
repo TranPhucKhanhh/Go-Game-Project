@@ -1,8 +1,8 @@
 #pragma once
-#include <Board.h>
-#include <Move.h>
+#include <game/Board.h>
+#include <model/Move.h>
+#include <model/Cell.h>
 #include <vector>
-#include <Cell.h>
 #include <iostream>
 
 //Direction arrays, used in dfs and bfs

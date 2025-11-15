@@ -1,39 +1,20 @@
-#include <Game.h>
-#include<UI.h>
+#include<game/Game.h>
+#include<UI/UI.h>
+
+const unsigned int WINDOW_START_WIDTH = 1280u;
+const unsigned int WINDOW_START_HEIGHT = 720u;
+
+const unsigned int WINDOW_MIN_WIDTH = 400u;
+const unsigned int WINDOW_MIN_HEIGHT = 650u;
 
 int main()
 {
-	Game game(1280, 720); // Set the default screen 
+	Game game;
 
-	//UI ui(game, "Go Game");
-
-	//ui.run();
-
-	//Use console to debug the logic, can be removed
 	game.start();
-	game.placeStone(1, 1);
-	game.pass();
-	game.placeStone(2, 2);
-	game.pass();
-	game.placeStone(2, 0);
-	game.pass();
-	game.placeStone(3, 1);
-	game.print();
 
-	game.placeStone(1, 2);
-	game.pass();
-	game.placeStone(2, 3);
-	game.pass();
-	game.placeStone(3, 2);
-	game.pass();
-	game.print();
-	game.placeStone(2, 1);
-	game.print();
+	UI ui(game, "Go Game", { WINDOW_START_WIDTH, WINDOW_START_HEIGHT }, { WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT });
 
-	game.placeStone(2, 2);
-	game.print();
-
-	game.pass();
-	game.pass();
+	ui.run();
 	return 0;
 }

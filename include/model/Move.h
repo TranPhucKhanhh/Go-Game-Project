@@ -1,5 +1,5 @@
 #pragma once
-#include <CellState.h>
+#include <model/CellState.h>
 
 struct Move {
 	int x, y;

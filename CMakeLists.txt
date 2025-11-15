@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(CMakeSFMLProject LANGUAGES CXX)
+project(GoGame LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -13,13 +13,26 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_executable(GoGame 
-                       src/main.cpp
-                       src/Game.cpp
-                       src/Board.cpp
-                       src/UI.cpp
-                       src/AI.cpp
- "include/Component.h" "src/Component.cpp" "src/History.cpp" "include/InGameState.h"  "include/Move.h" "include/CellState.h"  "include/Cell.h" "include/GameState.h")
+                        src/main.cpp
+                        src/component/Button.cpp
+                        src/component/TextBox.cpp
+                        src/component/BoardUI.cpp
+
+                        src/core/AssetManager.cpp
+
+                        src/UI/InGame.cpp
+                        src/UI/Menu.cpp
+                        src/UI/UI.cpp
+
+                        src/AI/AI.cpp
+
+                        src/game/Board.cpp
+                        src/game/Game.cpp
+                        src/game/History.cpp
+)
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics)
 target_include_directories(GoGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_compile_definitions(GoGame PRIVATE ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
