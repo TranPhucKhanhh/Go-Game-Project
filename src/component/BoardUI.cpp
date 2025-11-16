@@ -87,10 +87,9 @@ void BoardUI::hoverStone(const sf::Vector2i& mouse_pos, const Game& game) {
     else {
         hoverOnStone = 0;
     }
-    
 }
 
-void BoardUI::placeStone(const sf::Vector2i& mouse_pos, Game& game) {
+void BoardUI::placeStone(const sf::Vector2i& mouse_pos, Game& game) const {
     if (hoverOnStone) {
         game.placeStone(pos.x, pos.y);
     }

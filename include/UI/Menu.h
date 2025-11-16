@@ -3,23 +3,28 @@
 #include<UI/Component.h>
 #include<game/Game.h>
 #include<core/AssetManager.h>
+#include<model/UICfg.h>
 #include<vector>
 #include<string>
 
 class Menu {
 public:
-    Menu(GameCfg& _game_config) : game_config(_game_config) {};
+    Menu(const AssetManager& asset_manager, UICfg& ui_cfg);
 
-    void build(const sf::Vector2u& window_size, const AssetManager& asset_manager);
+    void eventHandle(const sf::Event &event, std::string& repond);
 
-    void eventHandle(const sf::Event &event, const sf::Vector2i &mouse_pos, const sf::Vector2u &window_size);
+    void resize();
 
-    void draw(sf::RenderWindow& window);
+    void draw();
 private:
-    std::unordered_map<std::string, SimpleButton> buttons;
-    std::unordered_map<std::string, sf::Text> texts;
+	SimpleButton start_button;
+	SimpleButton setting_button;
+    sf::Text title;
 
-    GameCfg& game_config;
+    UICfg& ui_cfg;
+    const AssetManager& asset_manager;
+
+    float margin;
 
     void resize(const sf::Vector2u& window_size);  
 };

@@ -2,32 +2,35 @@
 #include<SFML/Graphics.hpp>
 #include<game/Board.h>
 #include<game/Game.h>
+#include<model/UICfg.h>
 #include<functional>
 
 class SimpleButton {
 public:
-
-	SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::string& text, unsigned int text_size, const sf::Font& font);
+	SimpleButton() = default;
+	SimpleButton(const std::string& text, const sf::Font& font);
 
 	// Return value
 	const sf::Vector2f getPos() const { return position; };
 	const sf::Vector2f getSize() const { return size; };
 
 	// Update value
-	void updatePos(const sf::Vector2f& _position) { position = _position; };
-	void updateSize(const sf::Vector2f& _size) { size = _size; };
-	void updateTextSize(unsigned int text_size) { text_size = text_size; };
+	void updatePos(const sf::Vector2f& _position) { position = _position; updateState(); };
+	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
+	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
 
 	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
 	void updateTextColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_text_color = norm_c, hover_text_color = hover_c; }
-	void updateOnClick(std::function<void()> func) { onClick = func; }
+	void updateRespondStr(const std::string& respond_str) { on_click_respond = respond_str; }
 	// Event check and update
 
 	void checkHover(const sf::Vector2i& mouse_pos);
 
-	void eventHandle(const sf::Event& event, const sf::Vector2i& mouse_pos);
+	void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond);
 
-	void update();
+	void updateState();
+
+	void updateEffect();
 
 	void draw(sf::RenderWindow& window) const;
 
@@ -46,7 +49,7 @@ private:
 	sf::Vector2f size;
 	unsigned int text_size;
 
-	std::function<void()> onClick;
+	std::string on_click_respond;
 
 	bool hovered = false;
 	bool mouse_hold = false;
@@ -76,12 +79,12 @@ public:
 	void updateTexture(const sf::Texture& texure) { board_background = texure; }
 
 	// update stone
-	void updateStoneTexture(const sf::Texture& b_texture, const sf::Texture& w_texture) { white_texture = w_texture, black_texture = b_texture; };
+	void updateStoneTexture(const sf::Texture& w_texture, const sf::Texture& b_texture) { white_texture = w_texture, black_texture = b_texture; };
 
 	// React to mouse event
 	void hoverStone(const sf::Vector2i& mouse_pos, const Game& game);
 
-	void placeStone(const sf::Vector2i& mouse_pos, Game& game);
+	void placeStone(const sf::Vector2i& mouse_pos, Game& game) const;
 
 	// Apply all changes to the board before draw
 	void update();
@@ -115,19 +118,16 @@ private:
 class TextBox {
 public:
 
-	TextBox(sf::Vector2f position, sf::Vector2f size, const std::string& text, unsigned int text_size, const sf::Font& font);
-
-	// Return valuef::Font& f
-	const sf::Vector2f getPos() const { return position; };
-	const sf::Vector2f getSize() const { return size; };
+	TextBox(const sf::Font& font) : text(font) {};
 
 	// Update value
-	void updatePos(const sf::Vector2f& _position) { position = _position; };
-	void updateSize(const sf::Vector2f& _size) { size = _size;  };
-	void updateTextSize(unsigned int _text_size) { text_size = _text_size; };
+	void updateBoxPos(const sf::Vector2f& _position) { position = _position; update(); };
+	void updateBoxSize(const sf::Vector2f& _size) { box.setSize(_size); update(); };
+	void updateBoxColor(const sf::Color& color) { box.setFillColor(color); }
 
-	void updateButtonColor(const sf::Color& color) { box.setFillColor(color); }
 	void updateTextColor(const sf::Color& color) { text.setFillColor(color); }
+	void updateTextSize(const float& size) { text.setCharacterSize(size); update(); }
+	void updateStr(const std::string& _text) { text.setString(_text); update(); }
 	void update();
 
 	void draw(sf::RenderWindow& window) const;
@@ -137,6 +137,4 @@ private:
 	sf::Text text;
 
 	sf::Vector2f position;
-	sf::Vector2f size;
-	unsigned int text_size;
 };

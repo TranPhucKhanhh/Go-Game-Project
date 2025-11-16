@@ -12,6 +12,7 @@ enum class StoneDesign { Default, Minimal };
 
 struct GameCfg {
 	// Initial set up
+	GameState prev_state = GameState::Menu;
 	GameState state = GameState::Menu;
 	int board_size = 13;
 	int komi = 7;

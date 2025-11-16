@@ -2,9 +2,9 @@
 #include<UI/UI.h>
 #include<iostream>
 
-SimpleButton::SimpleButton(sf::Vector2f position, sf::Vector2f size, const std::string& str,
-	unsigned int text_size, const sf::Font& font) : button(size), text(font, str, text_size), size(size), position(position), text_size(text_size) {
-	update();
+SimpleButton::SimpleButton(const std::string& str, const sf::Font& font) : 
+	button(size), text(font, str) {
+	
 }
 
 void SimpleButton::checkHover(const sf::Vector2i& mouse_pos) {
@@ -23,17 +23,7 @@ void SimpleButton::draw(sf::RenderWindow& window) const {
 	window.draw(text);
 }
 
-void SimpleButton::update() {
-	if (mouse_hold && hovered) {
-		onMouseHold();
-	}
-	else if (hovered) {
-		onHover();
-	}
-	else {
-		onIdle();
-	}
-
+void SimpleButton::updateState() {
 	button.setSize(size);
 	button.setOrigin(size / 2.f);
 	button.setPosition(position);
@@ -43,9 +33,21 @@ void SimpleButton::update() {
 	text.setPosition(position);
 }
 
-void SimpleButton::eventHandle(const sf::Event& event, const sf::Vector2i& mouse_pos) {
+void SimpleButton::updateEffect() {
+	if (mouse_hold && hovered) {
+		onMouseHold();
+	}
+	else if (hovered) {
+		onHover();
+	}
+	else {
+		onIdle();
+	}
+}
+
+void SimpleButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
 	if (event.is<sf::Event::MouseMoved>()) {
-		checkHover(mouse_pos);
+		checkHover(ui_cfg.mouse_pos);
 	}
 	else if (const auto* button = event.getIf<sf::Event::MouseButtonPressed>()) {
 		if (button->button == sf::Mouse::Button::Left)
@@ -53,7 +55,7 @@ void SimpleButton::eventHandle(const sf::Event& event, const sf::Vector2i& mouse
 	}
 	else if (event.is<sf::Event::MouseButtonReleased>()) {
 		if (hovered && mouse_hold) {
-			onClick();
+			respond = on_click_respond;
 		}
 		mouse_hold = false;
 	}
