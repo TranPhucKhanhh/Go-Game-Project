@@ -1,83 +1,82 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Menu.h>
 #include<UI/Component.h>
+#include<model/UICfg.h>
 #include<core/AssetManager.h>
 #include<algorithm>
 #include<iostream>
 
-sf::Vector2f button_size = { 300,100 };
-int margin = 50;
 
-static void testClickFunction() {
-    std::cerr << "Click button" << std::endl;
+Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
+    : asset_manager(_asset_manager), ui_cfg(ui_cfg),
+    start_button("START", _asset_manager.getFont("Roboto-Slab-Bold")), setting_button("SETTING", _asset_manager.getFont("Roboto-Slab-Bold")),
+    title(_asset_manager.getFont("Momo"), "Go Game") {
+
+    title.setFillColor(sf::Color(0, 0, 0));
+
+    start_button.updateRespondStr("Start");
+    start_button.updateTextSize(50);
+    setting_button.updateRespondStr("Setting");
+    setting_button.updateTextSize(50);
+    
+    resize();
+	
+    std::cerr << "Load Menu UI successfully." << std::endl;
 }
 
-
-void Menu::build(const sf::Vector2u& window_size, const AssetManager& asset_manager) {
-    SimpleButton start_button({ window_size.x / 2.f, window_size.y / 2.f }, button_size, "START", 50, asset_manager.getFont("Roboto-Slab-Bold"));
-    SimpleButton setting_button({ window_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f)}, button_size, "SETTING", 50, asset_manager.getFont("Roboto-Slab-Bold"));
-   
-
-    auto startButtonClick = [this]() {
-        this -> game_config.state = GameState::Playing;
-        std::cerr << "clciked" << std::endl;
-    };
-
-    start_button.updateOnClick(startButtonClick);
-    setting_button.updateOnClick(testClickFunction);
-
-    buttons.emplace("Start", std::move(start_button));
-    buttons.emplace("Setting", std::move(setting_button));
-
-    sf::Text title(asset_manager.getFont("Momo"), "Go Game", 100);
-    title.setFillColor(sf::Color(0,0,0));
-    sf::FloatRect title_bound = title.getLocalBounds();
-    title.setOrigin({title_bound.position.x + title_bound.size.x / 2.f, title_bound.position.y + title_bound.size.y / 2.f });
-    title.setPosition({ window_size.x / 2.f, window_size.y / 2.f - (button_size.y + margin + title_bound.size.y) });
-
-    texts.emplace("Title", std::move(title));
-}
-
-void Menu::eventHandle(const sf::Event &event, const sf::Vector2i &mouse_pos, const sf::Vector2u &window_size) {
+void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
     
     if (event.is<sf::Event::Resized>()) {
-        resize(window_size);
+        resize();
     }
 
-    for (auto& [label, button] : buttons) {
-        button.eventHandle(event,mouse_pos);
+    std::string respond = "";
+    start_button.eventHandle(event, ui_cfg, respond);
+    setting_button.eventHandle(event, ui_cfg, respond);
+ 
+    if (respond != "") {
+        std::cerr << "clicked" << std::endl;
     }
+
+    if (respond == "Start") {
+        event_respond = "StartGame";
+	}
+    else if (respond == "Setting") {
+        event_respond = "OpenSetting";
+	}
 }
 
-void Menu::draw(sf::RenderWindow& window) {
-    window.clear(sf::Color(240, 217, 181));
-    for (auto& [label, button] : buttons) {
-        button.update();
-        button.draw(window);
-    }
-    for (auto& [label, text] : texts) {
-        window.draw(text);
-    }
+void Menu::draw() {
+    ui_cfg.window.clear(sf::Color(240, 217, 181));
+    
+    start_button.updateEffect();
+    start_button.draw(ui_cfg.window);
+    
+    setting_button.updateEffect();
+    setting_button.draw(ui_cfg.window);
+    
+    ui_cfg.window.draw(title);
 }
 
-void Menu::resize(const sf::Vector2u& window_size) {
-    SimpleButton& start_button = buttons.at("Start");
-    SimpleButton& setting_button = buttons.at("Setting");
+void Menu::resize() {
+    float scale = std::min(ui_cfg.window_size.x / 5.f, ui_cfg.window_size.y / 7.f * 3);
+	sf::Vector2f button_size;
+    button_size.x = std::min(500.f, std::max( scale, 300.f));
+    button_size.y = std::min(166.f, std::max( scale / 3.f, 100.f));
 
-    unsigned int scale = std::min(window_size.x / 5, window_size.y / 7 * 3);
-    button_size.x = std::min(500u, std::max( scale, 300u));
-    button_size.y = std::min(166u, std::max( scale / 3, 100u));
-    margin = std::min(150u, std::max(window_size.y / 14, 50u));
+    margin = std::min(150.f, std::max(ui_cfg.window_size.y / 14.f, 50.f));
 
     start_button.updateSize(button_size);
-    setting_button.updateSize(button_size);
-    start_button.updatePos({ window_size.x / 2.f, window_size.y / 2.f});
-    setting_button.updatePos({ window_size.x / 2.f, window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f) });
+    start_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f});
+    start_button.updateState();
 
-    sf::Text& title = texts.at("Title");
-    title.setCharacterSize(std::min(window_size.x, window_size.y) / 7);
+    setting_button.updateSize(button_size);
+    setting_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f) });
+    setting_button.updateState();
+
+    title.setCharacterSize(std::min(ui_cfg.window_size.x, ui_cfg.window_size.y) / 7);
     
     sf::FloatRect title_bound = title.getLocalBounds();
     title.setOrigin({ title_bound.position.x + title_bound.size.x / 2.f, title_bound.position.y + title_bound.size.y / 2.f });
-    title.setPosition({ window_size.x / 2.f, window_size.y / 2.f - (button_size.y + margin + title_bound.size.y) });
+    title.setPosition({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f - (button_size.y + margin + title_bound.size.y) });
 }

@@ -1,9 +1,13 @@
 #include<core/AssetManager.h>
+#include<iostream>
 
 bool AssetManager::loadFont(const std::string& name, std::string path) {
 	path = std::string(ASSET_DIR) + path;
 	sf::Font font;
-	font.openFromFile(path);
+	if (!font.openFromFile(path)) {
+		std::cerr << "Can not find Font " << name << " from path " << path << std::endl;
+		assert(0);
+	}
 	fonts[name] = std::move(font);
 	return true;
 }
@@ -11,7 +15,10 @@ bool AssetManager::loadFont(const std::string& name, std::string path) {
 bool AssetManager::loadTexture(const std::string& name, std::string path) {
 	path = std::string(ASSET_DIR) + path;
 	sf::Texture texture;
-	texture.loadFromFile(path);
+	if (!texture.loadFromFile(path)) {
+		std::cerr << "Can not find Texture " << name << " from path " << path << std::endl;
+		assert(0);
+	}
 	textures[name] = std::move(texture);
 	return true;
 }

@@ -3,29 +3,34 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Component.h>
 #include<core/AssetManager.h>
+#include<model/UICfg.h>
 #include<game/Game.h>
 #include<vector>
 #include<string>
 
 class InGame {
 public:
-    InGame(const AssetManager& asset_manager, Game& game);
+    InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg);
 
-    void build(const sf::Vector2u& window_size);
+    void enter();
 
-    void eventHandle(const sf::Event& event, const sf::Vector2i& mouse_pos, const sf::Vector2u& window_size);
+    void eventHandle(const sf::Event& event, std::string& respond);
 
-    void draw(sf::RenderWindow& window);
+    void resize();
+
+    void draw();
 private:
     BoardUI board;
     sf::RectangleShape side_panel;
-    sf::RectangleShape header_bar;
+    //sf::RectangleShape header_bar;
     sf::RectangleShape footer_bar;
+    TextBox header_bar;
 
     std::unordered_map<std::string, SimpleButton> buttons;
     std::unordered_map<std::string, sf::Text> texts;
 
     Game& game;
+	UICfg& ui_cfg;
     const AssetManager& asset_manager;
 
     void resize(const sf::Vector2u& window_size);
