@@ -62,22 +62,27 @@ static void getCapture(int x, int y, const Board& board, const CellState& type, 
 }
 
 static void getCapture(const Move& move, const Board& board, std::vector<Cell>& capture) {
-	visited.assign(board.size(), std::vector<bool>(board.size(), 0));
 	captured_cell.assign(board.size(), std::vector<bool>(board.size(), 0));
 	int x = move.x;
 	int y = move.y;
 	CellState type = move.player;
+	//std::cout << "Move: " << x << " " << y << " ";
+	//std::cout << (type == CellState::Black ? "Black" : "White") << "\n";
 	if (type == CellState::Black) type = CellState::White;
 	else type = CellState::Black;
 	for (int i = 0; i < 4; i++) {
 		int u = x + dx[i];
 		int v = y + dy[i];
 		if (isOutOfRange(u, v, board.size())) continue;
+		if (captured_cell[u][v]) continue;
+		visited.assign(board.size(), std::vector<bool>(board.size(), 0));
 		int tmp = countLiberty(u, v, board, type);
-		if (tmp > 0 || captured_cell[u][v]) continue;
+		//Note: this count Liberty DOES NOT reset visited state so reset it manually
 		//std::cout << u << " " << v << " " << tmp << "\n";
+		if (tmp > 0 || captured_cell[u][v]) continue;
 		getCapture(u, v, board, type, capture);
 	}
+	std::cout << capture.size() << "\n";
 }
 
 static bool canCapture(const Move& move,const Board& board, std::vector<Cell>& capture) {
@@ -93,9 +98,13 @@ bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capt
 	//Will be removed if it is invalid, and keep if it is valid
 	//Super-KO will be checked later
 	board[move.x][move.y] = move.player;
+	//printBoard(board);
 	//Self-suicide check
 	int liberty = countLiberty(move, board);
-	if (liberty != 0) return 1;
+	if (liberty != 0) {
+		getCapture(move, board, capture);
+		return 1;
+	}
 	//Place in no liberty but can capture is also valid
 	if (canCapture(move, board, capture)) return 1;
 	board[move.x][move.y] = CellState::Empty;

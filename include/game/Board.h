@@ -62,6 +62,20 @@ public:
 			}
 			std::cout << "\n";
 		}
+		std::cout << "\n";
+	}
+	void printBoard(Board& board) {
+		for (int i = 0; i < board.size(); i++) {
+			for (int j = 0; j < board.size(); j++) {
+				if (board[i][j] != CellState::Black && board[i][j] != CellState::White) {
+					std::cout << "_" << " ";
+					continue;
+				}
+				std::cout << (board[i][j] == CellState::Black ? "B" : "W") << " ";
+			}
+			std::cout << "\n";
+		}
+		std::cout << "\n";
 	}
 private:
 	std::vector<std::vector<CellState>> grid;
