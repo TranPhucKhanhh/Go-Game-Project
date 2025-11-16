@@ -2,6 +2,7 @@
 #include<UI/InGame.h>
 #include<UI/Component.h>
 #include<model/UICfg.h>
+#include<model/CellState.h>
 #include<game/Game.h>
 #include<algorithm>
 #include<iostream>
@@ -11,6 +12,18 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     header_bar(_asset_manager.getFont("Roboto-Slab-Bold")) {
    
     resize();
+
+    if (game.getCurrentPlayer() == CellState::White) {
+        header_bar.updateStr("WHITE TO MOVE");
+        header_bar.updateBoxColor(sf::Color::White);
+        header_bar.updateTextColor(sf::Color::Black);
+    }
+    else {
+        header_bar.updateStr("BLACK TO MOVE");
+        header_bar.updateBoxColor(sf::Color::Black);
+        header_bar.updateTextColor(sf::Color::White);
+    }
+
     std::cerr << "Load InGame UI successfully." << std::endl;
 }
 
@@ -77,16 +90,6 @@ void InGame::resize() {
     header_bar.updateBoxSize({ board_size, status_bar_size_y });
     header_bar.updateTextSize(50.f);
     header_bar.updateBoxPos({ _tmp + board_size / 2, ui_cfg.window_size.y / 2.f - board_size / 2.f - inner_padding - status_bar_size_y  / 2});
-    if (game.getCurrentPlayer() == CellState::White) {
-        header_bar.updateStr("WHITE TO MOVE");
-        header_bar.updateBoxColor(sf::Color::White);
-        header_bar.updateTextColor(sf::Color::Black);
-    }
-    else {
-        header_bar.updateStr("BLACK TO MOVE");
-        header_bar.updateBoxColor(sf::Color::Black);
-        header_bar.updateTextColor(sf::Color::White);
-    }
 
     footer_bar.setSize({ board_size, status_bar_size_y });
     footer_bar.setFillColor(sf::Color(242, 176, 109));

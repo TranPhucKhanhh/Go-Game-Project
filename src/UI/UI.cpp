@@ -52,6 +52,7 @@ void UI::run() {
 
             // Handle the event for GameState
             GameState current_state = game.getGameState();
+            respond = "";
             switch (current_state) {
             case GameState::Menu:
                 menu.eventHandle(*event, respond);
@@ -60,6 +61,10 @@ void UI::run() {
                 in_game.eventHandle(*event, respond);
                 break;
             }
+            if (respond == "StartGame") {
+				game.getGameCfg().state = GameState::Playing;
+                in_game.enter();
+			}
         }
 
         GameState current_state = game.getGameState();

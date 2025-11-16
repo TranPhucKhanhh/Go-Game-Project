@@ -68,11 +68,9 @@ void Menu::resize() {
 
     start_button.updateSize(button_size);
     start_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f});
-    start_button.updateState();
 
     setting_button.updateSize(button_size);
     setting_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f) });
-    setting_button.updateState();
 
     title.setCharacterSize(std::min(ui_cfg.window_size.x, ui_cfg.window_size.y) / 7);
     

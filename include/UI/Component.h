@@ -15,9 +15,9 @@ public:
 	const sf::Vector2f getSize() const { return size; };
 
 	// Update value
-	void updatePos(const sf::Vector2f& _position) { position = _position; };
-	void updateSize(const sf::Vector2f& _size) { size = _size; };
-	void updateTextSize(unsigned int _text_size) { text_size = _text_size; };
+	void updatePos(const sf::Vector2f& _position) { position = _position; updateState(); };
+	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
+	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
 
 	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
 	void updateTextColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_text_color = norm_c, hover_text_color = hover_c; }
@@ -79,7 +79,7 @@ public:
 	void updateTexture(const sf::Texture& texure) { board_background = texure; }
 
 	// update stone
-	void updateStoneTexture(const sf::Texture& b_texture, const sf::Texture& w_texture) { white_texture = w_texture, black_texture = b_texture; };
+	void updateStoneTexture(const sf::Texture& w_texture, const sf::Texture& b_texture) { white_texture = w_texture, black_texture = b_texture; };
 
 	// React to mouse event
 	void hoverStone(const sf::Vector2i& mouse_pos, const Game& game);
