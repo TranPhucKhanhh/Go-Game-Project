@@ -13,11 +13,13 @@ public:
 	// Return value
 	const sf::Vector2f getPos() const { return position; };
 	const sf::Vector2f getSize() const { return size; };
+	float getTextSizeFit(const float _ratio);
 
 	// Update value
 	void updatePos(const sf::Vector2f& _position) { position = _position; updateState(); };
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
 	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
+	void updateTextSizeFit(const float _ratio);
 
 	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
 	void updateTextColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_text_color = norm_c, hover_text_color = hover_c; }
@@ -45,9 +47,9 @@ private:
 	sf::RectangleShape button;
 	sf::Text text;
 
-	sf::Vector2f position;
-	sf::Vector2f size;
-	unsigned int text_size;
+	sf::Vector2f position = { 0.f,0.f };
+	sf::Vector2f size = { 0.f,0.f };
+	unsigned int text_size = 0;
 
 	std::string on_click_respond;
 
@@ -62,7 +64,6 @@ private:
 	// Color for text
 	sf::Color normal_text_color{ 255, 255, 255 };
 	sf::Color hover_text_color{ 255, 255, 255 };
-
 };
 
 class BoardUI {
@@ -120,6 +121,9 @@ public:
 
 	TextBox(const sf::Font& font) : text(font) {};
 
+	// Return value
+	float getTextSizeFit(const float _ratio);
+
 	// Update value
 	void updateBoxPos(const sf::Vector2f& _position) { position = _position; update(); };
 	void updateBoxSize(const sf::Vector2f& _size) { box.setSize(_size); update(); };
@@ -127,6 +131,7 @@ public:
 
 	void updateTextColor(const sf::Color& color) { text.setFillColor(color); }
 	void updateTextSize(const float& size) { text.setCharacterSize(size); update(); }
+	void updateTextSizeFit(const float _ratio);
 	void updateStr(const std::string& _text) { text.setString(_text); update(); }
 	void update();
 
