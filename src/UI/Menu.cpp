@@ -40,10 +40,10 @@ void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
 
     if (respond == "Start") {
         event_respond = "StartGame";
-	}
+    }
     else if (respond == "Setting") {
         event_respond = "OpenSetting";
-	}
+    }
 }
 
 void Menu::draw() {

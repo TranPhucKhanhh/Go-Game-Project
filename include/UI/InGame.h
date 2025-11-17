@@ -22,18 +22,32 @@ public:
 private:
     BoardUI board;
     sf::RectangleShape side_panel;
-    //sf::RectangleShape header_bar;
+    sf::RectangleShape mode_panel;
+    sf::RectangleShape option_panel;
+    sf::RectangleShape control_panel;
+    sf::RectangleShape history_panel;
     sf::RectangleShape footer_bar;
     TextBox header_bar;
 
-    std::unordered_map<std::string, SimpleButton> buttons;
-    std::unordered_map<std::string, sf::Text> texts;
+    SimpleButton new_button;
+    SimpleButton save_button;
+    SimpleButton setting_button;
+
+    SimpleButton undo_button;
+    SimpleButton redo_button;
+    SimpleButton pass_button;
 
     Game& game;
 	UICfg& ui_cfg;
     const AssetManager& asset_manager;
 
     void resize(const sf::Vector2u& window_size);
+
+    void updateHeaderBar();
+    void mode_panel_resize(const float& _total_height_panel);
+    void control_panel_resize(const float& _total_height_panel);
+    void option_panel_resize(const float& _total_height_panel);
+    void history_panel_resize(const float& _total_height_panel);
 
     // Screen UI value
     float padding;

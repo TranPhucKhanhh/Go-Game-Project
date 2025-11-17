@@ -60,3 +60,21 @@ void SimpleButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std:
 		mouse_hold = false;
 	}
 }
+
+void SimpleButton::updateTextSizeFit(const float _ratio) {
+	text.setCharacterSize(size.y);
+	sf::FloatRect bound = text.getLocalBounds();
+	float ratio = bound.size.x / bound.size.y;
+	ratio = size.x / ratio * _ratio;
+
+	updateTextSize(ratio);
+}
+
+float SimpleButton::getTextSizeFit(const float _ratio) {
+	text.setCharacterSize(size.y);
+	sf::FloatRect bound = text.getLocalBounds();
+	float ratio = bound.size.x / bound.size.y;
+	ratio = size.x / ratio * _ratio;
+
+	return ratio;
+}
