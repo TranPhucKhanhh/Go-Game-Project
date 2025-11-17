@@ -82,7 +82,7 @@ static void getCapture(const Move& move, const Board& board, std::vector<Cell>& 
 		if (tmp > 0 || captured_cell[u][v]) continue;
 		getCapture(u, v, board, type, capture);
 	}
-	std::cout << capture.size() << "\n";
+	//std::cout << capture.size() << "\n";
 }
 
 static bool canCapture(const Move& move,const Board& board, std::vector<Cell>& capture) {
