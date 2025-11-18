@@ -4,6 +4,7 @@
 #include<model/SettingPanel.h>
 #include<model/GameState.h>
 #include<model/CellState.h>
+#include<algorithm>
 
 void GameOption::drawNewPanel() {
 	ui_cfg.window.draw(game_mode_title);
