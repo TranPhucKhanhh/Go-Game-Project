@@ -92,6 +92,9 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         game.reset();
         updateHeaderBar();
     }
+    else if (event_respond == "New") {
+        respond = "GameNewOption";
+    }
 }
 
 void InGame::draw() {

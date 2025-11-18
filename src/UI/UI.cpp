@@ -66,10 +66,14 @@ void UI::run() {
 				break;
             }
 
-            if (respond == "StartGame") {
+            if (respond == "GameNewOption") {
 				game.getGameCfg().state = GameState::Setting;
                 game_setting.enter();
 			}
+            else if (respond == "StartNewGame") {
+                game.getGameCfg().state = GameState::Playing;
+                in_game.enter();
+            }
         }
 
         GameState current_state = game.getGameState();

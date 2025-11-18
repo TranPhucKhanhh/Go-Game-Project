@@ -138,7 +138,14 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 		panel = SettingPanel::Customization;
 	}
 	else if (event_respond == "StartGame") {
-		std::cerr << "start a game pls" << std::endl;
+		if (game_mode == GameMode::PvP) {
+			game.getGameCfg().board_size = board_size_chosen;
+			game.start();
+			respond = "StartNewGame";
+		}
+		else {
+			std::cerr << "Other game mode has't implemented yet!" << std::endl;
+		}
 	}
 }
 
