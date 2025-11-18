@@ -12,9 +12,7 @@ void BoardUI::updateSize(const float& size) {
     grid_size = board_size / (board_cell_number + 1);
     board_padding = grid_size;
 
-    sf::Color c = predict_stone.getFillColor();
-    c.a = 200;
-    predict_stone.setFillColor(c);
+    predict_stone.setFillColor(sf::Color(255,255,255, 200));
 }
 
 void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {

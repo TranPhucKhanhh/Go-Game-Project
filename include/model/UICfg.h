@@ -1,6 +1,7 @@
 #pragma once
 #include<SFML/Graphics.hpp>
 #include<iostream>
+
 struct UICfg {
     sf::Vector2u window_size;
     sf::Vector2u min_window_size;

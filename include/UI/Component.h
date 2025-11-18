@@ -7,6 +7,16 @@
 
 class SimpleButton {
 public:
+
+	// Color for button
+	sf::Color normal_button_color{ 100, 100, 200 };
+	sf::Color hover_button_color{ 90, 90, 150 };
+	sf::Color press_button_color{ 62, 62, 89 };
+
+	// Color for text
+	sf::Color normal_text_color{ 255, 255, 255 };
+	sf::Color hover_text_color{ 255, 255, 255 };
+
 	SimpleButton() = default;
 	SimpleButton(const std::string& text, const sf::Font& font);
 
@@ -19,10 +29,10 @@ public:
 	void updatePos(const sf::Vector2f& _position) { position = _position; updateState(); };
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
 	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
+	void updateOpacity(const float& c) { normal_button_color.a = c, hover_button_color.a = c, press_button_color.a = c; };
+	void updateBorder(const float& thickness, const sf::Color& color) { button.setOutlineColor(color), button.setOutlineThickness(thickness); };
 	void updateTextSizeFit(const float _ratio);
 
-	void updateButtonColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_button_color = norm_c, hover_button_color = hover_c; }
-	void updateTextColor(const sf::Color& norm_c, const sf::Color& hover_c) { normal_text_color = norm_c, hover_text_color = hover_c; }
 	void updateRespondStr(const std::string& respond_str) { on_click_respond = respond_str; }
 	// Event check and update
 
@@ -34,9 +44,9 @@ public:
 
 	void updateEffect();
 
-	void draw(sf::RenderWindow& window) const;
+	void draw(sf::RenderWindow& window);
 
-	// Function for modifying outside the class
+	// Function intended for modifying outside the class
 	void onIdle() { button.setFillColor(normal_button_color); };
 
 	void onHover() { button.setFillColor(hover_button_color); };
@@ -55,15 +65,6 @@ private:
 
 	bool hovered = false;
 	bool mouse_hold = false;
-
-	// Color for button
-	sf::Color normal_button_color{ 100, 100, 200 };
-	sf::Color hover_button_color{ 90, 90, 150 };
-	sf::Color press_button_color{ 62, 62, 89 };
-
-	// Color for text
-	sf::Color normal_text_color{ 255, 255, 255 };
-	sf::Color hover_text_color{ 255, 255, 255 };
 };
 
 class BoardUI {
@@ -142,4 +143,40 @@ private:
 	sf::Text text;
 
 	sf::Vector2f position;
+};
+
+class Slider {
+public:
+	float value = 0;
+	float pre_value = 0;
+	bool show = false;
+	std::string direction = "Right";
+
+	sf::Color handle_color = sf::Color({ 0, 0, 0 });
+	sf::Color slide_color = sf::Color({ 255, 255, 255 });
+	sf::Color fill_color = sf::Color({ 173, 240, 199 });
+
+	Slider() = default;
+
+	// update value
+	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
+	void updatePos(const sf::Vector2f& _pos) { position = _pos; updateState(); };
+
+	void updateState();
+
+	void updateEffect();
+
+	void eventHandle(const sf::Event& event, const UICfg& ui_cfg);
+
+	void draw(sf::RenderWindow& window);
+private:
+	sf::RectangleShape slide;
+	sf::RectangleShape fill;
+	sf::CircleShape handle;
+
+	sf::Vector2i mouse_last_pos = { -1,-1 };
+	sf::Vector2f position = { 0,0 }, size = { 0,0 };
+
+	bool hold = false;
+	bool hover = false;
 };
