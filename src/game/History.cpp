@@ -58,7 +58,7 @@ void GameHistory::redoMove(Board& current_board, CellState& current_player) {
 	for (auto i : capture_list) {
 		int x = i.x;
 		int y = i.y;
-		current_board[x][y] = i.state;
+		current_board[x][y] = CellState::Empty;
 	}
 	board.push_back(current_board);
 }
