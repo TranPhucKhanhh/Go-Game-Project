@@ -141,6 +141,7 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 		if (game_mode == GameMode::PvP) {
 			game.getGameCfg().board_size = board_size_chosen;
 			game.start();
+			game.reset();
 			respond = "StartNewGame";
 		}
 		else {
