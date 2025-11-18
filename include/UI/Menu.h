@@ -27,4 +27,7 @@ private:
     float margin;
 
     void resize(const sf::Vector2u& window_size);  
+
+    // debug
+    Slider slider;
 };

@@ -18,7 +18,20 @@ void SimpleButton::checkHover(const sf::Vector2i& mouse_pos) {
 	}
 }
 
-void SimpleButton::draw(sf::RenderWindow& window) const {
+void SimpleButton::updateEffect() {
+	if (mouse_hold && hovered) {
+		onMouseHold();
+	}
+	else if (hovered) {
+		onHover();
+	}
+	else {
+		onIdle();
+	}
+}
+
+void SimpleButton::draw(sf::RenderWindow& window) {
+	updateEffect();
 	window.draw(button);
 	window.draw(text);
 }
@@ -31,18 +44,6 @@ void SimpleButton::updateState() {
 	text.setCharacterSize(text_size);
 	text.setOrigin(text.getLocalBounds().getCenter());
 	text.setPosition(position);
-}
-
-void SimpleButton::updateEffect() {
-	if (mouse_hold && hovered) {
-		onMouseHold();
-	}
-	else if (hovered) {
-		onHover();
-	}
-	else {
-		onIdle();
-	}
 }
 
 void SimpleButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {

@@ -14,15 +14,15 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular")), 
     pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular")),
     new_button("New Game", _asset_manager.getFont("StackSansNotch-Regular")),
-    save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular")),
-    setting_button("Setting", _asset_manager.getFont("StackSansNotch-Regular")) {
+    reset_button("Reset Gane", _asset_manager.getFont("StackSansNotch-Regular")),
+    save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular")) {
    
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
 	pass_button.updateRespondStr("Pass");
-	new_button.updateRespondStr("NewGame");
-	save_button.updateRespondStr("SaveGame");
-	setting_button.updateRespondStr("Setting");
+	new_button.updateRespondStr("New");
+	reset_button.updateRespondStr("Reset");
+	save_button.updateRespondStr("Save");
 
 
     updateHeaderBar();
@@ -33,6 +33,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 }
 
 void InGame::enter() {
+    board.updateCellNumber(game.getGameCfg().board_size);
     resize();
 }
 
@@ -64,8 +65,8 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
 
 	std::string event_respond = "";
     new_button.eventHandle(event, ui_cfg, event_respond);
+    reset_button.eventHandle(event, ui_cfg, event_respond);
     save_button.eventHandle(event, ui_cfg, event_respond);
-    setting_button.eventHandle(event, ui_cfg, event_respond);
 
     undo_button.eventHandle(event, ui_cfg, event_respond);
     redo_button.eventHandle(event, ui_cfg, event_respond);
@@ -87,6 +88,10 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         game.pass();
         updateHeaderBar();
     }
+    else if (event_respond == "Reset") {
+        game.reset();
+        updateHeaderBar();
+    }
 }
 
 void InGame::draw() {
@@ -99,18 +104,12 @@ void InGame::draw() {
     ui_cfg.window.draw(history_panel);
     ui_cfg.window.draw(footer_bar);
 
-    new_button.updateEffect();
     new_button.draw(ui_cfg.window);
-    save_button.updateEffect();
+    reset_button.draw(ui_cfg.window);
     save_button.draw(ui_cfg.window);
-    setting_button.updateEffect();
-    setting_button.draw(ui_cfg.window);
 
-    undo_button.updateEffect();
     undo_button.draw(ui_cfg.window);
-    redo_button.updateEffect();
     redo_button.draw(ui_cfg.window);
-    pass_button.updateEffect();
     pass_button.draw(ui_cfg.window);
 
     header_bar.draw(ui_cfg.window);
@@ -140,17 +139,17 @@ void InGame::option_panel_resize(const float& _total_height_panel) {
     new_button.updateSize(_button_size);
     new_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y - _button_size.y - _inner_button_padding});
     
+    reset_button.updateSize(_button_size);
+    reset_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y });
+    
     save_button.updateSize(_button_size);
-    save_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y });
+    save_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y + _inner_button_padding + _button_size.y});
     
-    setting_button.updateSize(_button_size);
-    setting_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y + _inner_button_padding + _button_size.y});
-    
-    float _button_text_size = std::min({ new_button.getTextSizeFit(0.8), save_button.getTextSizeFit(0.8), setting_button.getTextSizeFit(0.8) });
+    float _button_text_size = std::min({ new_button.getTextSizeFit(0.8), reset_button.getTextSizeFit(0.8), save_button.getTextSizeFit(0.8) });
 
     new_button.updateTextSize(_button_text_size);
+    reset_button.updateTextSize(_button_text_size);
     save_button.updateTextSize(_button_text_size);
-    setting_button.updateTextSize(_button_text_size);
 }
 
 void InGame::control_panel_resize(const float& _total_height_panel) {
@@ -203,7 +202,6 @@ void InGame::resize() {
     float _tmp = (ui_cfg.window_size.x - board_size - inner_padding - side_panel_size_x) / 2;
     float _total_height_panel = status_bar_size_y * 2 + inner_padding * 2 + board_size;
 
-    board.updateCellNumber(game.getGameCfg().board_size);
     board.updateSize( board_size );
     board.updatePos({_tmp + board_size / 2, ui_cfg.window_size.y / 2.f});
     board.updateStoneTexture(asset_manager.getTexture("white-stone-default"), asset_manager.getTexture("black-stone-default"));

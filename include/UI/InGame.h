@@ -31,7 +31,7 @@ private:
 
     SimpleButton new_button;
     SimpleButton save_button;
-    SimpleButton setting_button;
+    SimpleButton reset_button;
 
     SimpleButton undo_button;
     SimpleButton redo_button;

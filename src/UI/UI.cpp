@@ -11,7 +11,8 @@
 UI::UI(Game& game, AssetManager& _asset_manager, const sf::Vector2u& window_size, const sf::Vector2u& min_size, const std::string& title)
     : game(game), asset_manager(_asset_manager), window(sf::VideoMode(window_size), title),
     ui_cfg(window_size, min_size,window),
-    menu(_asset_manager, ui_cfg), in_game(_asset_manager, game, ui_cfg) {
+    menu(_asset_manager, ui_cfg), in_game(_asset_manager, game, ui_cfg),
+    game_setting(_asset_manager, game, ui_cfg) {
 
     window.setVerticalSyncEnabled(true);
     window.setMinimumSize(ui_cfg.min_window_size);
@@ -60,10 +61,14 @@ void UI::run() {
             case GameState::Playing:
                 in_game.eventHandle(*event, respond);
                 break;
+            case GameState::Setting:
+                game_setting.eventHandle(*event, respond);
+				break;
             }
+
             if (respond == "StartGame") {
-				game.getGameCfg().state = GameState::Playing;
-                in_game.enter();
+				game.getGameCfg().state = GameState::Setting;
+                game_setting.enter();
 			}
         }
 
@@ -74,6 +79,9 @@ void UI::run() {
                 break;
             case GameState::Playing:
                 in_game.draw();
+                break;
+            case GameState::Setting:
+				game_setting.draw();
                 break;
         }
 

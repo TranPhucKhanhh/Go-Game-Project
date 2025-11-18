@@ -16,6 +16,7 @@ add_executable(GoGame
                         src/main.cpp
                         src/component/Button.cpp
                         src/component/TextBox.cpp
+                        src/component/Slider.cpp
                         src/component/BoardUI.cpp
 
                         src/core/AssetManager.cpp
@@ -23,13 +24,18 @@ add_executable(GoGame
                         src/UI/InGame.cpp
                         src/UI/Menu.cpp
                         src/UI/UI.cpp
+                        src/UI/GameOption.cpp
+                        src/UI/GameOptionPanel/GameCustomizeOption.cpp
+                        src/UI/GameOptionPanel/GameSettingOption.cpp
+                        src/UI/GameOptionPanel/LoadGameOption.cpp
+                        src/UI/GameOptionPanel/NewGameOption.cpp
 
                         src/AI/AI.cpp
 
                         src/game/Board.cpp
                         src/game/Game.cpp
                         src/game/History.cpp
- "include/model/UICfg.h")
+)
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics)

@@ -49,13 +49,14 @@ void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
 void Menu::draw() {
     ui_cfg.window.clear(sf::Color(240, 217, 181));
     
-    start_button.updateEffect();
     start_button.draw(ui_cfg.window);
     
-    setting_button.updateEffect();
     setting_button.draw(ui_cfg.window);
     
     ui_cfg.window.draw(title);
+
+    // debug
+	slider.draw(ui_cfg.window);
 }
 
 void Menu::resize() {
