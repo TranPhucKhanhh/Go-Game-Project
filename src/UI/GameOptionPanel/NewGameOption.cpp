@@ -122,8 +122,6 @@ void GameOption::resizeNewPanel() {
 	float _inner_margin = _margin / 2.f;
 	float _component_size_y = _margin / 2.f;
 
-	std::cerr << _margin << " " << _inner_margin << std::endl;
-
 	sf::Vector2f _mode_button_size = { (canvas_size.x - _margin * 2 - _inner_margin * 3) / 4.f , _component_size_y * 2 };
 
 	game_mode_title.setCharacterSize(_component_size_y);
@@ -171,8 +169,6 @@ void GameOption::resizeNewPanel() {
 	else {
 		_start_tmp = ai_easy_button.getPos().y + _mode_button_size.y / 2.f + _inner_margin;
 	}
-
-	std::cerr << _start_tmp << std::endl;
 
 	choose_board_size_title.setCharacterSize(_component_size_y);
 	choose_board_size_title.setPosition({ canvas.getPosition().x - canvas_size.x / 2.f + _margin , _start_tmp });
