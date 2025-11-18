@@ -4,6 +4,7 @@
 #include<model/SettingPanel.h>
 #include<model/GameState.h>
 #include<model/CellState.h>
+#include<algorithm>
 
 GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 	asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
