@@ -64,6 +64,7 @@ void GameOption::enter() {
 	game_mode = GameMode::PvP;
 	side_chosen = CellState::Black;
 	board_size_chosen = 19;
+	eventHandle(sf::Event::Closed{}, (std::string) "Hello");
 	resize();
 }
 
