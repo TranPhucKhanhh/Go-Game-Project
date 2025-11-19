@@ -47,10 +47,8 @@ void SimpleButton::updateState() {
 }
 
 void SimpleButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
-	if (event.is<sf::Event::MouseMoved>()) {
-		checkHover(ui_cfg.mouse_pos);
-	}
-	else if (const auto* button = event.getIf<sf::Event::MouseButtonPressed>()) {
+	checkHover(ui_cfg.mouse_pos);
+	if (const auto* button = event.getIf<sf::Event::MouseButtonPressed>()) {
 		if (button->button == sf::Mouse::Button::Left)
 			mouse_hold = true;
 	}
