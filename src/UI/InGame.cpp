@@ -34,7 +34,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 
 void InGame::enter() {
     board.updateCellNumber(game.getGameCfg().board_size);
-    eventHandle(sf::Event::Closed{}, (std::string)"Hello");
+    sf::Event _d = sf::Event::Closed{};
+    std::string _dt = "Test";
+    eventHandle(_d, _dt);
     resize();
 }
 
