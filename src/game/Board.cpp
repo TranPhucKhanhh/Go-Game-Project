@@ -116,7 +116,7 @@ static int getScore(const Board& board, int x, int y, int& mask) {
 	if (board[x][y] != CellState::Empty) {
 		if (board[x][y] == CellState::Black) mask |= 1;
 		else mask |= 2;
-		return 1;
+		return 0;
 	}
 	if (visited[x][y]) return 0;
 	visited[x][y] = 1;
@@ -131,8 +131,16 @@ static int getScore(const Board& board, int x, int y, int& mask) {
 
 void Board::calculateScore(const Board& board, int& black_score, int& white_score) {
 	visited.assign(board.size(), std::vector<bool>(board.size(), 0));
-	for (int i = 0; i < (*this).size(); i++) {
+	for (int i = 0; i < board.size(); i++) {
 		for (int j = 0; j < board.size(); j++) {
+			if (board[i][j] == CellState::Black) {
+				black_score++;
+				continue;
+			}
+			if (board[i][j] == CellState::White) {
+				white_score++;
+				continue;
+			}
 			if (visited[i][j]) continue;
 			int mask = 0;
 			int score = getScore(board, i, j, mask);

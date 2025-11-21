@@ -56,11 +56,11 @@ void Game::placeStone(int x, int y) {
 }
 
 std::pair<float, float> Game::getScore() {
-	int _white_score = 0;
 	int _black_score = 0;
+	int _white_score = 0;
 
-	state.current_board.calculateScore(state.current_board, _white_score, _black_score);
-	return std::make_pair(_white_score, _black_score);
+	state.current_board.calculateScore(state.current_board, _black_score, _white_score);
+	return std::make_pair(_black_score, _white_score);
 }
 
 void Game::print() {
