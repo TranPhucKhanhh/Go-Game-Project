@@ -6,6 +6,7 @@
 #include<game/Game.h>
 #include<algorithm>
 #include<iostream>
+#include<cmath>
 
 static std::string convert_to_string(const float& num) {
     int val = floor(num);
