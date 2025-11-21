@@ -39,7 +39,6 @@ public:
 	void redo();
 	void reset();
 	void placeStone(int x, int y);
-	void end();
 	void print(); // debug
 
 	// Return value
@@ -47,6 +46,10 @@ public:
 	GameCfg& getGameCfg() { return game_config; }
 	Board getCurrentBoard() const { return state.current_board; };
 	int getBoardSize() const { return game_config.board_size; }
+
+	bool isGameEnd() const { return game_end; }
+
+	std::pair<float, float> getScore(); // First value is black score and second value is white score
 
 private:
 	//Game configuration
@@ -57,4 +60,6 @@ private:
 
 	//Current game history
 	GameHistory history;
+
+	bool game_end;
 };

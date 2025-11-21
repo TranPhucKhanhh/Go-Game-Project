@@ -37,17 +37,24 @@ private:
     SimpleButton redo_button;
     SimpleButton pass_button;
 
+    TextBox white_score_box;
+    TextBox black_score_box;
+
     Game& game;
 	UICfg& ui_cfg;
     const AssetManager& asset_manager;
 
+    bool game_playable;
+
     void resize(const sf::Vector2u& window_size);
 
     void updateHeaderBar();
+    void updateScoreBox();
     void mode_panel_resize(const float& _total_height_panel);
     void control_panel_resize(const float& _total_height_panel);
     void option_panel_resize(const float& _total_height_panel);
     void history_panel_resize(const float& _total_height_panel);
+    void footer_bar_resize(const float& _tmp);
 
     // Screen UI value
     float padding;
