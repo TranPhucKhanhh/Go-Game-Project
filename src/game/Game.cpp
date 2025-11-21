@@ -6,6 +6,7 @@
 void Game::start() {
 	//Init first state with board_size size, black to move
 	state.initializer(game_config.board_size);
+	game_end = false;
 	std::cout << "Game initializer\n";
 }
 
@@ -14,7 +15,7 @@ void Game::pass() {
 	std::vector<Cell> capture;
 	state.setNextPlayer();
 	history.addMove(move, state.current_board, capture);
-	if (history.checkConsecutivePass()) end();
+	if (history.checkConsecutivePass()) game_end = true;
 }
 
 void Game::undo() {
@@ -30,6 +31,7 @@ void Game::reset() {
 	state.initializer(game_config.board_size);
 	//Clear all undo, redo, and board history
 	history.clear();   
+	game_end = false;
 }
 
 void Game::placeStone(int x, int y) {
@@ -53,11 +55,12 @@ void Game::placeStone(int x, int y) {
 	//state.printPlayer();
 }
 
-void Game::end() {
-	int black_score = 0;
-	int white_score = game_config.komi;
-	state.current_board.calculateScore(state.current_board,black_score, white_score);
-	std::cout << black_score << " " << white_score << "\n";
+std::pair<float, float> Game::getScore() {
+	int _white_score = 0;
+	int _black_score = 0;
+
+	state.current_board.calculateScore(state.current_board, _white_score, _black_score);
+	return std::make_pair(_white_score, _black_score);
 }
 
 void Game::print() {

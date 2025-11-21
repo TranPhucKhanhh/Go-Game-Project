@@ -116,7 +116,7 @@ static int getScore(const Board& board, int x, int y, int& mask) {
 	if (board[x][y] != CellState::Empty) {
 		if (board[x][y] == CellState::Black) mask |= 1;
 		else mask |= 2;
-		return 0;
+		return 1;
 	}
 	if (visited[x][y]) return 0;
 	visited[x][y] = 1;

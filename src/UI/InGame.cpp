@@ -6,6 +6,19 @@
 #include<game/Game.h>
 #include<algorithm>
 #include<iostream>
+#include<cmath>
+
+static std::string convert_to_string(const float& num) {
+    int val = floor(num);
+    float epsilon = 0.3;
+
+    std::string _re = std::to_string(val);
+    if (num - val > epsilon) {
+        _re += '.';
+        _re += '5';
+    }
+    return _re;
+}
 
 InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) : 
     asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
@@ -15,7 +28,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular")),
     new_button("New Game", _asset_manager.getFont("StackSansNotch-Regular")),
     reset_button("Reset Gane", _asset_manager.getFont("StackSansNotch-Regular")),
-    save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular")) {
+    save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular")),
+    white_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
+    black_score_box(_asset_manager.getFont("StackSansNotch-Regular")) {
    
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
@@ -24,8 +39,13 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 	reset_button.updateRespondStr("Reset");
 	save_button.updateRespondStr("Save");
 
+    white_score_box.updateTextColor(sf::Color::Black);
+    black_score_box.updateBoxColor(sf::Color::Black);
+    black_score_box.updateTextColor(sf::Color::White);
+    white_score_box.updateBoxColor(sf::Color::White);
 
     updateHeaderBar();
+    updateScoreBox();
 
     resize();
 
@@ -38,33 +58,56 @@ void InGame::enter() {
     std::string _dt = "Test";
     eventHandle(_d, _dt);
     resize();
+
+    game_playable = true;
+
+    updateHeaderBar();
+    updateScoreBox();
 }
 
 void InGame::updateHeaderBar() {
-    if (game.getCurrentPlayer() == CellState::White) {
-        header_bar.updateStr("WHITE TO MOVE");
-        header_bar.updateBoxColor(sf::Color::White);
-        header_bar.updateTextColor(sf::Color::Black);
+    if (game_playable) {
+        if (game.getCurrentPlayer() == CellState::White) {
+            header_bar.updateStr("WHITE TO MOVE");
+            header_bar.updateBoxColor(sf::Color::White);
+            header_bar.updateTextColor(sf::Color::Black);
+        }
+        else {
+            header_bar.updateStr("BLACK TO MOVE");
+            header_bar.updateBoxColor(sf::Color::Black);
+            header_bar.updateTextColor(sf::Color::White);
+        }
     }
-    else {
-        header_bar.updateStr("BLACK TO MOVE");
-        header_bar.updateBoxColor(sf::Color::Black);
-        header_bar.updateTextColor(sf::Color::White);
-    }
+}
+
+void InGame::updateScoreBox() {
+    std::pair<float, float> _score = game.getScore();
+
+    white_score_box.updateStr(convert_to_string(_score.second));
+    black_score_box.updateStr(convert_to_string(_score.first));
+
+    float _box_text_size = std::min(black_score_box.getTextSizeFit(0.6), white_score_box.getTextSizeFit(0.6));
+    black_score_box.updateTextSize(_box_text_size);
+    white_score_box.updateTextSize(_box_text_size);
 }
 
 void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     if (event.is<sf::Event::Resized>()) {
         resize();
     }
-    if (event.is<sf::Event::MouseMoved>()) {
-        board.hoverStone(ui_cfg.mouse_pos, game);
-    }
-    if (event.is<sf::Event::MouseButtonReleased>()) {
-        board.placeStone(ui_cfg.mouse_pos, game);
 
-        updateHeaderBar();
+    if (game_playable) {
+        if (event.is<sf::Event::MouseMoved>()) {
+            board.hoverStone(ui_cfg.mouse_pos, game);
+        }
+        if (event.is<sf::Event::MouseButtonReleased>()) {
+            board.placeStone(ui_cfg.mouse_pos, game);
+
+            updateHeaderBar();
+            updateScoreBox();
+        }
     }
+    
 
 	std::string event_respond = "";
     new_button.eventHandle(event, ui_cfg, event_respond);
@@ -79,15 +122,15 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
 		std::cerr << "clicked: " << event_respond << std::endl;
 	}
 
-    if (event_respond == "Undo") {
+    if (event_respond == "Undo" && game_playable) {
         game.undo();
         updateHeaderBar();
     }
-    else if (event_respond == "Redo") {
+    else if (event_respond == "Redo" && game_playable) {
         game.redo();
         updateHeaderBar();
     }
-    else if (event_respond == "Pass") {
+    else if (event_respond == "Pass" && game_playable) {
         game.pass();
         updateHeaderBar();
     }
@@ -97,6 +140,30 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     }
     else if (event_respond == "New") {
         respond = "GameNewOption";
+    }
+
+    // Check if the game reach the end stage
+    if (game.isGameEnd() && game_playable) {
+        game_playable = false;
+
+
+        std::pair<float, float> _score = game.getScore();
+        
+        if (_score.first < _score.second) {
+            header_bar.updateStr("WHITE WINS");
+            header_bar.updateBoxColor(sf::Color::White);
+            header_bar.updateTextColor(sf::Color::Black);
+        }
+        else if (_score.first > _score.second) {
+            header_bar.updateStr("BLACK WINS");
+            header_bar.updateBoxColor(sf::Color::Black);
+            header_bar.updateTextColor(sf::Color::White);
+        }
+        else {
+            header_bar.updateStr("DRAW");
+            header_bar.updateBoxColor(sf::Color::Magenta);
+            header_bar.updateTextColor(sf::Color::Black);
+        }
     }
 }
 
@@ -119,6 +186,9 @@ void InGame::draw() {
     pass_button.draw(ui_cfg.window);
 
     header_bar.draw(ui_cfg.window);
+
+    white_score_box.draw(ui_cfg.window);
+    black_score_box.draw(ui_cfg.window);
 
     board.draw(ui_cfg.window, game.getCurrentBoard());
 }
@@ -195,6 +265,19 @@ void InGame::history_panel_resize(const float& _total_height_panel) {
         control_panel.getPosition().y + control_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
 }
 
+void InGame::footer_bar_resize(const float& _tmp) {
+    float _box_size = board_size / 4;
+    black_score_box.updateBoxSize({ _box_size, status_bar_size_y });
+    black_score_box.updateBoxPos({ _tmp + _box_size / 2.f, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y / 2.f });
+    white_score_box.updateBoxSize({ _box_size, status_bar_size_y });
+    white_score_box.updateBoxPos({ _tmp - _box_size / 2.f + board_size, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y / 2.f });
+
+    float _box_text_size = std::min(black_score_box.getTextSizeFit(0.8), white_score_box.getTextSizeFit(0.8));
+    black_score_box.updateTextSize(_box_text_size);
+    white_score_box.updateTextSize(_box_text_size);
+
+}
+
 void InGame::resize() {
     float min_scale = std::min(ui_cfg.window_size.x, ui_cfg.window_size.y);
     
@@ -232,4 +315,6 @@ void InGame::resize() {
     footer_bar.setFillColor(sf::Color(242, 176, 109));
     footer_bar.setOrigin(footer_bar.getLocalBounds().getCenter());
     footer_bar.setPosition({ _tmp + board_size / 2, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y  / 2});
+
+    footer_bar_resize(_tmp);
 }
