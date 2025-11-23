@@ -53,9 +53,6 @@ private:
     CellState side_chosen;
     unsigned int board_size_chosen;
 
-
-    void resize(const sf::Vector2u& window_size);
-
     void resizeNewPanel();
     void drawNewPanel();
     void eventHandleNewPanel(const sf::Event& event, std::string& respond);
