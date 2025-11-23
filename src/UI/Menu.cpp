@@ -24,6 +24,10 @@ Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
     std::cerr << "Load Menu UI successfully." << std::endl;
 }
 
+void Menu::enter() {
+    resize();
+}
+
 void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
     
     if (event.is<sf::Event::Resized>()) {

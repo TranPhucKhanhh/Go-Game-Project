@@ -11,6 +11,8 @@ class Menu {
 public:
     Menu(const AssetManager& asset_manager, UICfg& ui_cfg);
 
+    void enter();
+
     void eventHandle(const sf::Event &event, std::string& repond);
 
     void resize();
@@ -25,8 +27,6 @@ private:
     const AssetManager& asset_manager;
 
     float margin;
-
-    void resize(const sf::Vector2u& window_size);  
 
     // debug
     Slider slider;
