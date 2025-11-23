@@ -1,5 +1,4 @@
 #include<SFML/Graphics.hpp>
-#include<UI/Component.h>
 #include<UI/UI.h>
 #include<game/Game.h>
 #include<core/AssetManager.h>
