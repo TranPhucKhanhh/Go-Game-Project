@@ -58,9 +58,10 @@ void Game::placeStone(int x, int y) {
 std::pair<float, float> Game::getScore() {
 	int _black_score = 0;
 	int _white_score = 0;
+	const float KOMI = 7.5;
 
 	state.current_board.calculateScore(state.current_board, _black_score, _white_score);
-	return std::make_pair(_black_score, _white_score);
+	return std::make_pair(_black_score, _white_score + KOMI);
 }
 
 void Game::print() {
