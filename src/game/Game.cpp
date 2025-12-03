@@ -146,21 +146,21 @@ void Game::loadGame(const std::string& name) {
 	history.loadFromMoveList(move_history, state.current_board, state.current_player);
 }
 
-Board Game::loadPreviewGame(const std::string& name) {
+void Game::loadPreviewGame(const std::string& name) {
 	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
 	std::ifstream fin(path);
 	if (!fin.is_open()) {
 		std::cout << "Cannot load file!\n";
-		return Board(0);
+		return;
 	}
 	json json_move_history;
 	json json_config;
 	fin >> json_config;
 	fin >> json_move_history;
-	Board tmp_board(json_config.at("board_size").get<int>());
+	tmp_board = json_config.at("board_size").get<int>();
 	std::vector<Move> move_history = json_move_history;
 	tmp_board.loadPreviewFromMoveList(move_history, tmp_board);
-	return tmp_board;
+	return;
 }
 
 void Game::print() {

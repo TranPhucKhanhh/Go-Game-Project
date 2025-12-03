@@ -55,7 +55,7 @@ public:
 	void reset();
 	void placeStone(int x, int y);
 	void saveGame(const std::string& name);
-	Board loadPreviewGame(const std::string& name);
+	void loadPreviewGame(const std::string& name);
 	void loadGame(const std::string& name);
 	void print(); // debug
 
@@ -63,6 +63,7 @@ public:
 	CellState getCurrentPlayer() const { return state.current_player; };
 	GameCfg& getGameCfg() { return game_config; }
 	Board getCurrentBoard() const { return state.current_board; };
+	Board getTempBoard() const { return tmp_board; };
 	int getBoardSize() const { return game_config.board_size; }
 
 	bool isGameEnd() const { return game_end; }
@@ -78,6 +79,8 @@ private:
 
 	//Current game history
 	GameHistory history;
+
+	Board tmp_board;
 
 	bool game_end;
 };

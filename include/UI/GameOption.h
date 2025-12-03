@@ -28,6 +28,7 @@ private:
     sf::RectangleShape canvas;
     SimpleButton start_game_button;
     
+	// New game panel components
     SimpleButton new_game_panel;
     sf::Text game_mode_title;
     SimpleButton pvp_mode_button;
@@ -41,6 +42,11 @@ private:
     SimpleButton board_size_9_button;
     SimpleButton board_size_13_button;
     SimpleButton board_size_19_button;
+
+    // Load game panel components
+    SimpleButton load_test_button;
+    BoardUI board_preview;
+    bool board_preview_show;
 
     SimpleButton load_game_panel;
     SimpleButton setting_panel;

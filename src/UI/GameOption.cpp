@@ -25,6 +25,8 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_size_19_button("19 x 19", asset_manager.getFont("StackSansNotch-Bold")),
 
 	load_game_panel("Load game", asset_manager.getFont("StackSansNotch-Regular")),
+	load_test_button("Load save1", asset_manager.getFont("StackSansNotch-Regular")),
+
 	setting_panel("Setting", asset_manager.getFont("StackSansNotch-Regular")),
 	customize_panel("Customization", asset_manager.getFont("StackSansNotch-Regular"))
 
@@ -45,6 +47,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_size_9_button.updateRespondStr("9x9");
 	board_size_13_button.updateRespondStr("13x13");
 	board_size_19_button.updateRespondStr("19x19");
+	load_test_button.updateRespondStr("LoadTest1");
 
 	// Initialzize the basic color and outline
 	canvas.setFillColor(sf::Color({ 254, 159, 77 }));
@@ -61,6 +64,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 }
 
 void GameOption::enter() {
+	board_preview_show = false;
 	game_mode = GameMode::PvP;
 	side_chosen = CellState::Black;
 	board_size_chosen = 19;
