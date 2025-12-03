@@ -5,6 +5,9 @@
 #include<model/Move.h>
 #include<model/CellState.h>
 #include<model/GameState.h>
+#include<JSON/json.hpp>
+
+using json = nlohmann::json;
 
 enum class SoundTheme { Default, Minimal };
 enum class BoardDesign { Default, Minimal };
@@ -27,7 +30,19 @@ struct GameCfg {
 	bool placing_stone = 1, capturing_stone = 1, end_game_sound = 1; // Sound effect
 };
 
+void to_json(json& j, const Move& move);
+void to_json(json& j, const GameCfg& config);
+
+void from_json(const json& j, Move& move);
+void from_json(const json& j, GameCfg& config);
+
 class Game {
+	//Global JSON
+	friend void to_json(json& j, const Move& move);
+	friend void to_json(json& j, const GameCfg& config);
+
+	friend void from_json(const json& j, Move& move);
+	friend void from_json(const json& j, GameCfg& config);
 public:
 	// Return value
 	GameState getGameState() const { return game_config.state; };
@@ -39,6 +54,9 @@ public:
 	void redo();
 	void reset();
 	void placeStone(int x, int y);
+	void saveGame(const std::string& name);
+	Board loadPreviewGame(const std::string& name);
+	void loadGame(const std::string& name);
 	void print(); // debug
 
 	// Return value

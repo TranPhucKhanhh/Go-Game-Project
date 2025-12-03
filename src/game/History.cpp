@@ -62,3 +62,43 @@ void GameHistory::redoMove(Board& current_board, CellState& current_player) {
 	}
 	board.push_back(current_board);
 }
+
+void GameHistory::clear() {
+	board.clear();
+	capture.clear();
+	move.clear();
+	restore.clear();
+	undo.clear();
+}
+
+bool GameHistory::checkConsecutivePass() {
+	if (move.size() <= 1) return 0;
+	return (move.back().pass == 1 && move[int(move.size()) - 2].pass == 1);
+}
+
+void GameHistory::loadFromMoveList(const std::vector<Move>& move_list, Board& current_board, CellState& current_player) {
+	GameHistory::clear();
+	for (const auto& m : move_list) {
+		std::vector<Cell> turn_capture;
+		current_player = m.player == CellState::Black ? CellState::White : CellState::Black;
+		if (m.pass == 0) current_board.placeStoneWithoutValidating(m, current_board, turn_capture);
+		for (const Cell& i : turn_capture) {
+			current_board[i.x][i.y] = i.state;
+		}
+		GameHistory::addMove(m, current_board, turn_capture);
+	}
+}
+
+void GameHistory::loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board) {
+	for (const auto& m : move_list) {
+		std::vector<Cell> turn_capture;
+		if (m.pass == 0) current_board.placeStoneWithoutValidating(m, current_board, turn_capture);
+		for (const Cell& i : turn_capture) {
+			current_board[i.x][i.y] = i.state;
+		}
+	}
+}
+
+std::vector<Move> GameHistory::getMoveHistory() {
+	return move;
+}

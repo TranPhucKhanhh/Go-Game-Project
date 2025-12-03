@@ -2,6 +2,11 @@
 #include<game/Game.h>
 #include<vector>
 #include<iostream>
+#include<fstream>
+#include<json/json.hpp>
+#include<filesystem>
+
+using json = nlohmann::json;
 
 void Game::start() {
 	//Init first state with board_size size, black to move
@@ -62,6 +67,100 @@ std::pair<float, float> Game::getScore() {
 
 	state.current_board.calculateScore(state.current_board, _black_score, _white_score);
 	return std::make_pair(_black_score, _white_score + KOMI);
+}
+
+void to_json(json& j, const Move& move) {
+	j = json{
+		{"player", move.player},
+		{"pass", move.pass},
+		{"x", move.x},
+		{"y", move.y}
+	};
+}
+
+void to_json(json& j, const GameCfg& config) {
+	j = json{
+		{"board_size", config.board_size},
+		{"prev_state", config.prev_state},
+		{"state", config.state},
+		{"sound_theme", config.sound_theme},
+		{"board_design", config.board_design},
+		{"stone_design", config.stone_design},
+		{"background_music", config.background_music},
+		{"placing_stone", config.placing_stone},
+		{"capturing_stone", config.capturing_stone},
+		{"end_game_sound", config.end_game_sound}
+	};
+}
+
+void from_json(const json& j, Move& move) {
+	move.player = j.at("player").get<CellState>();
+	move.pass = j.at("pass").get<bool>();
+	move.x = j.at("x").get<int>();
+	move.y = j.at("y").get<int>();
+}
+
+void from_json(const json& j, GameCfg& config) {
+	config.board_size = j.at("board_size").get<int>();
+	config.prev_state = j.at("prev_state").get<GameState>();
+	config.state = j.at("state").get<GameState>();
+	config.sound_theme = j.at("sound_theme").get<SoundTheme>();
+	config.board_design = j.at("board_design").get<BoardDesign>();
+	config.stone_design = j.at("stone_design").get<StoneDesign>();
+	config.background_music = j.at("background_music").get<int>();
+	config.placing_stone = j.at("placing_stone").get<int>();
+	config.capturing_stone = j.at("capturing_stone").get<int>();
+	config.end_game_sound = j.at("end_game_sound").get<int>();
+}
+
+void Game::saveGame(const std::string& name) {
+	std::vector<Move> move_history = history.getMoveHistory();
+	json j_move_history = move_history;
+	json j_config = Game::game_config;
+
+	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
+	std::ofstream fout(path);
+	if (!fout.is_open()) {
+		std::cout << "Cannot save file!\n";
+		return;
+	}
+	fout << j_config.dump(4) << "\n";
+	fout << j_move_history.dump(4) << "\n";
+	fout.close();
+}
+
+void Game::loadGame(const std::string& name) {
+	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
+	std::ifstream fin(path);
+	if (!fin.is_open()) {
+		std::cout << "Cannot load file!\n";
+		return;
+	}
+	json json_move_history;
+	json json_config;
+	fin >> json_config;
+	fin >> json_move_history;
+	std::vector<Move> move_history = json_move_history;
+	game_config = json_config;
+	Game::reset();
+	history.loadFromMoveList(move_history, state.current_board, state.current_player);
+}
+
+Board Game::loadPreviewGame(const std::string& name) {
+	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
+	std::ifstream fin(path);
+	if (!fin.is_open()) {
+		std::cout << "Cannot load file!\n";
+		return Board(0);
+	}
+	json json_move_history;
+	json json_config;
+	fin >> json_config;
+	fin >> json_move_history;
+	Board tmp_board(json_config.at("board_size").get<int>());
+	std::vector<Move> move_history = json_move_history;
+	tmp_board.loadPreviewFromMoveList(move_history, tmp_board);
+	return tmp_board;
 }
 
 void Game::print() {

@@ -47,9 +47,9 @@ public:
 	//Super-KO is NOT check here
 	//Return the capture list for future use
 	bool validateMove(const Move& move, Board& board, std::vector<Cell>& capture);
-
 	void calculateScore(const Board& board, int& black_score, int& white_score);
-
+	void placeStoneWithoutValidating(const Move& move, Board& board, std::vector<Cell>& capture);
+	void loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board);
 	//Debug purpose, no use
 	void printBoard(const Board& board) {
 		for (int i = 0; i < board.size(); i++) {

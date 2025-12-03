@@ -6,22 +6,15 @@
 
 class GameHistory {
 public:
-	GameHistory() {}
-	void clear() {
-		board.clear();
-		capture.clear();
-		move.clear();
-		restore.clear();
-		undo.clear();
-	}
-	bool checkConsecutivePass() {
-		if (move.size() <= 1) return 0;
-		return (move.back().pass == 1 && move[int(move.size()) - 2].pass == 1);
-	}
+	void clear();
+	bool checkConsecutivePass();
 	bool checkSuperKO(const Board& current_board);
 	void undoMove(Board& current_board, CellState& current_player);
 	void redoMove(Board& current_board, CellState& current_player);
 	void addMove(const Move& move, const Board& current_board, const std::vector<Cell>& turn_capture);
+	void loadFromMoveList(const std::vector<Move>& move_list, Board& current_board, CellState& current_player);
+	void loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board);
+	std::vector<Move> getMoveHistory();
 private:
 	//Board history, use in checking Super-KO
 	//Planning to upgrade to Zobrist hashing later on to improve speed

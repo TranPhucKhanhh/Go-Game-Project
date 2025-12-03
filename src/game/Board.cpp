@@ -90,6 +90,12 @@ static bool canCapture(const Move& move,const Board& board, std::vector<Cell>& c
 	return capture.size() > 0;
 }
 
+void Board::placeStoneWithoutValidating(const Move& move, Board& board, std::vector<Cell>& capture) {
+	board[move.x][move.y] = move.player;
+	int liberty = countLiberty(move, board);
+	if (liberty != 0) getCapture(move, board, capture);
+}
+
 bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture) {
 	if (isOutOfRange(move, board.size())) return 0;
 	if (isOccupied(move, board)) return 0;
@@ -147,6 +153,16 @@ void Board::calculateScore(const Board& board, int& black_score, int& white_scor
 			if (mask == 3) continue;
 			if (mask == 1) black_score += score;
 			if (mask == 2) white_score += score;
+		}
+	}
+}
+
+void Board::loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board) {
+	for (const auto& m : move_list) {
+		std::vector<Cell> turn_capture;
+		if (m.pass == 0) current_board.placeStoneWithoutValidating(m, current_board, turn_capture);
+		for (const Cell& i : turn_capture) {
+			current_board[i.x][i.y] = i.state;
 		}
 	}
 }

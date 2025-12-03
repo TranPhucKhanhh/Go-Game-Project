@@ -35,7 +35,11 @@ int main()
     Game game;
 
 	game.start();
-
+    game.placeStone(1, 1);
+    game.placeStone(6, 9);
+    game.placeStone(9, 6);
+    game.pass();
+    game.saveGame("save1");
 
     // Run UI
 	UI ui(game, asset_manager, { WINDOW_START_WIDTH, WINDOW_START_HEIGHT }, { WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT }, TITLE);
