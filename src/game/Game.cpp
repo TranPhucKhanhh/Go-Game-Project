@@ -3,7 +3,7 @@
 #include<vector>
 #include<iostream>
 #include<fstream>
-#include<json/json.hpp>
+#include<JSON/json.hpp>
 #include<filesystem>
 
 using json = nlohmann::json;
