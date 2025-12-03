@@ -17,8 +17,7 @@ void TextBox::updateTextSizeFit(const float _ratio) {
 	sf::Vector2f _size = box.getLocalBounds().size;
 	text.setCharacterSize(_size.y);
 	sf::FloatRect bound = text.getLocalBounds();
-	float ratio = bound.size.x / bound.size.y;
-	ratio = _size.x / ratio * _ratio;
+	float ratio = std::min(1.f,_size.x / bound.size.x) * bound.size.y * _ratio;
 
 	updateTextSize(ratio);
 }
@@ -27,8 +26,7 @@ float TextBox::getTextSizeFit(const float _ratio) {
 	sf::Vector2f _size = box.getLocalBounds().size;
 	text.setCharacterSize(_size.y);
 	sf::FloatRect bound = text.getLocalBounds();
-	float ratio = bound.size.x / bound.size.y;
-	ratio = _size.x / ratio * _ratio;
+	float ratio = std::min(1.f, _size.x / bound.size.x) * bound.size.y * _ratio;
 
 	return ratio;
 }

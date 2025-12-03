@@ -54,7 +54,7 @@ private:
     void control_panel_resize(const float& _total_height_panel);
     void option_panel_resize(const float& _total_height_panel);
     void history_panel_resize(const float& _total_height_panel);
-    void footer_bar_resize(const float& _tmp);
+    void footer_bar_resize();
 
     // Screen UI value
     float padding;

@@ -24,6 +24,7 @@ add_executable(GoGame
                         src/UI/InGame.cpp
                         src/UI/Menu.cpp
                         src/UI/UI.cpp
+                        src/UI/Loading.cpp
                         src/UI/GameOption.cpp
                         src/UI/GameOptionPanel/GameCustomizeOption.cpp
                         src/UI/GameOptionPanel/GameSettingOption.cpp

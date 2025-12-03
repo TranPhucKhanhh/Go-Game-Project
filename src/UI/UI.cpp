@@ -7,9 +7,10 @@
 #include<iostream>
 #include<vector>
 
-UI::UI(Game& game, AssetManager& _asset_manager, const sf::Vector2u& window_size, const sf::Vector2u& min_size, const std::string& title)
+UI::UI(Game& game, const AssetManager& _asset_manager, const sf::Vector2u& window_size, const sf::Vector2u& min_size, const std::string& title)
     : game(game), asset_manager(_asset_manager), window(sf::VideoMode(window_size), title),
     ui_cfg(window_size, min_size,window),
+    loading(_asset_manager, ui_cfg),
     menu(_asset_manager, ui_cfg), in_game(_asset_manager, game, ui_cfg),
     game_setting(_asset_manager, game, ui_cfg) {
 

@@ -86,9 +86,7 @@ void InGame::updateScoreBox() {
     white_score_box.updateStr(convert_to_string(_score.second));
     black_score_box.updateStr(convert_to_string(_score.first));
 
-    float _box_text_size = std::min(black_score_box.getTextSizeFit(0.6), white_score_box.getTextSizeFit(0.6));
-    black_score_box.updateTextSize(_box_text_size);
-    white_score_box.updateTextSize(_box_text_size);
+    footer_bar_resize();
 }
 
 void InGame::eventHandle(const sf::Event& event, std::string& respond) {
@@ -265,17 +263,18 @@ void InGame::history_panel_resize(const float& _total_height_panel) {
         control_panel.getPosition().y + control_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
 }
 
-void InGame::footer_bar_resize(const float& _tmp) {
+void InGame::footer_bar_resize() {
+    float _tmp = (ui_cfg.window_size.x - board_size - inner_padding - side_panel_size_x) / 2;
+
     float _box_size = board_size / 4;
     black_score_box.updateBoxSize({ _box_size, status_bar_size_y });
     black_score_box.updateBoxPos({ _tmp + _box_size / 2.f, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y / 2.f });
     white_score_box.updateBoxSize({ _box_size, status_bar_size_y });
     white_score_box.updateBoxPos({ _tmp - _box_size / 2.f + board_size, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y / 2.f });
 
-    float _box_text_size = std::min(black_score_box.getTextSizeFit(0.8), white_score_box.getTextSizeFit(0.8));
+    float _box_text_size = std::min(black_score_box.getTextSizeFit(0.9f), white_score_box.getTextSizeFit(0.9f));
     black_score_box.updateTextSize(_box_text_size);
     white_score_box.updateTextSize(_box_text_size);
-
 }
 
 void InGame::resize() {
@@ -316,5 +315,5 @@ void InGame::resize() {
     footer_bar.setOrigin(footer_bar.getLocalBounds().getCenter());
     footer_bar.setPosition({ _tmp + board_size / 2, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y  / 2});
 
-    footer_bar_resize(_tmp);
+    footer_bar_resize();
 }

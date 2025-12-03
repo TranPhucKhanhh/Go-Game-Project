@@ -97,7 +97,7 @@ void GameOption::draw() {
 		drawCustomizePanel();
 	}
 
-	start_game_button.draw(ui_cfg.window);
+	if (panel == SettingPanel::NewGame || panel == SettingPanel::LoadGame) start_game_button.draw(ui_cfg.window);
 	new_game_panel.draw(ui_cfg.window);
 	load_game_panel.draw(ui_cfg.window);
 	setting_panel.draw(ui_cfg.window);
