@@ -144,6 +144,7 @@ void Game::loadGame(const std::string& name) {
 	game_config = json_config;
 	Game::reset();
 	history.loadFromMoveList(move_history, state.current_board, state.current_player);
+	fin.close();
 }
 
 void Game::loadPreviewGame(const std::string& name) {
@@ -160,6 +161,7 @@ void Game::loadPreviewGame(const std::string& name) {
 	tmp_board = json_config.at("board_size").get<int>();
 	std::vector<Move> move_history = json_move_history;
 	tmp_board.loadPreviewFromMoveList(move_history, tmp_board);
+	fin.close();
 	return;
 }
 
