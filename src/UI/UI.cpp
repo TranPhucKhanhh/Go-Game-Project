@@ -3,7 +3,7 @@
 #include<game/Game.h>
 #include<core/AssetManager.h>
 #include<model/UICfg.h>
-#include<model/settingPanel.h>
+#include<model/SettingPanel.h>
 #include<string>
 #include<iostream>
 #include<vector>
