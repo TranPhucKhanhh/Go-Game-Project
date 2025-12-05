@@ -3,6 +3,7 @@
 #include<game/Game.h>
 #include<core/AssetManager.h>
 #include<model/UICfg.h>
+#include<model/settingPanel.h>
 #include<string>
 #include<iostream>
 #include<vector>
@@ -69,11 +70,25 @@ void UI::run() {
             if (respond == "GameNewOption") {
 				game.getGameCfg().state = GameState::Setting;
                 game_setting.enter();
+                game_setting.setPanel(SettingPanel::NewGame);
 			}
             else if (respond == "StartNewGame") {
                 game.getGameCfg().state = GameState::Playing;
                 in_game.enter();
             }
+            else if (respond == "OpenSetting") {
+                game.getGameCfg().state = GameState::Setting;
+                game_setting.enter();
+				game_setting.setPanel(SettingPanel::Setting);
+            }
+            else if (respond == "LoadNewGame") {
+                game.getGameCfg().state = GameState::Playing;
+                in_game.enter();
+            }
+            else if (respond == "GoBackToMenu") {
+                game.getGameCfg().state = GameState::Menu;
+                menu.enter();
+			}
         }
 
         GameState current_state = game.getGameState();

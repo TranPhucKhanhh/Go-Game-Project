@@ -5,7 +5,7 @@
 #include<model/UICfg.h>
 #include<functional>
 
-class SimpleButton {
+class BaseButton {
 public:
 
 	// Color for button
@@ -13,58 +13,74 @@ public:
 	sf::Color hover_button_color{ 90, 90, 150 };
 	sf::Color press_button_color{ 62, 62, 89 };
 
-	// Color for text
-	sf::Color normal_text_color{ 255, 255, 255 };
-	sf::Color hover_text_color{ 255, 255, 255 };
-
-	SimpleButton() = default;
-	SimpleButton(const std::string& text, const sf::Font& font);
+	BaseButton() = default;
 
 	// Return value
 	const sf::Vector2f getPos() const { return position; };
 	const sf::Vector2f getSize() const { return size; };
-	float getTextSizeFit(const float _ratio);
+	bool getHovered() const { return hovered; };
+	bool isMouseHold() const { return mouse_hold; };
 
 	// Update value
+	void updateOutlineThickness(const float& thickness) { button.setOutlineThickness(thickness); };
+	void updateOutlineColor(const sf::Color& color) { button.setOutlineColor(color); };
 	void updatePos(const sf::Vector2f& _position) { position = _position; updateState(); };
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
-	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
 	void updateOpacity(const float& c) { normal_button_color.a = c, hover_button_color.a = c, press_button_color.a = c; };
 	void updateBorder(const float& thickness, const sf::Color& color) { button.setOutlineColor(color), button.setOutlineThickness(thickness); };
-	void updateTextSizeFit(const float _ratio);
-
 	void updateRespondStr(const std::string& respond_str) { on_click_respond = respond_str; }
-	// Event check and update
 
+	// Event check and update
 	void checkHover(const sf::Vector2i& mouse_pos);
 
 	void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond);
+	virtual void updateState();
+	virtual void updateEffect();
 
-	void updateState();
+	virtual void draw(sf::RenderWindow& window);
 
-	void updateEffect();
+	// Animation or effect function
+	virtual void onIdle() { button.setFillColor(normal_button_color); };
 
-	void draw(sf::RenderWindow& window);
+	virtual void onHover() { button.setFillColor(hover_button_color); };
 
-	// Function intended for modifying outside the class
-	void onIdle() { button.setFillColor(normal_button_color); };
+	virtual void onMouseHold() { button.setFillColor(press_button_color); };
 
-	void onHover() { button.setFillColor(hover_button_color); };
-
-	void onMouseHold() { button.setFillColor(press_button_color); };
-
-private:
+protected:
 	sf::RectangleShape button;
-	sf::Text text;
 
 	sf::Vector2f position = { 0.f,0.f };
 	sf::Vector2f size = { 0.f,0.f };
-	unsigned int text_size = 0;
 
 	std::string on_click_respond;
 
 	bool hovered = false;
 	bool mouse_hold = false;
+};
+
+class TextButton : public BaseButton {
+public:
+	// Color for text
+	sf::Color normal_text_color{ 255, 255, 255 };
+	sf::Color hover_text_color{ 255, 255, 255 };
+
+	TextButton(const std::string& str, const sf::Font& font);
+
+	// update value
+	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
+	void updateStr(const std::string& _text) { text.setString(_text); updateState(); }
+	void updateTextSizeFit(const float _ratio);
+	void updateState() override;
+
+	// Return value
+	float getTextSizeFit(const float _ratio);
+
+	// draw
+	void draw(sf::RenderWindow& window) override;
+
+private:
+	sf::Text text;
+	unsigned int text_size = 0;
 };
 
 class BoardUI {
@@ -73,6 +89,7 @@ public:
 
 	// Return value
 	sf::Vector2f getPos() const { return position; }
+	sf::Vector2f getSize() const { return { canvas_size,canvas_size }; }
 	
 	// Update the board UI 
 	void updateCellNumber(const int& size) { board_cell_number = size; }
@@ -124,6 +141,8 @@ public:
 
 	// Return value
 	float getTextSizeFit(const float _ratio);
+	sf::Vector2f getPos() const { return position; };
+	sf::Vector2f getSize() const { return box.getSize(); };
 
 	// Update value
 	void updateBoxPos(const sf::Vector2f& _position) { position = _position; update(); };
@@ -148,7 +167,6 @@ private:
 class Slider {
 public:
 	float value = 0;
-	float pre_value = 0;
 	bool show = false;
 	std::string direction = "Right";
 
@@ -177,6 +195,83 @@ private:
 	sf::Vector2i mouse_last_pos = { -1,-1 };
 	sf::Vector2f position = { 0,0 }, size = { 0,0 };
 
+	float pre_value = 0;
+
 	bool hold = false;
 	bool hover = false;
+};
+
+class Scroll {
+public:
+	Scroll() = default;
+
+	// Return value
+	const sf::Vector2f getPos() const { return position; };
+	const sf::Vector2f getSize() const { return size; };
+
+	// Update value and index	
+	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
+	void updatePos(const sf::Vector2f& _pos) { position = _pos; updateState(); };
+	void udpateContent(const TextButton _content) { content.push_back(_content); updateState(); };
+	void clearContent() { content.clear(); updateState(); };
+	void updatePreviewSize(const int& _preview_size) { preview_size = _preview_size; updateState(); };
+	void updateIndex(const int& _index) { index = _index; updateState(); };
+	void updateState();
+
+	// event handle & draw
+	void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond);
+	void draw(sf::RenderWindow& window);
+
+private:
+	sf::Vector2f position, size;
+	int preview_size = 0;
+	int index = 0;
+	float _thumb_pos;
+	float last_mouse_pos_y = -1;
+
+	int pre_index = 0;
+
+	sf::RectangleShape container, placeholder;
+	BaseButton thumb;
+	std::vector<TextButton> content;
+};
+
+class BaseNotification {
+public:
+	// Accesible values
+	sf::Color title_color = sf::Color({ 0, 0, 0 });
+	sf::Color notification_color = sf::Color({ 0, 0, 0 });
+	sf::Color container_color = sf::Color({ 255,204,0 });
+	sf::Color background_color = sf::Color({ 0, 0, 0, 150 });
+
+	BaseNotification(const sf::Font &_font);
+
+	// Return value
+	sf::Vector2f getPos() const { return position; };
+	sf::Vector2f getSize() const { return size; };
+	bool onScreen() const { return on_screen; };
+
+	// Update value
+	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
+	void updatePos(const sf::Vector2f& _pos) { position = _pos; updateState(); };
+	void updateTitleStr(const std::string& _str) { title.updateStr(_str); updateState();};
+	void updateNotificationStr(const std::string& _str) { notification.updateStr(_str); updateState();};
+	void updateOutlineThickness(const float& thickness) { container.setOutlineThickness(thickness); };
+	void updateOutlineColor(const sf::Color& color) { container.setOutlineColor(color); };
+
+
+	void clearSelection() { selection.clear(); };
+	void addSelection(const TextButton& button) { selection.push_back(button); };
+	
+	// Update state, draw and event handle
+	virtual void updateState();
+	virtual void draw(sf::RenderWindow& window);
+	virtual void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond);
+protected:
+	sf::RectangleShape container, background;
+	TextBox title, notification;
+	std::vector<TextButton> selection;
+
+	sf::Vector2f size, position;
+	bool on_screen = false;
 };

@@ -29,13 +29,9 @@ private:
     sf::RectangleShape footer_bar;
     TextBox header_bar;
 
-    SimpleButton new_button;
-    SimpleButton save_button;
-    SimpleButton reset_button;
+    TextButton new_button, save_button, reset_button;
 
-    SimpleButton undo_button;
-    SimpleButton redo_button;
-    SimpleButton pass_button;
+    TextButton undo_button, redo_button, pass_button;
 
     TextBox white_score_box;
     TextBox black_score_box;

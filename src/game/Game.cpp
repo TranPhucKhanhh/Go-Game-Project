@@ -5,6 +5,7 @@
 #include<fstream>
 #include<JSON/json.hpp>
 #include<filesystem>
+#include<string.h>
 
 using json = nlohmann::json;
 
@@ -113,7 +114,7 @@ void from_json(const json& j, GameCfg& config) {
 	config.end_game_sound = j.at("end_game_sound").get<int>();
 }
 
-void Game::saveGame(const std::string& name) {
+bool Game::saveGame(const std::string& name) {
 	std::vector<Move> move_history = history.getMoveHistory();
 	json j_move_history = move_history;
 	json j_config = Game::game_config;
@@ -121,20 +122,21 @@ void Game::saveGame(const std::string& name) {
 	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
 	std::ofstream fout(path);
 	if (!fout.is_open()) {
-		std::cout << "Cannot save file!\n";
-		return;
+		std::cout << "Cannot save file: " << name << "\n";
+		return 0;
 	}
 	fout << j_config.dump(4) << "\n";
 	fout << j_move_history.dump(4) << "\n";
 	fout.close();
+	return 1;
 }
 
-void Game::loadGame(const std::string& name) {
+bool Game::loadGame(const std::string& name) {
 	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
 	std::ifstream fin(path);
 	if (!fin.is_open()) {
-		std::cout << "Cannot load file!\n";
-		return;
+		std::cout << "Cannot load file: " << name << "\n";
+		return 0;
 	}
 	json json_move_history;
 	json json_config;
@@ -144,23 +146,55 @@ void Game::loadGame(const std::string& name) {
 	game_config = json_config;
 	Game::reset();
 	history.loadFromMoveList(move_history, state.current_board, state.current_player);
+	fin.close();
+	return 1;
 }
 
-void Game::loadPreviewGame(const std::string& name) {
+bool Game::loadPreviewGame(const std::string& name) {
 	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
 	std::ifstream fin(path);
 	if (!fin.is_open()) {
-		std::cout << "Cannot load file!\n";
-		return;
+		std::cout << "Cannot load file to preview: " << name << "\n";
+		return 0;
 	}
 	json json_move_history;
 	json json_config;
 	fin >> json_config;
 	fin >> json_move_history;
-	tmp_board = json_config.at("board_size").get<int>();
 	std::vector<Move> move_history = json_move_history;
-	tmp_board.loadPreviewFromMoveList(move_history, tmp_board);
-	return;
+	history.loadFromMoveList(move_history, state.current_board, state.current_player);
+	fin.close();
+	return 1;
+}
+
+std::vector<std::string> Game::loadAllSaveGameName() {
+	std::vector<std::string> save_game_names;
+	if (!std::filesystem::exists(SAVEGAME_DIR) || !std::filesystem::is_directory(SAVEGAME_DIR)) {
+		std::cerr << "Error: Folder '" << SAVEGAME_DIR << "' does not exist or is not a directory." << std::endl;
+		
+		return save_game_names;
+	}
+
+	for (const auto& entry : std::filesystem::directory_iterator(SAVEGAME_DIR)) {
+		if (entry.is_regular_file()) {
+			save_game_names.push_back(entry.path().filename().string());
+		}
+	}
+	return save_game_names;
+}
+
+bool Game::deleteSaveGame(const std::string& name) {
+	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
+	if (!std::filesystem::exists(path)) {
+		std::cout << "Cannot delete file: " << name << " (file does not exist)\n";
+		return 0;
+	}
+	std::error_code ec;
+	if (!std::filesystem::remove(path, ec)) {
+		std::cout << "Error deleting file: " << ec.message() << "\n";
+		return 0;
+	}
+	return 1;
 }
 
 void Game::print() {

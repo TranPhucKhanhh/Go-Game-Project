@@ -19,15 +19,11 @@ public:
 
     void draw();
 private:
-	SimpleButton start_button;
-	SimpleButton setting_button;
+	TextButton start_button, setting_button;
     sf::Text title;
 
     UICfg& ui_cfg;
     const AssetManager& asset_manager;
 
     float margin;
-
-    // debug
-    Slider slider;
 };

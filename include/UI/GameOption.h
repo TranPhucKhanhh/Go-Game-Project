@@ -19,6 +19,8 @@ public:
     void resize();
 
     void draw();
+    
+	void setPanel(const SettingPanel &_panel) { panel = _panel; }
 private:
     
     Game& game;
@@ -26,31 +28,29 @@ private:
     const AssetManager& asset_manager;
 
     sf::RectangleShape canvas;
-    SimpleButton start_game_button;
+    TextButton start_game_button, go_back_button;
     
 	// New game panel components
-    SimpleButton new_game_panel;
+    TextButton new_game_panel;
     sf::Text game_mode_title;
-    SimpleButton pvp_mode_button;
-    SimpleButton ai_easy_button;
-    SimpleButton ai_medium_button;
-    SimpleButton ai_hard_button;
+    TextButton pvp_mode_button, ai_easy_button, ai_medium_button, ai_hard_button;
     sf::Text choose_side_title;
-    SimpleButton black_side_button;
-    SimpleButton white_side_button;
+    TextButton black_side_button, white_side_button;
     sf::Text choose_board_size_title;
-    SimpleButton board_size_9_button;
-    SimpleButton board_size_13_button;
-    SimpleButton board_size_19_button;
+    TextButton board_size_9_button, board_size_13_button, board_size_19_button;
 
     // Load game panel components
-    SimpleButton load_test_button;
+    TextButton load_game_panel;
+    
+    Scroll load_game_scroll;
+	TextButton refresh_button,delete_button;
     BoardUI board_preview;
     bool board_preview_show;
+	TextBox board_preview_title;
+	std::string file_to_load;
 
-    SimpleButton load_game_panel;
-    SimpleButton setting_panel;
-    SimpleButton customize_panel;
+    TextButton setting_panel;
+    TextButton customize_panel;
 
     float margin;
     sf::Vector2f canvas_size;
@@ -65,6 +65,7 @@ private:
 
     void resizeLoadPanel();
     void drawLoadPanel();
+    void loadGameFile();
     void eventHandleLoadPanel(const sf::Event& event, std::string& respond);
     
     void resizeSettingPanel();

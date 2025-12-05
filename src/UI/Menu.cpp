@@ -37,10 +37,6 @@ void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
     std::string respond = "";
     start_button.eventHandle(event, ui_cfg, respond);
     setting_button.eventHandle(event, ui_cfg, respond);
- 
-    if (respond != "") {
-        std::cerr << "clicked" << std::endl;
-    }
 
     if (respond == "Start") {
         event_respond = "GameNewOption";
@@ -48,6 +44,7 @@ void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
     else if (respond == "Setting") {
         event_respond = "OpenSetting";
     }
+
 }
 
 void Menu::draw() {
@@ -59,8 +56,6 @@ void Menu::draw() {
     
     ui_cfg.window.draw(title);
 
-    // debug
-	slider.draw(ui_cfg.window);
 }
 
 void Menu::resize() {

@@ -2,12 +2,9 @@
 #include<UI/UI.h>
 #include<iostream>
 
-SimpleButton::SimpleButton(const std::string& str, const sf::Font& font) : 
-	button(size), text(font, str) {
-	
-}
+// BaseButton function definition
 
-void SimpleButton::checkHover(const sf::Vector2i& mouse_pos) {
+void BaseButton::checkHover(const sf::Vector2i& mouse_pos) {
 	sf::FloatRect shape_bound = button.getGlobalBounds();
 
 	if (shape_bound.contains((sf::Vector2f)mouse_pos)) {
@@ -18,7 +15,7 @@ void SimpleButton::checkHover(const sf::Vector2i& mouse_pos) {
 	}
 }
 
-void SimpleButton::updateEffect() {
+void BaseButton::updateEffect() {
 	if (mouse_hold && hovered) {
 		onMouseHold();
 	}
@@ -30,23 +27,18 @@ void SimpleButton::updateEffect() {
 	}
 }
 
-void SimpleButton::draw(sf::RenderWindow& window) {
+void BaseButton::draw(sf::RenderWindow& window) {
 	updateEffect();
 	window.draw(button);
-	window.draw(text);
 }
 
-void SimpleButton::updateState() {
+void BaseButton::updateState() {
 	button.setSize(size);
 	button.setOrigin(size / 2.f);
 	button.setPosition(position);
-
-	text.setCharacterSize(text_size);
-	text.setOrigin(text.getLocalBounds().getCenter());
-	text.setPosition(position);
 }
 
-void SimpleButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
+void BaseButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
 	checkHover(ui_cfg.mouse_pos);
 	if (const auto* button = event.getIf<sf::Event::MouseButtonPressed>()) {
 		if (button->button == sf::Mouse::Button::Left)
@@ -60,7 +52,9 @@ void SimpleButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std:
 	}
 }
 
-void SimpleButton::updateTextSizeFit(const float _ratio) {
+// TextButton function definition
+
+void TextButton::updateTextSizeFit(const float _ratio) {
 	sf::Vector2f _size = button.getLocalBounds().size;
 	text.setCharacterSize(_size.y);
 	sf::FloatRect bound = text.getLocalBounds();
@@ -69,11 +63,31 @@ void SimpleButton::updateTextSizeFit(const float _ratio) {
 	updateTextSize(ratio);
 }
 
-float SimpleButton::getTextSizeFit(const float _ratio) {
+float TextButton::getTextSizeFit(const float _ratio) {
 	sf::Vector2f _size = button.getLocalBounds().size;
 	text.setCharacterSize(_size.y);
 	sf::FloatRect bound = text.getLocalBounds();
 	float ratio = std::min(1.f, _size.x / bound.size.x) * bound.size.y * _ratio;
 
 	return ratio;
+}
+
+TextButton::TextButton(const std::string& str, const sf::Font& font) :
+	text(font, str) {
+}
+
+void TextButton::draw(sf::RenderWindow& window) {
+	updateEffect();
+	window.draw(button);
+	window.draw(text);
+}
+
+void TextButton::updateState() {
+	button.setSize(size);
+	button.setOrigin(size / 2.f);
+	button.setPosition(position);
+
+	text.setCharacterSize(text_size);
+	text.setOrigin(text.getLocalBounds().getCenter());
+	text.setPosition(position);
 }

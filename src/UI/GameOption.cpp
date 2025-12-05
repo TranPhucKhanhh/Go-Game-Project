@@ -11,6 +11,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	start_game_button("Start a new game", asset_manager.getFont("StackSansNotch-Regular")),
 
 	new_game_panel("New game", asset_manager.getFont("StackSansNotch-Regular")),
+	go_back_button("Go back", asset_manager.getFont("StackSansNotch-Regular")),
 	game_mode_title(asset_manager.getFont("Momo"), "Select game mode:"),
 	pvp_mode_button("PvP", asset_manager.getFont("StackSansNotch-Bold")),
 	ai_easy_button("AI easy", asset_manager.getFont("StackSansNotch-Bold")),
@@ -25,7 +26,9 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_size_19_button("19 x 19", asset_manager.getFont("StackSansNotch-Bold")),
 
 	load_game_panel("Load game", asset_manager.getFont("StackSansNotch-Regular")),
-	load_test_button("Load save1", asset_manager.getFont("StackSansNotch-Regular")),
+	refresh_button("Refresh", asset_manager.getFont("StackSansNotch-Regular")),
+	delete_button("Delete", asset_manager.getFont("StackSansNotch-Regular")),
+	board_preview_title(asset_manager.getFont("Momo")),
 
 	setting_panel("Setting", asset_manager.getFont("StackSansNotch-Regular")),
 	customize_panel("Customization", asset_manager.getFont("StackSansNotch-Regular"))
@@ -47,16 +50,28 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_size_9_button.updateRespondStr("9x9");
 	board_size_13_button.updateRespondStr("13x13");
 	board_size_19_button.updateRespondStr("19x19");
-	load_test_button.updateRespondStr("LoadTest1");
+	refresh_button.updateRespondStr("Refresh");
+	go_back_button.updateRespondStr("GoBack");
+	delete_button.updateRespondStr("Delete");
 
 	// Initialzize the basic color and outline
 	canvas.setFillColor(sf::Color({ 254, 159, 77 }));
 	canvas.setOutlineThickness(3);
 	canvas.setOutlineColor(sf::Color::Black);
 
+	go_back_button.updateOutlineThickness(3);
+	go_back_button.updateOutlineColor(sf::Color::Black);
+
 	game_mode_title.setFillColor(sf::Color::Black);
 	choose_side_title.setFillColor(sf::Color::Black);
 	choose_board_size_title.setFillColor(sf::Color::Black);
+
+	board_preview_title.updateBoxColor(sf::Color(255, 255, 255, 0));
+	board_preview_title.updateTextColor(sf::Color::Black);
+
+	// Initial value
+	load_game_scroll.updatePreviewSize(7);
+	loadGameFile();
 
 	resize();
 
@@ -101,11 +116,24 @@ void GameOption::draw() {
 		drawCustomizePanel();
 	}
 
-	if (panel == SettingPanel::NewGame || panel == SettingPanel::LoadGame) start_game_button.draw(ui_cfg.window);
+	if (panel == SettingPanel::NewGame || panel == SettingPanel::LoadGame) {
+		start_game_button.draw(ui_cfg.window);
+		if (panel == SettingPanel::NewGame) {
+			start_game_button.updateStr("New Game");
+			start_game_button.updateRespondStr("StartGame");
+		}
+		else {
+			start_game_button.updateStr("Load Game");
+			start_game_button.updateRespondStr("LoadNewGame");
+		}
+		start_game_button.updateTextSizeFit(0.9f);
+	}
+	go_back_button.draw(ui_cfg.window);
 	new_game_panel.draw(ui_cfg.window);
 	load_game_panel.draw(ui_cfg.window);
 	setting_panel.draw(ui_cfg.window);
 	customize_panel.draw(ui_cfg.window);
+	go_back_button.draw(ui_cfg.window);
 }
 
 void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
@@ -118,6 +146,7 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 	load_game_panel.eventHandle(event, ui_cfg, event_respond);
 	setting_panel.eventHandle(event, ui_cfg, event_respond);
 	customize_panel.eventHandle(event, ui_cfg, event_respond);
+	go_back_button.eventHandle(event, ui_cfg, event_respond);
 
 	if (panel == SettingPanel::NewGame) {
 		eventHandleNewPanel(event, event_respond);
@@ -130,6 +159,10 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 	}
 	else if (panel == SettingPanel::Customization) {
 		eventHandleCustomizePanel(event, event_respond);
+	}
+
+	if (event_respond != "") {
+		std::cerr << event_respond << std::endl;
 	}
 
 	if (event_respond == "NewGame") {
@@ -154,6 +187,15 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 		else {
 			std::cerr << "Other game mode has't implemented yet!" << std::endl;
 		}
+	}
+	else if (event_respond == "LoadNewGame") {
+		if (board_preview_show) {
+			game.loadGame(file_to_load);
+			respond = "LoadNewGame";
+		}
+	}
+	else if (event_respond == "GoBack") {
+		respond = "GoBackToMenu";
 	}
 }
 
@@ -184,11 +226,14 @@ void GameOption::resize() {
 
 	start_game_button.updateSize(_button_panel_size);
 	start_game_button.updatePos({ canvas.getPosition().x, canvas.getPosition().y + canvas_size.y / 2.f - _button_panel_size.y / 2.f});
+	go_back_button.updateSize({ _button_panel_size.x, std::min(margin * 0.7f, _button_panel_size.y * 0.7f)});
+	go_back_button.updatePos({ new_game_panel.getPos().x, new_game_panel.getPos().y - _button_panel_size .y/2.f - go_back_button.getSize().y/2.f - 7.f});
 
 	float _ratio = 0.9;
 	float _min_button_text_size = std::min({ new_game_panel.getTextSizeFit(_ratio),load_game_panel.getTextSizeFit(_ratio),setting_panel.getTextSizeFit(_ratio),customize_panel.getTextSizeFit(_ratio) });
 
 	start_game_button.updateTextSizeFit(_ratio);
+	go_back_button.updateTextSizeFit(_ratio);
 	new_game_panel.updateTextSize(_min_button_text_size);
 	load_game_panel.updateTextSize(_min_button_text_size);
 	setting_panel.updateTextSize(_min_button_text_size);

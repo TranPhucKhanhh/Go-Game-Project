@@ -18,6 +18,7 @@ add_executable(GoGame
                         src/component/TextBox.cpp
                         src/component/Slider.cpp
                         src/component/BoardUI.cpp
+                        src/component/Scroll.cpp
 
                         src/core/AssetManager.cpp
 
@@ -36,7 +37,7 @@ add_executable(GoGame
                         src/game/Board.cpp
                         src/game/Game.cpp
                         src/game/History.cpp
-)
+  "src/component/Notification.cpp")
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics)
