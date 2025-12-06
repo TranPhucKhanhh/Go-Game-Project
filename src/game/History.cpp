@@ -115,7 +115,7 @@ static std::string intToString(int n) {
 	return s;
 }
 
-std::string GameHistory::getLastMove() {
+std::string GameHistory::getLastMove(const int board_size) {
 	if (move.empty()) return "";
 	Move m = move.back();
 	std::string s = "";
@@ -124,11 +124,13 @@ std::string GameHistory::getLastMove() {
 		s = lastPlayer + " pass";
 		return s;
 	}
-	s = lastPlayer + " " + conv[m.y] + intToString(m.x);
+	s = lastPlayer + " " + conv[m.x] + intToString(board_size - m.y);
+	//std::cout << s << "\n";
+	//std::cout << m.x << " " << m.y << "\n";
 	return s;
 }
 
-std::vector<std::string> GameHistory::getFullMove() {
+std::vector<std::string> GameHistory::getFullMove(const int board_size) {
 	if (move.empty()) return { };
 
 	std::vector<std::string> vec;
@@ -141,8 +143,10 @@ std::vector<std::string> GameHistory::getFullMove() {
 			vec.push_back(s);
 			continue;
 		}
-		s = lastPlayer + " " + conv[m.y] + intToString(m.x);
+		s = lastPlayer + " " + conv[m.x] + intToString(board_size - m.y);
 		vec.push_back(s);
+		//std::cout << s << "\n";
+		//std::cout << m.x << " " << m.y << "\n";
 	}
 
 	return vec;

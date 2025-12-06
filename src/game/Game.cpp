@@ -209,7 +209,7 @@ Board Game::getKthBoard(const int k) {
 }
 
 std::string Game::getLastMove() {
-	return history.getLastMove();
+	return history.getLastMove(game_config.board_size);
 }
 
 //debug purpose

@@ -14,9 +14,9 @@ public:
 	void addMove(const Move& move, const Board& current_board, const std::vector<Cell>& turn_capture);
 	void loadFromMoveList(const std::vector<Move>& move_list, Board& current_board, CellState& current_player);
 	void loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board);
-	std::string getLastMove();
+	std::string getLastMove(const int board_size);
 	std::vector<Move> getMoveHistory();
-	std::vector<std::string> getFullMove();
+	std::vector<std::string> getFullMove(const int board_size);
 	int getMoveListSize();
 	Board getKthBoard(const int k);
 private:
