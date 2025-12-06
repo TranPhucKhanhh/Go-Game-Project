@@ -129,7 +129,7 @@ std::string GameHistory::getLastMove() {
 }
 
 std::vector<std::string> GameHistory::getFullMove() {
-	if (move.empty()) return { "" };
+	if (move.empty()) return { };
 
 	std::vector<std::string> vec;
 
