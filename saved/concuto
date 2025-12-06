@@ -1,9 +1,10 @@
 {
     "background_music": true,
     "board_design": 1,
-    "board_size": 9,
+    "board_size": 19,
     "capturing_stone": true,
     "end_game_sound": true,
+    "game_mode": 0,
     "placing_stone": true,
     "prev_state": 0,
     "sound_theme": 1,
@@ -14,44 +15,44 @@
     {
         "pass": false,
         "player": 2,
-        "x": 5,
-        "y": 4
+        "x": 11,
+        "y": 9
     },
     {
         "pass": false,
         "player": 3,
-        "x": 4,
-        "y": 3
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 4,
-        "y": 4
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 5,
-        "y": 3
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 4,
-        "y": 6
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 2,
-        "y": 2
+        "x": 8,
+        "y": 5
     },
     {
         "pass": false,
         "player": 2,
         "x": 6,
-        "y": 1
+        "y": 7
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 6,
+        "y": 14
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 12,
+        "y": 15
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 14,
+        "y": 13
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 15,
+        "y": 3
     },
     {
         "pass": false,
@@ -62,13 +63,37 @@
     {
         "pass": false,
         "player": 2,
-        "x": 6,
+        "x": 2,
         "y": 6
     },
     {
         "pass": false,
         "player": 3,
-        "x": 6,
-        "y": 7
+        "x": 2,
+        "y": 10
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 10,
+        "y": 13
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 17,
+        "y": 10
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 12,
+        "y": 5
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 12,
+        "y": 4
     }
 ]

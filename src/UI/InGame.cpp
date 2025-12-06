@@ -32,7 +32,8 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     white_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     black_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
-    error_notification(_asset_manager.getFont("StackSansNotch-Regular")) {
+    error_notification(_asset_manager.getFont("StackSansNotch-Regular")),
+    mode_box(_asset_manager.getFont("StackSansNotch-Regular")) {
    
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
@@ -45,6 +46,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     black_score_box.updateBoxColor(sf::Color::Black);
     black_score_box.updateTextColor(sf::Color::White);
     white_score_box.updateBoxColor(sf::Color::White);
+
+	mode_box.updateBoxColor(sf::Color({ 0, 0, 0, 0 }));
+    mode_box.updateTextColor(sf::Color::Black);
 
     updateHeaderBar();
     updateScoreBox();
@@ -69,6 +73,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     TextButton _close("Close", _asset_manager.getFont("StackSansNotch-Regular"));
     _close.updateRespondStr("CloseNoti");
     error_notification.addSelection(_close);
+
+	// initialize the history
+    history_scroll.updatePreviewSize(7);
 }
 
 void InGame::enter() {
@@ -76,13 +83,29 @@ void InGame::enter() {
     sf::Event _d = sf::Event::Closed{};
     std::string _dt = "Test";
     eventHandle(_d, _dt);
-    resize();
-
+    
     save_file_input.updateOnScreen(false);
     game_playable = true;
+	
+	history_scroll.clearContent();
+	std::vector<std::string> _move_list = game.getMoveList();
+	for (size_t i = 0; i < _move_list.size(); i++) {
+		std::string _str = std::to_string(i + 1) + ". " + _move_list[i];
+        TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
+		_move_btn.updateRespondStr("|" + std::to_string(i + 1));
+		history_scroll.updateContent(_move_btn);
+	}
+    history_scroll.updateIndex(std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize())); // Set the current index to the last move
+	
+    if (game.getGameCfg().game_mode == GameMode::PvP) mode_box.updateStr("Mode: PvP");
+    else if (game.getGameCfg().game_mode == GameMode::AIEasy) mode_box.updateStr("Mode: AI easy");
+    else if (game.getGameCfg().game_mode == GameMode::AIMedium) mode_box.updateStr("Mode: AI medium");
+	else if (game.getGameCfg().game_mode == GameMode::AIHard) mode_box.updateStr("Mode: AI hard");
 
     updateHeaderBar();
     updateScoreBox();
+
+    resize();
 }
 
 void InGame::updateHeaderBar() {
@@ -143,6 +166,12 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         if (event.is<sf::Event::MouseButtonReleased>()) {
             board.placeStone(ui_cfg.mouse_pos, game);
 
+            if (history_scroll.getContentSize() + 1 < game.getMoveListSize()) {
+                std::string _str = std::to_string(game.getMoveListSize()) + ". " + game.getLastMove();
+				TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
+                _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize() + 1));
+                history_scroll.updateContent(_move_btn);
+			}
             updateHeaderBar();
             updateScoreBox();
         }
@@ -155,6 +184,8 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     undo_button.eventHandle(event, ui_cfg, event_respond);
     redo_button.eventHandle(event, ui_cfg, event_respond);
     pass_button.eventHandle(event, ui_cfg, event_respond);
+
+	history_scroll.eventHandle(event, ui_cfg, event_respond);
 
     if (event_respond != "") {
 		std::cerr << "clicked: " << event_respond << std::endl;
@@ -191,7 +222,6 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     // Check if the game reach the end stage
     if (game.isGameEnd() && game_playable) {
         game_playable = false;
-
 
         std::pair<float, float> _score = game.getScore();
         
@@ -238,6 +268,9 @@ void InGame::draw() {
 
     board.draw(ui_cfg.window, game.getCurrentBoard());
 
+    history_scroll.draw(ui_cfg.window);
+    mode_box.draw(ui_cfg.window);
+
     if (save_file_input.onScreen()) {
         save_file_input.draw(ui_cfg.window);
     }
@@ -252,6 +285,10 @@ void InGame::mode_panel_resize(const float& _total_height_panel) {
     mode_panel.setFillColor(sf::Color(242, 176, 109));
     mode_panel.setOrigin(mode_panel.getLocalBounds().getCenter());
     mode_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2, ui_cfg.window_size.y / 2.f - _total_height_panel / 2.f + _total_height_panel / 20.f });
+
+    mode_box.updateBoxPos(mode_panel.getPosition());
+    mode_box.updateBoxSize({ mode_panel.getSize().x * 0.8f, mode_panel.getSize().y * 0.8f });
+    mode_box.updateTextSizeFit(1.f);
 }
 
 void InGame::option_panel_resize(const float& _total_height_panel) {
@@ -316,6 +353,12 @@ void InGame::history_panel_resize(const float& _total_height_panel) {
     history_panel.setFillColor(sf::Color(242, 176, 109));
     history_panel.setOrigin(history_panel.getLocalBounds().getCenter());
     history_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
+        control_panel.getPosition().y + control_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
+
+
+    history_scroll.updateSize({ side_panel_size_x,
+        _total_height_panel - inner_padding * 3 - option_panel.getSize().y - mode_panel.getSize().y - control_panel.getSize().y });
+    history_scroll.updatePos({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
         control_panel.getPosition().y + control_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
 }
 

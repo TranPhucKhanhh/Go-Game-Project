@@ -34,9 +34,12 @@ private:
 
     TextBox white_score_box;
     TextBox black_score_box;
+    TextBox mode_box;
 
     TextInputNotification save_file_input;
 	BaseNotification error_notification;
+
+	Scroll history_scroll;
 
     Game& game;
 	UICfg& ui_cfg;

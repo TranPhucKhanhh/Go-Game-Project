@@ -87,7 +87,7 @@ void GameOption::loadGameFile() {
 	for (int i = 0; i < save_files.size(); i++) {
 		TextButton _tmp(save_files[i], asset_manager.getFont("StackSansNotch-Regular"));
 		_tmp.updateRespondStr('-' + save_files[i]);
-		load_game_scroll.udpateContent(_tmp);
+		load_game_scroll.updateContent(_tmp);
 	}
 	load_game_scroll.updateIndex(0);
 	load_game_scroll.updateState();

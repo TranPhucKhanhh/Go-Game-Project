@@ -124,8 +124,28 @@ std::string GameHistory::getLastMove() {
 		s = lastPlayer + " pass";
 		return s;
 	}
-	s = lastPlayer + conv[m.y] + intToString(m.x);
+	s = lastPlayer + " " + conv[m.y] + intToString(m.x);
 	return s;
+}
+
+std::vector<std::string> GameHistory::getFullMove() {
+	if (move.empty()) return { "" };
+
+	std::vector<std::string> vec;
+
+	for (const auto& m : move) {
+		std::string s = "";
+		std::string lastPlayer = (m.player == CellState::Black ? "b" : "w");
+		if (m.pass) {
+			s = lastPlayer + " pass";
+			vec.push_back(s);
+			continue;
+		}
+		s = lastPlayer + " " + conv[m.y] + intToString(m.x);
+		vec.push_back(s);
+	}
+
+	return vec;
 }
 
 int GameHistory::getMoveListSize() {

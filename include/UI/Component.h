@@ -216,11 +216,13 @@ public:
 	// Return value
 	const sf::Vector2f getPos() const { return position; };
 	const sf::Vector2f getSize() const { return size; };
+	int getPreviewSize() const { return preview_size; };
+	int getContentSize() const { return (int) content.size(); };
 
 	// Update value and index	
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
 	void updatePos(const sf::Vector2f& _pos) { position = _pos; updateState(); };
-	void udpateContent(const TextButton _content) { content.push_back(_content); updateState(); };
+	void updateContent(const TextButton _content) { content.push_back(_content); updateState(); };
 	void clearContent() { content.clear(); updateState(); };
 	void updatePreviewSize(const int& _preview_size) { preview_size = _preview_size; updateState(); };
 	void updateIndex(const int& _index) { index = _index; updateState(); };
