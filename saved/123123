@@ -1,7 +1,7 @@
 {
     "background_music": true,
     "board_design": 1,
-    "board_size": 19,
+    "board_size": 9,
     "capturing_stone": true,
     "end_game_sound": true,
     "placing_stone": true,

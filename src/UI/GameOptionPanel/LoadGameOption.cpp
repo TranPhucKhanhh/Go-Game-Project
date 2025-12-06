@@ -8,8 +8,8 @@
 
 void GameOption::drawLoadPanel() {
 	if (board_preview_show) {
-		board_preview.updateCellNumber(game.getCurrentBoard().size());
-		board_preview.draw(ui_cfg.window, game.getCurrentBoard());
+		board_preview.updateCellNumber(game.getPreviewBoard().size());
+		board_preview.draw(ui_cfg.window, game.getPreviewBoard());
 		delete_button.draw(ui_cfg.window);
 		board_preview_title.draw(ui_cfg.window);
 	}
@@ -34,7 +34,7 @@ void GameOption::eventHandleLoadPanel(const sf::Event& event, std::string& respo
 
 		board_preview_show = true;
 
-		board_preview.updateCellNumber(game.getCurrentBoard().size());
+		board_preview.updateCellNumber(game.getPreviewBoard().size());
 		GameOption::resizeLoadPanel();
 	}
 	else if (event_respond == "Delete") {

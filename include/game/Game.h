@@ -65,6 +65,7 @@ public:
 	// Return value
 	CellState getCurrentPlayer() const { return state.current_player; };
 	GameCfg& getGameCfg() { return game_config; }
+	Board getPreviewBoard() const { return previewBoard; };
 	Board getCurrentBoard() const { return state.current_board; };
 	int getBoardSize() const { return game_config.board_size; }
 
@@ -81,6 +82,8 @@ private:
 
 	//Current game history
 	GameHistory history;
+
+	Board previewBoard;
 
 	bool game_end;
 };

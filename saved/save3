@@ -14,79 +14,61 @@
     {
         "pass": false,
         "player": 2,
-        "x": 3,
-        "y": 3
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 2,
-        "y": 3
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 5,
-        "y": 7
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 7,
-        "y": 4
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 7,
-        "y": 1
-    },
-    {
-        "pass": false,
-        "player": 3,
         "x": 5,
         "y": 4
     },
     {
         "pass": false,
+        "player": 3,
+        "x": 4,
+        "y": 3
+    },
+    {
+        "pass": false,
         "player": 2,
-        "x": 2,
+        "x": 4,
+        "y": 4
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 5,
+        "y": 3
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 4,
         "y": 6
     },
     {
         "pass": false,
         "player": 3,
-        "x": 5,
+        "x": 2,
         "y": 2
     },
     {
         "pass": false,
         "player": 2,
-        "x": 3,
-        "y": 2
+        "x": 6,
+        "y": 1
     },
     {
         "pass": false,
         "player": 3,
-        "x": 5,
-        "y": 5
+        "x": 7,
+        "y": 3
     },
     {
         "pass": false,
         "player": 2,
-        "x": 8,
-        "y": 3
+        "x": 6,
+        "y": 6
     },
     {
         "pass": false,
         "player": 3,
         "x": 6,
-        "y": 3
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 2,
-        "y": 4
+        "y": 7
     }
 ]
