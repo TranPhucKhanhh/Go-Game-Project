@@ -166,7 +166,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         if (event.is<sf::Event::MouseButtonReleased>()) {
             board.placeStone(ui_cfg.mouse_pos, game);
 
-            if (history_scroll.getContentSize() + 1 < game.getMoveListSize()) {
+            if (history_scroll.getContentSize() < game.getMoveListSize()) {
                 std::string _str = std::to_string(game.getMoveListSize()) + ". " + game.getLastMove();
 				TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
                 _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize() + 1));
@@ -208,6 +208,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     }
     else if (event_respond == "Reset") {
         game.reset();
+		history_scroll.clearContent();
         updateHeaderBar();
         updateScoreBox();
     }

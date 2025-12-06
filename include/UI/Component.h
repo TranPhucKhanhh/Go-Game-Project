@@ -223,7 +223,7 @@ public:
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
 	void updatePos(const sf::Vector2f& _pos) { position = _pos; updateState(); };
 	void updateContent(const TextButton _content) { content.push_back(_content); updateState(); };
-	void clearContent() { content.clear(); updateState(); };
+	void clearContent() { content.clear(); index = 0; updateState(); };
 	void updatePreviewSize(const int& _preview_size) { preview_size = _preview_size; updateState(); };
 	void updateIndex(const int& _index) { index = _index; updateState(); };
 	void updateState();
