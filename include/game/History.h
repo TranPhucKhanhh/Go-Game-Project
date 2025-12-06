@@ -14,7 +14,10 @@ public:
 	void addMove(const Move& move, const Board& current_board, const std::vector<Cell>& turn_capture);
 	void loadFromMoveList(const std::vector<Move>& move_list, Board& current_board, CellState& current_player);
 	void loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board);
+	std::string getLastMove();
 	std::vector<Move> getMoveHistory();
+	int getMoveListSize();
+	Board getKthBoard(const int k);
 private:
 	//Board history, use in checking Super-KO
 	//Planning to upgrade to Zobrist hashing later on to improve speed

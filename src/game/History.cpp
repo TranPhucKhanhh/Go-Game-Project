@@ -1,6 +1,8 @@
 #include<game/History.h>
 #include<iostream>
 
+static std::string conv[19] = { "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"};
+
 bool GameHistory::checkSuperKO(const Board& current) {
 	for (Board b : board) {
 		if (current == b) {
@@ -101,4 +103,35 @@ void GameHistory::loadPreviewFromMoveList(const std::vector<Move>& move_list, Bo
 
 std::vector<Move> GameHistory::getMoveHistory() {
 	return move;
+}
+
+static std::string intToString(int n) {
+	std::string s = "";
+	while (n) {
+		s += (n % 10) + '0';
+		n /= 10;
+	}
+	std::reverse(s.begin(), s.end());
+	return s;
+}
+
+std::string GameHistory::getLastMove() {
+	if (move.empty()) return "";
+	Move m = move.back();
+	std::string s = "";
+	std::string lastPlayer = (m.player == CellState::Black ? "b" : "w");
+	if (m.pass) {
+		s = lastPlayer + " pass";
+		return s;
+	}
+	s = lastPlayer + conv[m.y] + intToString(m.x);
+	return s;
+}
+
+int GameHistory::getMoveListSize() {
+	return move.size();
+}
+
+Board GameHistory::getKthBoard(const int k) {
+	return board[k];
 }

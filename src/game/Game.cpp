@@ -84,6 +84,7 @@ void to_json(json& j, const GameCfg& config) {
 		{"board_size", config.board_size},
 		{"prev_state", config.prev_state},
 		{"state", config.state},
+		{"game_mode", config.game_mode},
 		{"sound_theme", config.sound_theme},
 		{"board_design", config.board_design},
 		{"stone_design", config.stone_design},
@@ -105,6 +106,7 @@ void from_json(const json& j, GameCfg& config) {
 	config.board_size = j.at("board_size").get<int>();
 	config.prev_state = j.at("prev_state").get<GameState>();
 	config.state = j.at("state").get<GameState>();
+	config.game_mode = j.at("game_mode").get<GameMode>();
 	config.sound_theme = j.at("sound_theme").get<SoundTheme>();
 	config.board_design = j.at("board_design").get<BoardDesign>();
 	config.stone_design = j.at("stone_design").get<StoneDesign>();
@@ -198,6 +200,19 @@ bool Game::deleteSaveGame(const std::string& name) {
 	return 1;
 }
 
+int Game::getMoveListSize() {
+	return history.getMoveListSize();
+}
+
+Board Game::getKthBoard(const int k) {
+	return history.getKthBoard(k);
+}
+
+std::string Game::getLastMove() {
+	return history.getLastMove();
+}
+
+//debug purpose
 void Game::print() {
 	state.printPlayer();
 	state.current_board.printBoard(state.current_board);

@@ -4,6 +4,7 @@
     "board_size": 13,
     "capturing_stone": true,
     "end_game_sound": true,
+    "game_mode": 0,
     "placing_stone": true,
     "prev_state": 0,
     "sound_theme": 1,

@@ -18,6 +18,7 @@ struct GameCfg {
 	// Initial set up
 	GameState prev_state = GameState::Menu;
 	GameState state = GameState::Menu;
+	GameMode game_mode = GameMode::PvP;
 	int board_size = 13;
 	int komi = 7;
 
@@ -60,6 +61,9 @@ public:
 	bool loadGame(const std::string& name);
 	bool deleteSaveGame(const std::string& name);
 	std::vector<std::string> loadAllSaveGameName();
+	int getMoveListSize();
+	Board getKthBoard(const int k);
+	std::string getLastMove();
 	void print(); // debug
 
 	// Return value
