@@ -298,7 +298,7 @@ public:
 	// Update value
 	void updateMaxInputLength(const unsigned int& length) { max_input_length = length; };
 	void updateOnScreen(const bool& _on) override { on_screen = _on; };
-	void clearString() { input_str.clear(); input_box.updateStr(input_str); };
+	void clearStr() { input_str.clear(); input_box.updateStr(input_str); };
 
 	// Event handle & draw
 	void updateState() override;
