@@ -1,0 +1,128 @@
+{
+    "background_music": true,
+    "board_design": 1,
+    "board_size": 13,
+    "capturing_stone": true,
+    "end_game_sound": true,
+    "placing_stone": true,
+    "prev_state": 0,
+    "sound_theme": 1,
+    "state": 2,
+    "stone_design": 1
+}
+[
+    {
+        "pass": false,
+        "player": 2,
+        "x": 8,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 7,
+        "y": 8
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 10,
+        "y": 5
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 7,
+        "y": 4
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 7,
+        "y": 5
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 4,
+        "y": 4
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 3,
+        "y": 3
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 4,
+        "y": 2
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 5,
+        "y": 2
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 5,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 3,
+        "y": 8
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 2,
+        "y": 8
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 1,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 4,
+        "y": 7
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 4,
+        "y": 10
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 6,
+        "y": 11
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 12,
+        "y": 4
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 11,
+        "y": 2
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 9,
+        "y": 1
+    }
+]

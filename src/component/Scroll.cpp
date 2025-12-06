@@ -27,18 +27,24 @@ void Scroll::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::strin
 		}
 	}
 
-	if (thumb.isMouseHold()) {
+	if (thumb.isMousePress()) {
 		if (last_mouse_pos_y == -1) {
 			last_mouse_pos_y = ui_cfg.mouse_pos.y;
 			pre_index = index;
 		}
-		float delta_y = ui_cfg.mouse_pos.y - last_mouse_pos_y;
-		float move_ratio = delta_y / _thumb_pos;
-		index = pre_index + (int)move_ratio;
-		index = std::max(0, std::min((int)content.size() - preview_size, index));
-		updateState();
 	}
-	else {
+
+	if (event.is<sf::Event::MouseMoved>()) {
+		if (last_mouse_pos_y != -1) {
+			float delta_y = ui_cfg.mouse_pos.y - last_mouse_pos_y;
+			float move_ratio = delta_y / _thumb_pos;
+			index = pre_index + (int)move_ratio;
+			index = std::max(0, std::min((int)content.size() - preview_size, index));
+			updateState();
+		}
+	}
+
+	if (event.is<sf::Event::MouseButtonReleased>()) {
 		last_mouse_pos_y = -1;
 	}
 }

@@ -18,8 +18,8 @@ public:
 	// Return value
 	const sf::Vector2f getPos() const { return position; };
 	const sf::Vector2f getSize() const { return size; };
-	bool getHovered() const { return hovered; };
-	bool isMouseHold() const { return mouse_hold; };
+	bool isHovered() const { return hovered; };
+	bool isMousePress() const { return mouse_hold && hovered; };
 
 	// Update value
 	void updateOutlineThickness(const float& thickness) { button.setOutlineThickness(thickness); };
@@ -143,11 +143,17 @@ public:
 	float getTextSizeFit(const float _ratio);
 	sf::Vector2f getPos() const { return position; };
 	sf::Vector2f getSize() const { return box.getSize(); };
+	bool containPoint(const sf::Vector2f& point) const {
+		sf::FloatRect rect = box.getGlobalBounds();
+		return rect.contains(point);
+	}
 
 	// Update value
 	void updateBoxPos(const sf::Vector2f& _position) { position = _position; update(); };
 	void updateBoxSize(const sf::Vector2f& _size) { box.setSize(_size); update(); };
 	void updateBoxColor(const sf::Color& color) { box.setFillColor(color); }
+	void updateOutlineThickness(const float& thickness) { box.setOutlineThickness(thickness); };
+	void updateOutlineColor(const sf::Color& color) { box.setOutlineColor(color); };
 
 	void updateTextColor(const sf::Color& color) { text.setFillColor(color); }
 	void updateTextSize(const float& size) { text.setCharacterSize(size); update(); }
@@ -156,6 +162,8 @@ public:
 	void update();
 
 	void draw(sf::RenderWindow& window) const;
+
+	void updateTextSizeFitWithScale(const float _ratio);
 
 private:
 	sf::RectangleShape box;
@@ -258,10 +266,11 @@ public:
 	void updateNotificationStr(const std::string& _str) { notification.updateStr(_str); updateState();};
 	void updateOutlineThickness(const float& thickness) { container.setOutlineThickness(thickness); };
 	void updateOutlineColor(const sf::Color& color) { container.setOutlineColor(color); };
+	virtual void updateOnScreen(const bool &_on) { on_screen = _on; };
 
 
 	void clearSelection() { selection.clear(); };
-	void addSelection(const TextButton& button) { selection.push_back(button); };
+	void addSelection(const TextButton& button) { selection.push_back(button); updateState();  };
 	
 	// Update state, draw and event handle
 	virtual void updateState();
@@ -272,6 +281,34 @@ protected:
 	TextBox title, notification;
 	std::vector<TextButton> selection;
 
-	sf::Vector2f size, position;
+	sf::Vector2f size, position, _selection_size;
 	bool on_screen = false;
+};
+
+class TextInputNotification : public BaseNotification {
+public:
+	sf::Color input_box_color = sf::Color({ 255, 255, 255 });
+	sf::Color input_text_color = sf::Color({ 0, 0, 0 });
+
+	TextInputNotification(const sf::Font& _font);
+
+	// Return value
+	std::string getInputStr() const { return input_str; };
+	
+	// Update value
+	void updateMaxInputLength(const unsigned int& length) { max_input_length = length; };
+	void updateOnScreen(const bool& _on) override { on_screen = _on; };
+	void clearString() { input_str.clear(); input_box.updateStr(input_str); };
+
+	// Event handle & draw
+	void updateState() override;
+	void draw(sf::RenderWindow& window) override;
+	void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) override;
+private:
+	std::string input_str;
+	TextBox input_box;
+	unsigned int max_input_length = 20;
+
+	bool input_focus = true;
+	bool mouse_release = true;
 };

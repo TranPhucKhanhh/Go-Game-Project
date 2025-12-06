@@ -30,3 +30,26 @@ float TextBox::getTextSizeFit(const float _ratio) {
 
 	return ratio;
 }
+
+void TextBox::updateTextSizeFitWithScale(const float _ratio) {
+    sf::FloatRect tb = text.getLocalBounds();
+
+    if (tb.size.x <= 0.f || tb.size.y <= 0.f)
+        return;
+
+    sf::FloatRect boxBounds = box.getLocalBounds();
+    float availableWidth = boxBounds.size.x * _ratio;
+    float availableHeight = boxBounds.size.y * _ratio;
+
+    if (availableWidth <= 0 || availableHeight <= 0)
+        return;
+
+    float scaleX = availableWidth / tb.size.x;
+    float scaleY = availableHeight / tb.size.y;
+
+    float scale = std::min(scaleX, scaleY);
+
+    scale = std::min(scale, 1.f);
+
+    text.setScale({ scale, scale });
+}

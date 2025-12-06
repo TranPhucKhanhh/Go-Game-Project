@@ -30,11 +30,13 @@ private:
     TextBox header_bar;
 
     TextButton new_button, save_button, reset_button;
-
     TextButton undo_button, redo_button, pass_button;
 
     TextBox white_score_box;
     TextBox black_score_box;
+
+    TextInputNotification save_file_input;
+	BaseNotification error_notification;
 
     Game& game;
 	UICfg& ui_cfg;

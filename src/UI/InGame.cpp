@@ -30,7 +30,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     reset_button("Reset Gane", _asset_manager.getFont("StackSansNotch-Regular")),
     save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular")),
     white_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
-    black_score_box(_asset_manager.getFont("StackSansNotch-Regular")) {
+    black_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
+    save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
+    error_notification(_asset_manager.getFont("StackSansNotch-Regular")) {
    
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
@@ -50,6 +52,23 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     resize();
 
     std::cerr << "Load InGame UI successfully." << std::endl;
+
+    // initialize the notification
+    save_file_input.updateTitleStr("Save game file");
+    save_file_input.updateNotificationStr("Input file name (max 20 words):");
+    save_file_input.updateMaxInputLength(20);
+    TextButton _cancel("Cancel", _asset_manager.getFont("StackSansNotch-Regular"));
+    _cancel.updateRespondStr("CloseNoti");
+    TextButton _save("Save", _asset_manager.getFont("StackSansNotch-Regular"));
+    _save.updateRespondStr("SaveCurrentGame");
+    save_file_input.addSelection(_cancel);
+    save_file_input.addSelection(_save);
+
+    error_notification.updateTitleStr("ERROR");
+    error_notification.container_color = sf::Color(255, 92, 92);
+    TextButton _close("Close", _asset_manager.getFont("StackSansNotch-Regular"));
+    _close.updateRespondStr("CloseNoti");
+    error_notification.addSelection(_close);
 }
 
 void InGame::enter() {
@@ -59,6 +78,7 @@ void InGame::enter() {
     eventHandle(_d, _dt);
     resize();
 
+    save_file_input.updateOnScreen(false);
     game_playable = true;
 
     updateHeaderBar();
@@ -90,8 +110,30 @@ void InGame::updateScoreBox() {
 }
 
 void InGame::eventHandle(const sf::Event& event, std::string& respond) {
+    std::string event_respond = "";
+    
     if (event.is<sf::Event::Resized>()) {
         resize();
+    }
+
+    if (error_notification.onScreen()) {
+        error_notification.eventHandle(event, ui_cfg, event_respond);
+        return;
+	}
+
+    if (save_file_input.onScreen()) {
+        save_file_input.eventHandle(event, ui_cfg, event_respond);
+        if (event_respond == "SaveCurrentGame") {
+			int check = game.saveGame(save_file_input.getInputStr());
+            if (check == 0) {
+				error_notification.updateNotificationStr("Failed to save file");
+				error_notification.updateOnScreen(true);
+            }
+            else {
+				save_file_input.updateOnScreen(false);
+            }
+        }
+        return;
     }
 
     if (game_playable) {
@@ -106,8 +148,6 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         }
     }
     
-
-	std::string event_respond = "";
     new_button.eventHandle(event, ui_cfg, event_respond);
     reset_button.eventHandle(event, ui_cfg, event_respond);
     save_button.eventHandle(event, ui_cfg, event_respond);
@@ -123,22 +163,30 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     if (event_respond == "Undo" && game_playable) {
         game.undo();
         updateHeaderBar();
+        updateScoreBox();
     }
     else if (event_respond == "Redo" && game_playable) {
         game.redo();
         updateHeaderBar();
+        updateScoreBox();
     }
     else if (event_respond == "Pass" && game_playable) {
         game.pass();
         updateHeaderBar();
+        updateScoreBox();
     }
     else if (event_respond == "Reset") {
         game.reset();
         updateHeaderBar();
+        updateScoreBox();
     }
     else if (event_respond == "New") {
         respond = "GameNewOption";
     }
+    else if (event_respond == "Save" && game_playable) {
+        save_file_input.clearStr();
+        save_file_input.updateOnScreen(true);
+	}
 
     // Check if the game reach the end stage
     if (game.isGameEnd() && game_playable) {
@@ -189,6 +237,14 @@ void InGame::draw() {
     black_score_box.draw(ui_cfg.window);
 
     board.draw(ui_cfg.window, game.getCurrentBoard());
+
+    if (save_file_input.onScreen()) {
+        save_file_input.draw(ui_cfg.window);
+    }
+
+    if (error_notification.onScreen()) {
+        error_notification.draw(ui_cfg.window);
+	}
 }
 
 void InGame::mode_panel_resize(const float& _total_height_panel) {
@@ -300,10 +356,14 @@ void InGame::resize() {
     header_bar.updateBoxPos({ _tmp + board_size / 2, ui_cfg.window_size.y / 2.f - board_size / 2.f - inner_padding - status_bar_size_y  / 2});
 	header_bar.updateTextSizeFit(0.9);
     
-    //side_panel.setSize({ side_panel_size_x, _total_height_panel });
-    //side_panel.setFillColor(sf::Color::Transparent);
-    //side_panel.setOrigin(side_panel.getLocalBounds().getCenter());
-    //side_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2, ui_cfg.window_size.y / 2.f});
+    // Notification resize
+	float _tmp_noti_size = std::max(std::min(ui_cfg.window_size.x * 3 / 20.f, ui_cfg.window_size.y / 4.f), 180.f);
+	sf::Vector2f _noti_size = { _tmp_noti_size * 5 / 3.f, _tmp_noti_size };
+    save_file_input.updateSize(_noti_size);
+    save_file_input.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
+
+    error_notification.updateSize(_noti_size);
+    error_notification.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
 
     mode_panel_resize(_total_height_panel);
     option_panel_resize(_total_height_panel);

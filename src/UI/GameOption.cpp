@@ -118,15 +118,6 @@ void GameOption::draw() {
 
 	if (panel == SettingPanel::NewGame || panel == SettingPanel::LoadGame) {
 		start_game_button.draw(ui_cfg.window);
-		if (panel == SettingPanel::NewGame) {
-			start_game_button.updateStr("New Game");
-			start_game_button.updateRespondStr("StartGame");
-		}
-		else {
-			start_game_button.updateStr("Load Game");
-			start_game_button.updateRespondStr("LoadNewGame");
-		}
-		start_game_button.updateTextSizeFit(0.9f);
 	}
 	go_back_button.draw(ui_cfg.window);
 	new_game_panel.draw(ui_cfg.window);
@@ -161,10 +152,6 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 		eventHandleCustomizePanel(event, event_respond);
 	}
 
-	if (event_respond != "") {
-		std::cerr << event_respond << std::endl;
-	}
-
 	if (event_respond == "NewGame") {
 		panel = SettingPanel::NewGame;
 	}
@@ -196,6 +183,18 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 	}
 	else if (event_respond == "GoBack") {
 		respond = "GoBackToMenu";
+	}
+
+	// Change the start game button text according to the panel
+	if (event_respond == "NewGame" || event_respond == "LoadGame") {
+		if (panel == SettingPanel::NewGame) {
+			start_game_button.updateStr("New Game");
+			start_game_button.updateRespondStr("StartGame");
+		}
+		else {
+			start_game_button.updateStr("Load Game");
+			start_game_button.updateRespondStr("LoadNewGame");
+		}
 	}
 }
 

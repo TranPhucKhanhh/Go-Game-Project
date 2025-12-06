@@ -49,7 +49,7 @@ void GameOption::eventHandleLoadPanel(const sf::Event& event, std::string& respo
 	}
 
 	board_preview_title.updateStr(file_to_load);
-	board_preview_title.updateTextSizeFit(1);
+	board_preview_title.updateTextSizeFitWithScale(0.9);
 }
 
 void GameOption::resizeLoadPanel() {
