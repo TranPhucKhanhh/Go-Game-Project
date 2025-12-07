@@ -185,6 +185,10 @@ public:
 
 	Slider() = default;
 
+	// Return value
+	sf::Vector2f getSize() const { return size; };
+	sf::Vector2f getPos() const { return position; };
+
 	// update value
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
 	void updatePos(const sf::Vector2f& _pos) { position = _pos; updateState(); };

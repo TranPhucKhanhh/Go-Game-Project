@@ -29,6 +29,10 @@ int main()
     asset_manager.loadTexture("board-minimal", "/board-background/board-minimal.png");
     asset_manager.loadTexture("white-stone-default", "/stone/white-stone-default.png");
     asset_manager.loadTexture("black-stone-default", "/stone/black-stone-default.png");
+
+    // Load music
+    asset_manager.loadMusic("Puzzle-Dreams", "/music/Puzzle-Dreams.ogg");
+    asset_manager.loadMusic("The-Spunky-Princess", "/music/The-Spunky-Princess.ogg");
 	std::cerr << "Load all assets successfully." << std::endl;
 
     // Start the game

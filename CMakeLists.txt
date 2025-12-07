@@ -41,7 +41,7 @@ add_executable(GoGame
    )
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
-target_link_libraries(GoGame PRIVATE SFML::Graphics)
+target_link_libraries(GoGame PRIVATE SFML::Graphics SFML::Audio)
 target_include_directories(GoGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_compile_definitions(GoGame PRIVATE ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")

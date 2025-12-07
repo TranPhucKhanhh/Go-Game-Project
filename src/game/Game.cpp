@@ -93,13 +93,7 @@ void to_json(json& j, const GameCfg& config) {
 		{"board_size", config.board_size},
 		{"prev_state", config.prev_state},
 		{"state", config.state},
-		{"game_mode", config.game_mode},
-		{"sound_theme", config.sound_theme},
-		{"board_design", config.board_design},
-		{"stone_design", config.stone_design},
-		{"background_music", config.background_music},
-		{"sound_effect", config.sound_effect},
-		{"music_name", config.music_name}
+		{"game_mode", config.game_mode}
 	};
 }
 
@@ -115,12 +109,6 @@ void from_json(const json& j, GameCfg& config) {
 	config.prev_state = j.at("prev_state").get<GameState>();
 	config.state = j.at("state").get<GameState>();
 	config.game_mode = j.at("game_mode").get<GameMode>();
-	config.sound_theme = j.at("sound_theme").get<SoundTheme>();
-	config.board_design = j.at("board_design").get<BoardDesign>();
-	config.stone_design = j.at("stone_design").get<StoneDesign>();
-	config.background_music = j.at("background_music").get<int>();
-	config.sound_effect = j.at("sound_effect").get<int>();
-	config.music_name = j.at("music_name").get<std::string>();
 }
 
 bool Game::saveGame(const std::string& name) {

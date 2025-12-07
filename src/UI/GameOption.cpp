@@ -11,7 +11,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	start_game_button("Start a new game", asset_manager.getFont("StackSansNotch-Regular")),
 
 	new_game_panel("New game", asset_manager.getFont("StackSansNotch-Regular")),
-	go_back_button("Go back", asset_manager.getFont("StackSansNotch-Regular")),
+	go_back_button("Menu", asset_manager.getFont("StackSansNotch-Regular")),
 	game_mode_title(asset_manager.getFont("Momo"), "Select game mode:"),
 	pvp_mode_button("PvP", asset_manager.getFont("StackSansNotch-Bold")),
 	ai_easy_button("AI easy", asset_manager.getFont("StackSansNotch-Bold")),
@@ -31,6 +31,10 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_preview_title(asset_manager.getFont("Momo")),
 
 	setting_panel("Setting", asset_manager.getFont("StackSansNotch-Regular")),
+	music_scroll_title(asset_manager.getFont("Momo"), "Choose your music: " + ui_cfg.music_name),
+	music_volume_title(asset_manager.getFont("Momo"), "Music Volume: 25%"),
+	sound_effect_volume_title(asset_manager.getFont("Momo"), "Sound effect Volume: 25%"),
+
 	customize_panel("Customization", asset_manager.getFont("StackSansNotch-Regular"))
 
 {
@@ -69,10 +73,22 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_preview_title.updateBoxColor(sf::Color(255, 255, 255, 0));
 	board_preview_title.updateTextColor(sf::Color::Black);
 
+	music_scroll_title.setFillColor(sf::Color::Black);
+	music_volume_title.setFillColor(sf::Color::Black);
+	sound_effect_volume_title.setFillColor(sf::Color::Black);
+
 	// Initial value
 	load_game_scroll.updatePreviewSize(7);
 	loadGameFile();
-
+	background_music_slide.value = 25;
+	sound_effect_slide.value = 25;
+	music_scroll.updatePreviewSize(5);
+	music_scroll.updateIndex(0);
+	TextButton _music1("Puzzle-Dreams", asset_manager.getFont("StackSansNotch-Regular")); _music1.updateRespondStr("~Puzzle-Dreams");
+	TextButton _music2("The-Spunky-Princess", asset_manager.getFont("StackSansNotch-Regular")); _music2.updateRespondStr("~The-Spunky-Princess");
+	music_scroll.updateContent(_music1);
+	music_scroll.updateContent(_music2);
+	
 	resize();
 
 	std::cerr << "Load game Option UI successfully." << std::endl;

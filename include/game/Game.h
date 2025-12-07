@@ -10,28 +10,13 @@
 
 using json = nlohmann::json;
 
-enum class SoundTheme { Default, Minimal };
-enum class BoardDesign { Default, Minimal };
-enum class StoneDesign { Default, Minimal };
-
 struct GameCfg {
 	// Initial set up
 	GameState prev_state = GameState::Menu;
 	GameState state = GameState::Menu;
 	GameMode game_mode = GameMode::PvP;
 	int board_size = 13;
-	int komi = 7;
-
-	// Design selection
-	SoundTheme sound_theme = SoundTheme::Minimal;  // temporarily set to minimal
-	BoardDesign board_design = BoardDesign::Minimal;
-	StoneDesign stone_design = StoneDesign::Minimal;
-
-	// Volumn state of the game audio
-	float background_music = 100;
-	float sound_effect = 100; // Sound effect
-
-	std::string music_name = "None";
+	float komi = 7.5;	
 };
 
 void to_json(json& j, const Move& move);

@@ -1,0 +1,26 @@
+{
+    "board_size": 9,
+    "game_mode": 0,
+    "prev_state": 0,
+    "state": 2
+}
+[
+    {
+        "pass": false,
+        "player": 2,
+        "x": 5,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 6,
+        "y": 4
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 6,
+        "y": 2
+    }
+]

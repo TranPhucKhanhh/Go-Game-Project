@@ -23,6 +23,7 @@ UI::UI(Game& game, const AssetManager& _asset_manager, const sf::Vector2u& windo
 
 void UI::run() {
     sf::View uiView(sf::FloatRect( { 0.f, 0.f }, (sf::Vector2f) window.getSize()));
+	ui_cfg.updateMusic(asset_manager.getMusicPath("The-Spunky-Princess"));
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())

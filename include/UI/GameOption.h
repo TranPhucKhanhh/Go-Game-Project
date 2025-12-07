@@ -41,7 +41,6 @@ private:
 
     // Load game panel components
     TextButton load_game_panel;
-    
     Scroll load_game_scroll;
 	TextButton refresh_button,delete_button;
     BoardUI board_preview;
@@ -49,7 +48,12 @@ private:
 	TextBox board_preview_title;
 	std::string file_to_load;
 
+	// Setting panel components
     TextButton setting_panel;
+    Scroll music_scroll;
+	sf::Text music_scroll_title, music_volume_title, sound_effect_volume_title;
+    Slider background_music_slide, sound_effect_slide;
+
     TextButton customize_panel;
 
     float margin;
