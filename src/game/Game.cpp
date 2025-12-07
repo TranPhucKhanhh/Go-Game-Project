@@ -70,6 +70,15 @@ std::pair<float, float> Game::getScore() {
 	return std::make_pair(_black_score, _white_score + KOMI);
 }
 
+std::pair<float, float> Game::getScoreFromBoard(Board board) {
+	int _black_score = 0;
+	int _white_score = 0;
+	const float KOMI = 7.5;
+
+	board.calculateScore(board, _black_score, _white_score);
+	return std::make_pair(_black_score, _white_score + KOMI);
+}
+
 void to_json(json& j, const Move& move) {
 	j = json{
 		{"player", move.player},
@@ -89,9 +98,8 @@ void to_json(json& j, const GameCfg& config) {
 		{"board_design", config.board_design},
 		{"stone_design", config.stone_design},
 		{"background_music", config.background_music},
-		{"placing_stone", config.placing_stone},
-		{"capturing_stone", config.capturing_stone},
-		{"end_game_sound", config.end_game_sound}
+		{"sound_effect", config.sound_effect},
+		{"music_name", config.music_name}
 	};
 }
 
@@ -111,9 +119,8 @@ void from_json(const json& j, GameCfg& config) {
 	config.board_design = j.at("board_design").get<BoardDesign>();
 	config.stone_design = j.at("stone_design").get<StoneDesign>();
 	config.background_music = j.at("background_music").get<int>();
-	config.placing_stone = j.at("placing_stone").get<int>();
-	config.capturing_stone = j.at("capturing_stone").get<int>();
-	config.end_game_sound = j.at("end_game_sound").get<int>();
+	config.sound_effect = j.at("sound_effect").get<int>();
+	config.music_name = j.at("music_name").get<std::string>();
 }
 
 bool Game::saveGame(const std::string& name) {
@@ -205,7 +212,7 @@ int Game::getMoveListSize() {
 }
 
 Board Game::getKthBoard(const int k) {
-	return history.getKthBoard(k);
+	return previewBoard = history.getKthBoard(k);
 }
 
 std::string Game::getLastMove() {

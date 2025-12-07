@@ -27,9 +27,11 @@ struct GameCfg {
 	BoardDesign board_design = BoardDesign::Minimal;
 	StoneDesign stone_design = StoneDesign::Minimal;
 
-	// On/Off state of the game audio
-	bool background_music = 1;
-	bool placing_stone = 1, capturing_stone = 1, end_game_sound = 1; // Sound effect
+	// Volumn state of the game audio
+	float background_music = 100;
+	float sound_effect = 100; // Sound effect
+
+	std::string music_name = "None";
 };
 
 void to_json(json& j, const Move& move);
@@ -77,6 +79,7 @@ public:
 	bool isGameEnd() const { return game_end; }
 
 	std::pair<float, float> getScore(); // First value is black score and second value is white score
+	std::pair<float, float> getScoreFromBoard(Board board);
 
 private:
 	//Game configuration

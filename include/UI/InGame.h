@@ -45,12 +45,14 @@ private:
 	UICfg& ui_cfg;
     const AssetManager& asset_manager;
 
+    int history_preview_index = -1;
+
     bool game_playable;
 
     void resize(const sf::Vector2u& window_size);
 
     void updateHeaderBar();
-    void updateScoreBox();
+    void updateScoreBox(const std:: pair<float, float> &_score);
     void mode_panel_resize(const float& _total_height_panel);
     void control_panel_resize(const float& _total_height_panel);
     void option_panel_resize(const float& _total_height_panel);

@@ -50,9 +50,6 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 	mode_box.updateBoxColor(sf::Color({ 0, 0, 0, 0 }));
     mode_box.updateTextColor(sf::Color::Black);
 
-    updateHeaderBar();
-    updateScoreBox();
-
     resize();
 
     std::cerr << "Load InGame UI successfully." << std::endl;
@@ -103,7 +100,7 @@ void InGame::enter() {
 	else if (game.getGameCfg().game_mode == GameMode::AIHard) mode_box.updateStr("Mode: AI hard");
 
     updateHeaderBar();
-    updateScoreBox();
+    updateScoreBox(game.getScore());
 
     resize();
 }
@@ -123,9 +120,7 @@ void InGame::updateHeaderBar() {
     }
 }
 
-void InGame::updateScoreBox() {
-    std::pair<float, float> _score = game.getScore();
-
+void InGame::updateScoreBox(const std::pair<float, float> &_score) {
     white_score_box.updateStr(convert_to_string(_score.second));
     black_score_box.updateStr(convert_to_string(_score.first));
 
@@ -167,13 +162,16 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             board.placeStone(ui_cfg.mouse_pos, game);
 
             if (history_scroll.getContentSize() < game.getMoveListSize()) {
+                if (history_scroll.getIndex() < std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize())) {
+					history_scroll.updateIndex(history_scroll.getIndex() + 1);
+                }
                 std::string _str = std::to_string(game.getMoveListSize()) + ". " + game.getLastMove();
 				TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
-                _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize() + 1));
+                _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize()));
                 history_scroll.updateContent(_move_btn);
 			}
             updateHeaderBar();
-            updateScoreBox();
+            updateScoreBox(game.getScore());
         }
     }
     
@@ -191,26 +189,48 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
 		std::cerr << "clicked: " << event_respond << std::endl;
 	}
 
+    if (event_respond.size() >= 1 && event_respond[0] == '|') {
+        // Clicked the move in the history
+        int k = std::stoi(event_respond.substr(1));
+
+        if (k < game.getMoveListSize()) {
+            game.getKthBoard(k-1);
+            game_playable = false;
+            history_preview_index = k-1;
+            updateScoreBox(game.getScoreFromBoard(game.getPreviewBoard()));
+
+            header_bar.updateStr(history_scroll.getContentStr(k-1));
+            header_bar.updateBoxColor(sf::Color::Yellow);
+            header_bar.updateTextColor(sf::Color::Black);
+            return;
+        }
+        else {
+            game_playable = true;
+            history_preview_index = -1;
+            updateHeaderBar();
+            updateScoreBox(game.getScore());
+        }
+    }
     if (event_respond == "Undo" && game_playable) {
         game.undo();
         updateHeaderBar();
-        updateScoreBox();
+        updateScoreBox(game.getScore());
     }
     else if (event_respond == "Redo" && game_playable) {
         game.redo();
         updateHeaderBar();
-        updateScoreBox();
+        updateScoreBox(game.getScore());
     }
     else if (event_respond == "Pass" && game_playable) {
         game.pass();
         updateHeaderBar();
-        updateScoreBox();
+        updateScoreBox(game.getScore());
     }
-    else if (event_respond == "Reset") {
+    else if (event_respond == "Reset" && game_playable) {
         game.reset();
 		history_scroll.clearContent();
         updateHeaderBar();
-        updateScoreBox();
+        updateScoreBox(game.getScore());
     }
     else if (event_respond == "New") {
         respond = "GameNewOption";
@@ -267,7 +287,8 @@ void InGame::draw() {
     white_score_box.draw(ui_cfg.window);
     black_score_box.draw(ui_cfg.window);
 
-    board.draw(ui_cfg.window, game.getCurrentBoard());
+    if (history_preview_index != -1) board.draw(ui_cfg.window, game.getPreviewBoard());
+    else board.draw(ui_cfg.window, game.getCurrentBoard());
 
     history_scroll.draw(ui_cfg.window);
     mode_box.draw(ui_cfg.window);

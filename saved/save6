@@ -1,12 +1,11 @@
 {
-    "background_music": true,
+    "background_music": 100.0,
     "board_design": 1,
-    "board_size": 19,
-    "capturing_stone": true,
-    "end_game_sound": true,
+    "board_size": 13,
     "game_mode": 0,
-    "placing_stone": true,
+    "music_name": "None",
     "prev_state": 0,
+    "sound_effect": 100.0,
     "sound_theme": 1,
     "state": 2,
     "stone_design": 1
@@ -15,44 +14,32 @@
     {
         "pass": false,
         "player": 2,
-        "x": 11,
-        "y": 9
+        "x": 7,
+        "y": 8
     },
     {
         "pass": false,
         "player": 3,
-        "x": 8,
-        "y": 5
+        "x": 7,
+        "y": 6
     },
     {
         "pass": false,
         "player": 2,
-        "x": 6,
+        "x": 7,
         "y": 7
     },
     {
         "pass": false,
         "player": 3,
-        "x": 6,
-        "y": 14
+        "x": 7,
+        "y": 5
     },
     {
         "pass": false,
         "player": 2,
-        "x": 12,
-        "y": 15
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 14,
-        "y": 13
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 15,
-        "y": 3
+        "x": 7,
+        "y": 4
     },
     {
         "pass": false,
@@ -63,37 +50,31 @@
     {
         "pass": false,
         "player": 2,
-        "x": 2,
-        "y": 6
+        "x": 7,
+        "y": 2
     },
     {
         "pass": false,
         "player": 3,
-        "x": 2,
-        "y": 10
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 10,
-        "y": 13
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 17,
-        "y": 10
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 12,
-        "y": 5
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 12,
+        "x": 8,
         "y": 4
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 9,
+        "y": 7
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 9,
+        "y": 8
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 9,
+        "y": 10
     }
 ]

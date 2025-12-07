@@ -66,14 +66,15 @@ public:
 
 	TextButton(const std::string& str, const sf::Font& font);
 
+	// Return value
+	float getTextSizeFit(const float _ratio);
+	std::string getString() const { return text.getString(); };
+
 	// update value
 	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
 	void updateStr(const std::string& _text) { text.setString(_text); updateState(); }
 	void updateTextSizeFit(const float _ratio);
 	void updateState() override;
-
-	// Return value
-	float getTextSizeFit(const float _ratio);
 
 	// draw
 	void draw(sf::RenderWindow& window) override;
@@ -218,6 +219,8 @@ public:
 	const sf::Vector2f getSize() const { return size; };
 	int getPreviewSize() const { return preview_size; };
 	int getContentSize() const { return (int) content.size(); };
+	int getIndex() const { return index; };
+	std::string getContentStr(const int& _index) const { return (_index < content.size()) ? content[_index].getString() : ""; };
 
 	// Update value and index	
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
