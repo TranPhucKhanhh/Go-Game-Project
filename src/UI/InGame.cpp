@@ -33,7 +33,8 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     black_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
     error_notification(_asset_manager.getFont("StackSansNotch-Regular")),
-    mode_box(_asset_manager.getFont("StackSansNotch-Regular")) {
+    mode_box(_asset_manager.getFont("StackSansNotch-Regular")),
+    board(_asset_manager.getFont("Momo")) {
    
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
@@ -76,7 +77,12 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 }
 
 void InGame::enter() {
+    // Initailize the board
     board.updateCellNumber(game.getGameCfg().board_size);
+    board.updateBoardUI(ui_cfg.board_design, asset_manager);
+    board.updateStoneUI(ui_cfg.stone_design, asset_manager);
+
+    // Run first time preventing bug
     sf::Event _d = sf::Event::Closed{};
     std::string _dt = "Test";
     eventHandle(_d, _dt);
@@ -84,6 +90,8 @@ void InGame::enter() {
     save_file_input.updateOnScreen(false);
     game_playable = true;
 	
+
+    // Update history from game
 	history_scroll.clearContent();
 	std::vector<std::string> _move_list = game.getMoveList();
 	for (size_t i = 0; i < _move_list.size(); i++) {
@@ -94,6 +102,7 @@ void InGame::enter() {
 	}
     history_scroll.updateIndex(std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize())); // Set the current index to the last move
 	
+    // update the mode
     if (game.getGameCfg().game_mode == GameMode::PvP) mode_box.updateStr("Mode: PvP");
     else if (game.getGameCfg().game_mode == GameMode::AIEasy) mode_box.updateStr("Mode: AI easy");
     else if (game.getGameCfg().game_mode == GameMode::AIMedium) mode_box.updateStr("Mode: AI medium");
@@ -225,11 +234,12 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         updateHeaderBar();
         updateScoreBox(game.getScore());
     }
-    else if (event_respond == "Reset" && game_playable) {
+    else if (event_respond == "Reset") {
         game.reset();
 		history_scroll.clearContent();
         updateHeaderBar();
         updateScoreBox(game.getScore());
+        game_playable = true;
     }
     else if (event_respond == "New") {
         respond = "GameNewOption";
@@ -412,8 +422,6 @@ void InGame::resize() {
 
     board.updateSize( board_size );
     board.updatePos({_tmp + board_size / 2, ui_cfg.window_size.y / 2.f});
-    board.updateStoneTexture(asset_manager.getTexture("white-stone-default"), asset_manager.getTexture("black-stone-default"));
-    board.updateTexture(asset_manager.getTexture("board-minimal"));
     board.update();
 
     header_bar.updateBoxSize({ board_size, status_bar_size_y });

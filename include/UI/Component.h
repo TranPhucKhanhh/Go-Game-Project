@@ -1,5 +1,6 @@
 #pragma once
 #include<SFML/Graphics.hpp>
+#include<core/AssetManager.h>
 #include<game/Board.h>
 #include<game/Game.h>
 #include<model/UICfg.h>
@@ -86,6 +87,7 @@ private:
 
 class BoardUI {
 public:
+	BoardUI(const sf::Font& _font);
 	void draw(sf::RenderWindow& window, const Board& current_board);
 
 	// Return value
@@ -97,9 +99,11 @@ public:
 	void updatePos(const sf::Vector2f& _position) { position = _position; }
 	void updateSize(const float& _size);
 	void updateTexture(const sf::Texture& texure) { board_background = texure; }
+	void updateBoardUI(const std::string& _design, const AssetManager& asset_manager);
+	void updateStoneUI(const std::string& _design, const AssetManager& asset_manager);
 
 	// update stone
-	void updateStoneTexture(const sf::Texture& w_texture, const sf::Texture& b_texture) { white_texture = w_texture, black_texture = b_texture; };
+	//void updateStoneTexture(const sf::Texture& w_texture, const sf::Texture& b_texture) { white_texture = w_texture, black_texture = b_texture; };
 
 	// React to mouse event
 	void hoverStone(const sf::Vector2i& mouse_pos, const Game& game);
@@ -124,15 +128,17 @@ private:
 
 	int board_cell_number = 0;
 
-	sf::CircleShape stone;
-	sf::CircleShape predict_stone;
+	sf::CircleShape stone, predict_stone;
 	sf::Vector2i pos = { -1,-1 };
 
 	float stone_size;
 	bool hoverOnStone = 0;
 
-	sf::Texture white_texture;
-	sf::Texture black_texture;
+	sf::Texture white_texture, black_texture;
+	sf::Font font;
+	sf::Color line_color, text_color;
+
+	
 };
 
 class TextBox {

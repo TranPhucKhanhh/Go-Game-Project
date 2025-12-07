@@ -29,4 +29,6 @@ private:
     GameOption game_setting;
 
 	std::string respond;
+
+	void switchGameState(const std::string& respond);
 };

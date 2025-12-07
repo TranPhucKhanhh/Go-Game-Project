@@ -69,8 +69,6 @@ void GameOption::resizeLoadPanel() {
 
 	board_preview.updateSize(_board_size);
 	board_preview.updatePos({load_game_scroll.getPos().x + _load_size.x /2.f + _inner_margin + _board_size / 2.f, load_game_scroll.getPos().y});
-	board_preview.updateStoneTexture(asset_manager.getTexture("white-stone-default"), asset_manager.getTexture("black-stone-default"));
-	board_preview.updateTexture(asset_manager.getTexture("board-minimal"));
 	board_preview.update();
 
 	delete_button.updateSize(_button_size);

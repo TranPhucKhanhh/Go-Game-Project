@@ -4,6 +4,7 @@
 #include<core/AssetManager.h>
 #include<model/UICfg.h>
 #include<model/SettingPanel.h>
+#include<model/GameState.h>
 #include<string>
 #include<iostream>
 #include<vector>
@@ -19,6 +20,42 @@ UI::UI(Game& game, const AssetManager& _asset_manager, const sf::Vector2u& windo
     window.setMinimumSize(ui_cfg.min_window_size);
 
 	std::cerr << "UI initialized successfully." << std::endl;
+}
+
+void UI::switchGameState(const std::string &respond) {
+    if (respond == "ToMenu") {
+        game.getGameCfg().prev_state = game.getGameCfg().state;
+        game.getGameCfg().state = GameState::Menu;
+		menu.enter();
+    }
+    else if (respond == "GameNewOption") {
+        game.getGameCfg().prev_state = game.getGameCfg().state;
+        game.getGameCfg().state = GameState::Setting;
+        game_setting.enter();
+        game_setting.setPanel(SettingPanel::NewGame);
+    }
+    else if (respond == "StartNewGame") {
+        game.getGameCfg().prev_state = game.getGameCfg().state;
+        game.getGameCfg().state = GameState::Playing;
+        in_game.enter();
+    }
+    else if (respond == "OpenSetting") {
+        game.getGameCfg().prev_state = game.getGameCfg().state;
+        game.getGameCfg().state = GameState::Setting;
+        game_setting.enter();
+        game_setting.setPanel(SettingPanel::Setting);
+    }
+    else if (respond == "LoadNewGame") {
+        game.getGameCfg().prev_state = game.getGameCfg().state;
+        game.getGameCfg().state = GameState::Playing;
+        in_game.enter();
+    }
+    else if (respond == "GoBack") {
+        std::swap(game.getGameCfg().prev_state, game.getGameCfg().state);
+
+		if (game.getGameCfg().state == GameState::Playing) switchGameState("LoadNewGame");
+        else if (game.getGameCfg().state == GameState::Menu) switchGameState("ToMenu");
+    }
 }
 
 void UI::run() {
@@ -68,28 +105,10 @@ void UI::run() {
 				break;
             }
 
-            if (respond == "GameNewOption") {
-				game.getGameCfg().state = GameState::Setting;
-                game_setting.enter();
-                game_setting.setPanel(SettingPanel::NewGame);
-			}
-            else if (respond == "StartNewGame") {
-                game.getGameCfg().state = GameState::Playing;
-                in_game.enter();
+            if (respond == "GameNewOption" || respond == "StartNewGame" || respond == "OpenSetting" 
+                || respond == "LoadNewGame" || respond == "GoBack") {
+				UI::switchGameState(respond);
             }
-            else if (respond == "OpenSetting") {
-                game.getGameCfg().state = GameState::Setting;
-                game_setting.enter();
-				game_setting.setPanel(SettingPanel::Setting);
-            }
-            else if (respond == "LoadNewGame") {
-                game.getGameCfg().state = GameState::Playing;
-                in_game.enter();
-            }
-            else if (respond == "GoBackToMenu") {
-                game.getGameCfg().state = GameState::Menu;
-                menu.enter();
-			}
         }
 
         GameState current_state = game.getGameState();

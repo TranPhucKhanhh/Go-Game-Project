@@ -4,8 +4,8 @@
 #include<iostream>
 
 enum class SoundTheme { Default, Minimal };
-enum class BoardDesign { Default, Minimal };
-enum class StoneDesign { Default, Minimal };
+const std::string BoardDesign[] = { "White color", "Cyan color", "Green color", "Black color", "Yellow color" };
+const std::string StoneDesign[] = { "Default", "Fruit", "Card"};
 
 struct UICfg {
     sf::Vector2u window_size;
@@ -13,18 +13,18 @@ struct UICfg {
 
     sf::Vector2i mouse_pos;
     std::string title;
-
+    
     sf::RenderWindow& window;
 
 
 	// Adio & Theme settings
     SoundTheme sound_theme = SoundTheme::Minimal;  // temporarily set to minimal
-    BoardDesign board_design = BoardDesign::Minimal;
-    StoneDesign stone_design = StoneDesign::Minimal;
+    std::string board_design = "White color";
+    std::string stone_design = "Default";
 
     // Volumn state of the game audio
-    float background_music_volume = 25;
-    float sound_effect_volume = 25; // Sound effect
+    float background_music_volume = 0;
+    float sound_effect_volume = 25;
 
     std::string music_name = "The-Spunky-Princess";
     sf::Music music;

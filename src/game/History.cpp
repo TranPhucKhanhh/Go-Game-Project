@@ -1,5 +1,6 @@
 #include<game/History.h>
 #include<iostream>
+#include<algorithm>
 
 static std::string conv[19] = { "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"};
 

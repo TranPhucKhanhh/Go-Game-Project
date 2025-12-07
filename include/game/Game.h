@@ -58,6 +58,7 @@ public:
 	GameCfg& getGameCfg() { return game_config; }
 	Board getPreviewBoard() const { return previewBoard; };
 	Board getCurrentBoard() const { return state.current_board; };
+	Board getExampleBoard(); // example_board use for previewing the design
 	int getBoardSize() const { return game_config.board_size; }
 	std::vector<std::string> getMoveList() { return history.getFullMove(game_config.board_size); }
 
@@ -76,7 +77,7 @@ private:
 	//Current game history
 	GameHistory history;
 
-	Board previewBoard;
+	Board previewBoard, example_board; 
 
 	bool game_end;
 };

@@ -1,14 +1,21 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Component.h>
+#include<core/AssetManager.h>
 #include<model/CellState.h>
 #include<game/Game.h>
 #include<iostream>
 #include<cmath>
 
+static char charPos[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+
+BoardUI::BoardUI(const sf::Font & _font) : font(_font) {
+    board.setFillColor(sf::Color::White);
+}
+
 void BoardUI::updateSize(const float& size) {
     canvas_size = size;
-    canvas_padding = canvas_size / 20;
-    board_size = canvas_size - canvas_padding * 2;
+    canvas_padding = canvas_size / 25;
+    board_size = canvas_size - canvas_padding * 0;
     grid_size = board_size / (board_cell_number + 1);
     board_padding = grid_size;
 
@@ -25,16 +32,35 @@ void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {
     // draw vetical lines
     for (int i = 0; i < board_cell_number; i++) {
         sf::RectangleShape line({ line_thickness, line_length + line_thickness * (i == board_cell_number - 1) });
-        line.setFillColor(sf::Color(0, 0, 0, 200));
+        line.setFillColor(line_color);
         line.setPosition({ start_position.x + i * grid_size, start_position.y });
         window.draw(line);
+        
+        // draw Letter
+        sf::Text letter_text(font, charPos[i], (grid_size * 0.6f));
+		letter_text.setFillColor(text_color);
+		letter_text.setPosition({ start_position.x + i * grid_size - letter_text.getLocalBounds().size.x / 2, start_position.y - grid_size});
+        window.draw(letter_text);
+
+        letter_text.setPosition({ start_position.x + i * grid_size - letter_text.getLocalBounds().size.x / 2, position.y + board_size/2.f - grid_size * 0.85f});
+        window.draw(letter_text);
     }
     // draw horizontal lines
     for (int i = 0; i < board_cell_number; i++) {
         sf::RectangleShape line({ line_length + line_thickness * (i==board_cell_number-1), line_thickness});
-        line.setFillColor(sf::Color(0, 0, 0, 200));
+        line.setFillColor(line_color);
         line.setPosition({ start_position.x, start_position.y + i * grid_size });
         window.draw(line);
+
+        // draw number
+        sf::Text number_text(font, std::to_string(board_cell_number - i), (grid_size * 0.6f));
+        number_text.setFillColor(text_color);
+		number_text.setOrigin(number_text.getLocalBounds().getCenter());
+        number_text.setPosition({ start_position.x - grid_size/2.f, start_position.y + i * grid_size});
+        window.draw(number_text);
+
+        number_text.setPosition({ start_position.x - grid_size * 1.5f + board_size, start_position.y + i * grid_size});
+        window.draw(number_text);
     }
 
     if (hoverOnStone) {
@@ -96,21 +122,48 @@ void BoardUI::placeStone(const sf::Vector2i& mouse_pos, Game& game) const {
 void BoardUI::update() {
     start_position = { position.x - board_size / 2.f + board_padding, position.y - board_size / 2.f + board_padding };
     
-    canvas.setFillColor(sf::Color(242, 176, 109));
-    canvas.setSize({ canvas_size, canvas_size });
-    canvas.setOrigin(canvas.getLocalBounds().getCenter());
-    canvas.setPosition(position);
+    //canvas.setFillColor(sf::Color(242, 176, 109));
+    //canvas.setSize({ canvas_size, canvas_size });
+    //canvas.setOrigin(canvas.getLocalBounds().getCenter());
+    //canvas.setPosition(position);
 
     board.setSize({ board_size, board_size });
     board.setOrigin(board.getLocalBounds().getCenter());
     board.setPosition(position);
     //board_background.setSmooth(true);
     //board.setTexture(&board_background);
-    board.setFillColor(sf::Color::White);
-
+    
     stone.setRadius(grid_size * 0.45);
     stone.setOrigin(stone.getLocalBounds().getCenter());
 
     predict_stone.setRadius(grid_size * 0.45);
     predict_stone.setOrigin(stone.getLocalBounds().getCenter());
+}
+
+void BoardUI::updateBoardUI(const std::string& _design, const AssetManager &asset_manager) {
+    if (_design == "White color") {
+        text_color = line_color = sf::Color(0, 0, 0, 200);
+        board.setFillColor(sf::Color(255,255,255));
+    }
+    else if (_design == "Cyan color") {
+        text_color = line_color = sf::Color(0, 0, 0, 200);
+        board.setFillColor(sf::Color(200, 255, 255));
+    }
+    else if (_design == "Green color") {
+        text_color = line_color = sf::Color(0, 0, 0, 200);
+        board.setFillColor(sf::Color(200, 255, 200));
+    }
+    else if (_design == "Black color") {
+        text_color = line_color = sf::Color(200, 200, 200, 200);
+        board.setFillColor(sf::Color(50, 50, 50));
+    }
+    else if (_design == "Yellow color") {
+        text_color = line_color = sf::Color(0, 0, 0, 200);
+        board.setFillColor(sf::Color(255, 255, 200));
+	}
+}
+
+void BoardUI::updateStoneUI(const std::string& _design, const AssetManager &asset_manager) {
+    white_texture = asset_manager.getTexture("white-stone-" + _design);
+    black_texture = asset_manager.getTexture("black-stone-" + _design);
 }

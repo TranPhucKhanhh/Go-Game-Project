@@ -212,3 +212,20 @@ void Game::print() {
 	state.printPlayer();
 	state.current_board.printBoard(state.current_board);
 }
+
+
+Board Game::getExampleBoard() {
+	if (example_board.size() != 13) {
+		example_board = Board(13);
+		//Place some stones for preview
+		for (int i = 0; i < 13; i++) {
+			if (i % 2) {
+				example_board[i][i] = CellState::White;
+			}
+			else {
+				example_board[i][i] = CellState::Black;
+			}
+		}
+	}
+	return example_board;
+}

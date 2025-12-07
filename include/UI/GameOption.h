@@ -40,13 +40,12 @@ private:
     TextButton board_size_9_button, board_size_13_button, board_size_19_button;
 
     // Load game panel components
-    TextButton load_game_panel;
+    TextButton load_game_panel, refresh_button, delete_button;
     Scroll load_game_scroll;
-	TextButton refresh_button,delete_button;
     BoardUI board_preview;
-    bool board_preview_show;
 	TextBox board_preview_title;
 	std::string file_to_load;
+    bool board_preview_show;
 
 	// Setting panel components
     TextButton setting_panel;
@@ -54,7 +53,12 @@ private:
 	sf::Text music_scroll_title, music_volume_title, sound_effect_volume_title;
     Slider background_music_slide, sound_effect_slide;
 
+	// Customize panel components
     TextButton customize_panel;
+    sf::Text board_design_title, stone_design_title, design_preview_title;
+	Scroll board_design_scroll, stone_design_scroll;
+	BoardUI customize_board_preview;
+	std::string board_design_chosen, stone_design_chosen;
 
     float margin;
     sf::Vector2f canvas_size;

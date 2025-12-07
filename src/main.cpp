@@ -25,11 +25,13 @@ int main()
     asset_manager.loadFont("Momo", "/fonts/Momo_Trust_Display/MomoTrustDisplay-Regular.ttf");
 
     // Load texture
-    asset_manager.loadTexture("board-default", "/board-background/board-default.png");
-    asset_manager.loadTexture("board-minimal", "/board-background/board-minimal.png");
-    asset_manager.loadTexture("white-stone-default", "/stone/white-stone-default.png");
-    asset_manager.loadTexture("black-stone-default", "/stone/black-stone-default.png");
-
+    asset_manager.loadTexture("dummy", "/dummy.png");
+    asset_manager.loadTexture("white-stone-Default", "/stone/white-stone-Default.png");
+    asset_manager.loadTexture("black-stone-Default", "/stone/black-stone-Default.png");
+    asset_manager.loadTexture("white-stone-Fruit", "/stone/white-stone-Fruit.png");
+    asset_manager.loadTexture("black-stone-Fruit", "/stone/black-stone-Fruit.png");
+    asset_manager.loadTexture("white-stone-Card", "/stone/white-stone-Card.png");
+    asset_manager.loadTexture("black-stone-Card", "/stone/black-stone-Card.png");
     // Load music
     asset_manager.loadMusic("Puzzle-Dreams", "/music/Puzzle-Dreams.ogg");
     asset_manager.loadMusic("The-Spunky-Princess", "/music/The-Spunky-Princess.ogg");
