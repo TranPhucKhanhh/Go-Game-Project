@@ -42,6 +42,7 @@ public:
 	void undo();
 	void redo();
 	void reset();
+	void resign();
 	void placeStone(int x, int y);
 	bool saveGame(const std::string& name);
 	bool loadPreviewGame(const std::string& name);
@@ -51,7 +52,6 @@ public:
 	int getMoveListSize();
 	Board getKthBoard(const int k);
 	std::string getLastMove();
-	void print(); // debug
 
 	// Return value
 	CellState getCurrentPlayer() const { return state.current_player; };
@@ -66,6 +66,7 @@ public:
 	std::pair<float, float> getScore(); // First value is black score and second value is white score
 	std::pair<float, float> getScoreFromBoard(Board board);
 
+	void print(); // debug
 private:
 	//Game configuration
 	GameCfg game_config;
@@ -77,6 +78,8 @@ private:
 	GameHistory history;
 
 	Board previewBoard;
+
+	CellState resigned_player = CellState::Empty;
 
 	bool game_end;
 };

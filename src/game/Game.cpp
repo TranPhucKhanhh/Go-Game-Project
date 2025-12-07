@@ -62,12 +62,13 @@ void Game::placeStone(int x, int y) {
 }
 
 std::pair<float, float> Game::getScore() {
-	int _black_score = 0;
-	int _white_score = 0;
-	const float KOMI = 7.5;
-
-	state.current_board.calculateScore(state.current_board, _black_score, _white_score);
-	return std::make_pair(_black_score, _white_score + KOMI);
+	int black_score = 0;
+	int white_score = 0;
+	float KOMI = game_config.komi;
+	state.current_board.calculateScore(state.current_board, black_score, white_score);
+	if (resigned_player == CellState::Empty) return std::make_pair(black_score, white_score + KOMI);
+	if (resigned_player == CellState::Black) return std::make_pair(-1, white_score + KOMI);
+	if (resigned_player == CellState::White) return std::make_pair(black_score, -1);
 }
 
 std::pair<float, float> Game::getScoreFromBoard(Board board) {
@@ -205,6 +206,11 @@ Board Game::getKthBoard(const int k) {
 
 std::string Game::getLastMove() {
 	return history.getLastMove(game_config.board_size);
+}
+
+void Game::resign() {
+	resigned_player = state.current_player;
+	game_end = 1;
 }
 
 //debug purpose
