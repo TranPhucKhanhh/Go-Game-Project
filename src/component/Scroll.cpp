@@ -78,3 +78,12 @@ void Scroll::updateState() {
 		content[i].updateTextSizeFit(0.9f);
 	}
 }
+
+void Scroll::deleteLastContent() {
+	if (content.empty()) return;
+	content.pop_back(); 
+	if (index != 0 && index + preview_size > content.size()) {
+		index--;
+	}
+	updateState();
+}

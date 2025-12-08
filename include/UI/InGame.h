@@ -53,6 +53,7 @@ private:
 
     void updateHeaderBar();
     void updateScoreBox(const std:: pair<float, float> &_score);
+    void updateHistoryScroll();
     void mode_panel_resize(const float& _total_height_panel);
     void control_panel_resize(const float& _total_height_panel);
     void option_panel_resize(const float& _total_height_panel);

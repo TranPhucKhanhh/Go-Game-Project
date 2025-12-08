@@ -136,6 +136,16 @@ void InGame::updateScoreBox(const std::pair<float, float> &_score) {
     footer_bar_resize();
 }
 
+void InGame::updateHistoryScroll() {
+    if (history_scroll.getContentSize() == game.getMoveListSize()) return;
+    if (history_scroll.getIndex() < std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize()))
+        history_scroll.updateIndex(history_scroll.getIndex() + 1);
+    std::string _str = std::to_string(game.getMoveListSize()) + ". " + game.getLastMove();
+    TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
+    _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize()));
+    history_scroll.updateContent(_move_btn);
+}
+
 void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     std::string event_respond = "";
     
@@ -170,14 +180,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         if (event.is<sf::Event::MouseButtonReleased>()) {
             board.placeStone(ui_cfg.mouse_pos, game);
 
-            if (history_scroll.getContentSize() < game.getMoveListSize()) {
-                if (history_scroll.getIndex() < std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize())) 
-                    history_scroll.updateIndex(history_scroll.getIndex() + 1);
-                std::string _str = std::to_string(game.getMoveListSize()) + ". " + game.getLastMove();
-				TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
-                _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize()));
-                history_scroll.updateContent(_move_btn);
-			}
+            updateHistoryScroll();
             updateHeaderBar();
             updateScoreBox(game.getScore());
         }
@@ -223,16 +226,22 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         game.undo();
         updateHeaderBar();
         updateScoreBox(game.getScore());
+
+		// updat the history scroll
+        history_scroll.deleteLastContent();
+
     }
     else if (event_respond == "Redo" && game_playable) {
         game.redo();
         updateHeaderBar();
         updateScoreBox(game.getScore());
+        updateHistoryScroll();
     }
     else if (event_respond == "Pass" && game_playable) {
         game.pass();
         updateHeaderBar();
         updateScoreBox(game.getScore());
+        updateHistoryScroll();
     }
     else if (event_respond == "Reset") {
         game.reset();

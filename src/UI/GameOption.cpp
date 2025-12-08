@@ -34,7 +34,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	setting_panel("Setting", asset_manager.getFont("StackSansNotch-Regular")),
 	music_scroll_title(asset_manager.getFont("Momo"), "Choose your music: " + ui_cfg.music_name),
 	music_volume_title(asset_manager.getFont("Momo"), "Music Volume: " + std::to_string((int)ui_cfg.background_music_volume) + "%"),
-	sound_effect_volume_title(asset_manager.getFont("Momo"), "Sound effect Volume: " + std::to_string((int)ui_cfg.background_music_volume) + "%"),
+	sound_effect_volume_title(asset_manager.getFont("Momo"), "Sound effect Volume: " + std::to_string((int)ui_cfg.sound_effect_volume) + "%"),
 
 	customize_panel("Customization", asset_manager.getFont("StackSansNotch-Regular")),
 	customize_board_preview(_asset_manager.getFont("Momo")),

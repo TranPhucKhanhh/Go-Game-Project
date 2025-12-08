@@ -239,6 +239,7 @@ public:
 	void clearContent() { content.clear(); index = 0; updateState(); };
 	void updatePreviewSize(const int& _preview_size) { preview_size = _preview_size; updateState(); };
 	void updateIndex(const int& _index) { index = _index; updateState(); };
+	void deleteLastContent();
 	void updateState();
 
 	// event handle & draw
