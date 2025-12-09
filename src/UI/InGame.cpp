@@ -108,6 +108,7 @@ void InGame::enter() {
     else if (game.getGameCfg().game_mode == GameMode::AIMedium) mode_box.updateStr("Mode: AI medium");
 	else if (game.getGameCfg().game_mode == GameMode::AIHard) mode_box.updateStr("Mode: AI hard");
 
+    history_preview_index = -1;
     updateHeaderBar();
     updateScoreBox(game.getScore());
 
@@ -246,9 +247,10 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     else if (event_respond == "Reset") {
         game.reset();
 		history_scroll.clearContent();
+        game_playable = true; 
+        history_preview_index = -1;
         updateHeaderBar();
         updateScoreBox(game.getScore());
-        game_playable = true;
     }
     else if (event_respond == "New") {
         respond = "GameNewOption";

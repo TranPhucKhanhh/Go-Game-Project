@@ -37,9 +37,6 @@ int main()
     asset_manager.loadMusic("The-Spunky-Princess", "/music/The-Spunky-Princess.ogg");
 	std::cerr << "Load all assets successfully." << std::endl;
 
-#ifdef __APPLE__
-std::cout << "Window!\n";
-#endif
     // Start the game
     Game game;
 

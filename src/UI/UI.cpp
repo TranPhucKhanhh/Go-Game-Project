@@ -31,8 +31,8 @@ void UI::switchGameState(const std::string &respond) {
     else if (respond == "GameNewOption") {
         game.getGameCfg().prev_state = game.getGameCfg().state;
         game.getGameCfg().state = GameState::Setting;
-        game_setting.enter();
         game_setting.setPanel(SettingPanel::NewGame);
+        game_setting.enter();
     }
     else if (respond == "StartNewGame") {
         game.getGameCfg().prev_state = game.getGameCfg().state;

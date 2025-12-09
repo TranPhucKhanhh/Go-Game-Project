@@ -83,4 +83,7 @@ private:
     void resizeCustomizePanel();
     void drawCustomizePanel();
     void eventHandleCustomizePanel(const sf::Event& event, std::string& respond);
+
+    // helper functions
+    void updateLoadNewButton();
 };

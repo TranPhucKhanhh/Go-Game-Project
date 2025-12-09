@@ -166,4 +166,6 @@ void BoardUI::updateBoardUI(const std::string& _design, const AssetManager &asse
 void BoardUI::updateStoneUI(const std::string& _design, const AssetManager &asset_manager) {
     white_texture = asset_manager.getTexture("white-stone-" + _design);
     black_texture = asset_manager.getTexture("black-stone-" + _design);
+
+    
 }

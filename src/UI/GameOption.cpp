@@ -122,6 +122,17 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	std::cerr << "Load game Option UI successfully." << std::endl;
 }
 
+void GameOption::updateLoadNewButton() {
+	if (panel == SettingPanel::NewGame) {
+		start_game_button.updateStr("New Game");
+		start_game_button.updateRespondStr("StartGame");
+	}
+	else {
+		start_game_button.updateStr("Load Game");
+		start_game_button.updateRespondStr("LoadNewGame");
+	}
+}
+
 void GameOption::enter() {
 	board_preview_show = false;
 	game_mode = GameMode::PvP;
@@ -135,6 +146,7 @@ void GameOption::enter() {
 	music_scroll.updateIndex(0);
 	board_design_scroll.updateIndex(0);
 	stone_design_scroll.updateIndex(0);
+	updateLoadNewButton();
 	resize();
 }
 
@@ -236,14 +248,7 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 
 	// Change the start game button text according to the panel
 	if (event_respond == "NewGame" || event_respond == "LoadGame") {
-		if (panel == SettingPanel::NewGame) {
-			start_game_button.updateStr("New Game");
-			start_game_button.updateRespondStr("StartGame");
-		}
-		else {
-			start_game_button.updateStr("Load Game");
-			start_game_button.updateRespondStr("LoadNewGame");
-		}
+		updateLoadNewButton();
 	}
 }
 
