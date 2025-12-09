@@ -30,8 +30,12 @@ int main()
     asset_manager.loadTexture("black-stone-Default", "/stone/black-stone-Default.png");
     asset_manager.loadTexture("white-stone-Fruit", "/stone/white-stone-Fruit.png");
     asset_manager.loadTexture("black-stone-Fruit", "/stone/black-stone-Fruit.png");
-    asset_manager.loadTexture("white-stone-Card", "/stone/white-stone-Card.png");
-    asset_manager.loadTexture("black-stone-Card", "/stone/black-stone-Card.png");
+    asset_manager.loadTexture("white-stone-Animal1", "/stone/white-stone-Animal1.png");
+    asset_manager.loadTexture("black-stone-Animal1", "/stone/black-stone-Animal1.png");
+    asset_manager.loadTexture("white-stone-Animal2", "/stone/white-stone-Animal2.png");
+    asset_manager.loadTexture("black-stone-Animal2", "/stone/black-stone-Animal2.png");
+    asset_manager.loadTexture("white-stone-Animal3", "/stone/white-stone-Animal3.png");
+    asset_manager.loadTexture("black-stone-Animal3", "/stone/black-stone-Animal3.png");
     // Load music
     asset_manager.loadMusic("Puzzle-Dreams", "/music/Puzzle-Dreams.ogg");
     asset_manager.loadMusic("The-Spunky-Princess", "/music/The-Spunky-Princess.ogg");

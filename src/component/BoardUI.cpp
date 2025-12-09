@@ -8,7 +8,13 @@
 
 static char charPos[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
 
-BoardUI::BoardUI(const sf::Font & _font) : font(_font) {
+static float min(const float& a, const float& b) {
+    if (a < b) return a;
+    return b;
+}
+
+BoardUI::BoardUI(const AssetManager & _asset_manager) :
+    font(_asset_manager.getFont("Momo")), stone(_asset_manager.getTexture("dummy")), predict_stone(_asset_manager.getTexture("dummy")) {
     board.setFillColor(sf::Color::White);
 }
 
@@ -19,7 +25,7 @@ void BoardUI::updateSize(const float& size) {
     grid_size = board_size / (board_cell_number + 1);
     board_padding = grid_size;
 
-    predict_stone.setFillColor(sf::Color(255,255,255, 200));
+    predict_stone.setColor(sf::Color(255,255,255, 200));
 }
 
 void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {
@@ -70,11 +76,12 @@ void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {
     for (int i = 0; i < board_cell_number; i++) {
         for (int j = 0; j < board_cell_number; j++) {
             if (current_board[i][j] != CellState::Empty) {
-                stone.setPosition({start_position.x + grid_size * i, start_position.y + grid_size * j });
                 
-                if (current_board[i][j] == CellState::White) stone.setTexture(&white_texture);
-                else stone.setTexture(&black_texture);
+                if (current_board[i][j] == CellState::White) stone.setTexture(white_texture, true);
+                else stone.setTexture(black_texture, true);
 
+                BoardUI::updateStone();
+                stone.setPosition({start_position.x + grid_size * i, start_position.y + grid_size * j });
                 window.draw(stone);
             }
         }
@@ -102,8 +109,10 @@ void BoardUI::hoverStone(const sf::Vector2i& mouse_pos, const Game& game) {
             return;
         }
 
-        if (game.getCurrentPlayer() == CellState::White) predict_stone.setTexture(&white_texture);
-        else predict_stone.setTexture(&black_texture);
+
+        if (game.getCurrentPlayer() == CellState::White) predict_stone.setTexture(white_texture, true);
+        else predict_stone.setTexture(black_texture, true);
+        BoardUI::updateStone();
 
         predict_stone.setPosition({ start_position.x + grid_size * pos.x, start_position.y + grid_size * pos.y });
         hoverOnStone = 1;
@@ -133,11 +142,25 @@ void BoardUI::update() {
     //board_background.setSmooth(true);
     //board.setTexture(&board_background);
     
-    stone.setRadius(grid_size * 0.45);
-    stone.setOrigin(stone.getLocalBounds().getCenter());
+    BoardUI::updateStone();
+}
 
-    predict_stone.setRadius(grid_size * 0.45);
-    predict_stone.setOrigin(stone.getLocalBounds().getCenter());
+void BoardUI::updateStone() {
+    BoardUI::updateRadiusSprite(stone, grid_size * 0.9);
+    stone.setOrigin({ stone.getLocalBounds().size.x / 2.f,stone.getLocalBounds().size.y / 2.f });
+
+    BoardUI::updateRadiusSprite(predict_stone, grid_size * 0.9);
+    predict_stone.setOrigin({ predict_stone.getLocalBounds().size.x / 2.f,predict_stone.getLocalBounds().size.y / 2.f });
+}
+
+void BoardUI::updateRadiusSprite(sf::Sprite& _sprite, const float& _size) {
+    _sprite.setScale({ 1.f, 1.f });
+
+    sf::Vector2f _sprite_size = _sprite.getLocalBounds().size;
+
+    float _new_scale = min(_size / _sprite_size.x, _size / _sprite_size.y);
+
+    _sprite.setScale({ _new_scale , _new_scale });
 }
 
 void BoardUI::updateBoardUI(const std::string& _design, const AssetManager &asset_manager) {
@@ -166,6 +189,4 @@ void BoardUI::updateBoardUI(const std::string& _design, const AssetManager &asse
 void BoardUI::updateStoneUI(const std::string& _design, const AssetManager &asset_manager) {
     white_texture = asset_manager.getTexture("white-stone-" + _design);
     black_texture = asset_manager.getTexture("black-stone-" + _design);
-
-    
 }

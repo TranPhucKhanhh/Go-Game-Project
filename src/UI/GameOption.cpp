@@ -29,7 +29,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	refresh_button("Refresh", asset_manager.getFont("StackSansNotch-Regular")),
 	delete_button("Delete", asset_manager.getFont("StackSansNotch-Regular")),
 	board_preview_title(asset_manager.getFont("Momo")),
-	board_preview(_asset_manager.getFont("Momo")),
+	board_preview(_asset_manager),
 
 	setting_panel("Setting", asset_manager.getFont("StackSansNotch-Regular")),
 	music_scroll_title(asset_manager.getFont("Momo"), "Choose your music: " + ui_cfg.music_name),
@@ -37,7 +37,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	sound_effect_volume_title(asset_manager.getFont("Momo"), "Sound effect Volume: " + std::to_string((int)ui_cfg.sound_effect_volume) + "%"),
 
 	customize_panel("Customization", asset_manager.getFont("StackSansNotch-Regular")),
-	customize_board_preview(_asset_manager.getFont("Momo")),
+	customize_board_preview(_asset_manager),
 	board_design_title(asset_manager.getFont("Momo"), "Choose your board design: " + ui_cfg.board_design),
 	stone_design_title(asset_manager.getFont("Momo"), "Choose your stone design: " + ui_cfg.stone_design),
 	design_preview_title(asset_manager.getFont("Momo"), "Board design preview")

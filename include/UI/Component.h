@@ -87,7 +87,7 @@ private:
 
 class BoardUI {
 public:
-	BoardUI(const sf::Font& _font);
+	BoardUI(const AssetManager &_asset_manager);
 	void draw(sf::RenderWindow& window, const Board& current_board);
 
 	// Return value
@@ -103,6 +103,7 @@ public:
 	void updateStoneUI(const std::string& _design, const AssetManager& asset_manager);
 
 	// update stone
+	void updateRadiusSprite(sf::Sprite &_sprite, const float& _size);
 	//void updateStoneTexture(const sf::Texture& w_texture, const sf::Texture& b_texture) { white_texture = w_texture, black_texture = b_texture; };
 
 	// React to mouse event
@@ -112,6 +113,8 @@ public:
 
 	// Apply all changes to the board before draw
 	void update();
+	void updateStone();
+
 private:
 	sf::RectangleShape canvas;
 	sf::RectangleShape board;
@@ -128,7 +131,7 @@ private:
 
 	int board_cell_number = 0;
 
-	sf::CircleShape stone, predict_stone;
+	sf::Sprite stone, predict_stone;
 	sf::Vector2i pos = { -1,-1 };
 
 	float stone_size;

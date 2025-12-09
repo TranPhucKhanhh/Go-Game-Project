@@ -34,7 +34,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
     error_notification(_asset_manager.getFont("StackSansNotch-Regular")),
     mode_box(_asset_manager.getFont("StackSansNotch-Regular")),
-    board(_asset_manager.getFont("Momo")) {
+    board(_asset_manager) {
    
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
