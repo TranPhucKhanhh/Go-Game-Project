@@ -29,8 +29,8 @@ private:
     sf::RectangleShape footer_bar;
     TextBox header_bar;
 
-    TextButton new_button, save_button, reset_button;
-    TextButton undo_button, redo_button, pass_button;
+    TextButton new_button, save_button, reset_button, setting_button;
+    TextButton undo_button, redo_button, pass_button, resign_button, out_his_button;
 
     TextBox white_score_box;
     TextBox black_score_box;
@@ -54,17 +54,17 @@ private:
     void updateHeaderBar();
     void updateScoreBox(const std:: pair<float, float> &_score);
     void updateHistoryScroll();
-    void mode_panel_resize(const float& _total_height_panel);
-    void control_panel_resize(const float& _total_height_panel);
-    void option_panel_resize(const float& _total_height_panel);
-    void history_panel_resize(const float& _total_height_panel);
-    void footer_bar_resize();
+    void mode_panel_resize(const float& _height);
+    void control_panel_resize(const float& _height);
+    void option_panel_resize(const float& _height);
+    void history_panel_resize(const float& _height);
+    void score_bar_resize(const float& _height);
 
     // Screen UI value
     float padding;
     float inner_padding;
     sf::Vector2f canvas_size;
-    float side_panel_size_x;
+    float side_panel_size_x, control_bar_size_x;
     float board_size;
     float status_bar_size_y;
 };

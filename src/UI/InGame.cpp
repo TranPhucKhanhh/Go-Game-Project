@@ -27,8 +27,11 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular")), 
     pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular")),
     new_button("New Game", _asset_manager.getFont("StackSansNotch-Regular")),
-    reset_button("Reset Gane", _asset_manager.getFont("StackSansNotch-Regular")),
+    reset_button("Reset Game", _asset_manager.getFont("StackSansNotch-Regular")),
+    resign_button("Resign", _asset_manager.getFont("StackSansNotch-Regular")),
+    out_his_button("Close history", _asset_manager.getFont("StackSansNotch-Regular")),
     save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular")),
+    setting_button("Setting", _asset_manager.getFont("StackSansNotch-Regular")),
     white_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     black_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
@@ -36,12 +39,16 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     mode_box(_asset_manager.getFont("StackSansNotch-Regular")),
     board(_asset_manager) {
    
+    // Set the respond message for each button
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
 	pass_button.updateRespondStr("Pass");
+    resign_button.updateRespondStr("Resign");
+    out_his_button.updateRespondStr("Close History");
 	new_button.updateRespondStr("New");
 	reset_button.updateRespondStr("Reset");
 	save_button.updateRespondStr("Save");
+    setting_button.updateRespondStr("Setting");
 
     white_score_box.updateTextColor(sf::Color::Black);
     black_score_box.updateBoxColor(sf::Color::Black);
@@ -130,11 +137,13 @@ void InGame::updateHeaderBar() {
     }
 }
 
-void InGame::updateScoreBox(const std::pair<float, float> &_score) {
+void InGame::updateScoreBox(const std::pair<float, float>& _score) {
     white_score_box.updateStr(convert_to_string(_score.second));
     black_score_box.updateStr(convert_to_string(_score.first));
 
-    footer_bar_resize();
+    float _tmp = std::min(white_score_box.getTextSizeFit(0.9f), black_score_box.getTextSizeFit(0.9f));
+    white_score_box.updateTextSize(_tmp);
+    black_score_box.updateTextSize(_tmp);
 }
 
 void InGame::updateHistoryScroll() {
@@ -190,10 +199,13 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     new_button.eventHandle(event, ui_cfg, event_respond);
     reset_button.eventHandle(event, ui_cfg, event_respond);
     save_button.eventHandle(event, ui_cfg, event_respond);
+    setting_button.eventHandle(event, ui_cfg, event_respond);
 
     undo_button.eventHandle(event, ui_cfg, event_respond);
     redo_button.eventHandle(event, ui_cfg, event_respond);
     pass_button.eventHandle(event, ui_cfg, event_respond);
+    resign_button.eventHandle(event, ui_cfg, event_respond);
+    if (history_preview_index != -1) out_his_button.eventHandle(event, ui_cfg, event_respond);
 
 	history_scroll.eventHandle(event, ui_cfg, event_respond);
 
@@ -259,6 +271,15 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         save_file_input.clearStr();
         save_file_input.updateOnScreen(true);
 	}
+    else if (event_respond == "Setting") {
+        respond = "OpenSetting";
+    }
+    else if (event_respond == "Close History") {
+        game_playable = true;
+        history_preview_index = -1;
+        updateHeaderBar();
+        updateScoreBox(game.getScore());
+    }
 
     // Check if the game reach the end stage
     if (game.isGameEnd() && game_playable) {
@@ -297,10 +318,13 @@ void InGame::draw() {
     new_button.draw(ui_cfg.window);
     reset_button.draw(ui_cfg.window);
     save_button.draw(ui_cfg.window);
+    setting_button.draw(ui_cfg.window);
 
     undo_button.draw(ui_cfg.window);
     redo_button.draw(ui_cfg.window);
     pass_button.draw(ui_cfg.window);
+    resign_button.draw(ui_cfg.window);
+    if (history_preview_index != -1) out_his_button.draw(ui_cfg.window);
 
     header_bar.draw(ui_cfg.window);
 
@@ -322,96 +346,107 @@ void InGame::draw() {
 	}
 }
 
-void InGame::mode_panel_resize(const float& _total_height_panel) {
-    mode_panel.setSize({ side_panel_size_x, _total_height_panel / 10.f });
+void InGame::mode_panel_resize(const float& _height) {
+    mode_panel.setSize({ side_panel_size_x, _height });
     mode_panel.setFillColor(sf::Color(242, 176, 109));
     mode_panel.setOrigin(mode_panel.getLocalBounds().getCenter());
-    mode_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2, ui_cfg.window_size.y / 2.f - _total_height_panel / 2.f + _total_height_panel / 20.f });
+    mode_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2, 
+        header_bar.getPos().y - status_bar_size_y / 2.f + _height /2.f});
 
     mode_box.updateBoxPos(mode_panel.getPosition());
     mode_box.updateBoxSize({ mode_panel.getSize().x * 0.8f, mode_panel.getSize().y * 0.8f });
     mode_box.updateTextSizeFit(1.f);
 }
 
-void InGame::option_panel_resize(const float& _total_height_panel) {
+void InGame::option_panel_resize(const float& _height) {
     float _button_padding = side_panel_size_x / 15.f;
     float _inner_button_padding = _button_padding / 1.5f;
 
-    option_panel.setSize({ side_panel_size_x, _total_height_panel / 6.f });
+    option_panel.setSize({ side_panel_size_x, _height });
     option_panel.setFillColor(sf::Color(242, 176, 109));
     option_panel.setOrigin(option_panel.getLocalBounds().getCenter());
     option_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
         mode_panel.getPosition().y + mode_panel.getSize().y / 2.f + option_panel.getSize().y / 2.f + inner_padding });
 
-    sf::Vector2f _button_size = { side_panel_size_x - _button_padding * 2, (option_panel.getSize().y - 2 * _button_padding - 3 * _inner_button_padding) / 3.f };
+    sf::Vector2f _button_size = { side_panel_size_x - _button_padding * 2, (_height - 2 * _button_padding - 3 * _inner_button_padding) / 4.f };
 
     new_button.updateSize(_button_size);
-    new_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y - _button_size.y - _inner_button_padding});
+    new_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y - _height/2.f + _button_size.y/2.f + _button_padding});
     
     reset_button.updateSize(_button_size);
-    reset_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y });
+    reset_button.updatePos({ option_panel.getPosition().x, new_button.getPos().y + _button_size.y + _inner_button_padding });
     
     save_button.updateSize(_button_size);
-    save_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y + _inner_button_padding + _button_size.y});
+    save_button.updatePos({ option_panel.getPosition().x, reset_button.getPos().y + _button_size.y + _inner_button_padding });
     
-    float _button_text_size = std::min({ new_button.getTextSizeFit(0.8), reset_button.getTextSizeFit(0.8), save_button.getTextSizeFit(0.8) });
+    setting_button.updateSize(_button_size);
+    setting_button.updatePos({ option_panel.getPosition().x, save_button.getPos().y + _button_size.y + _inner_button_padding });
+
+    float _ratio = 0.95;
+    float _button_text_size = std::min({ new_button.getTextSizeFit(_ratio), reset_button.getTextSizeFit(_ratio), save_button.getTextSizeFit(_ratio), setting_button.getTextSizeFit(_ratio)});
 
     new_button.updateTextSize(_button_text_size);
     reset_button.updateTextSize(_button_text_size);
     save_button.updateTextSize(_button_text_size);
+    setting_button.updateTextSize(_button_text_size);
 }
 
-void InGame::control_panel_resize(const float& _total_height_panel) {
-    control_panel.setSize({ side_panel_size_x, _total_height_panel / 8.f });
+void InGame::history_panel_resize(const float& _height) {
+    history_panel.setSize({ side_panel_size_x, _height });
+    history_panel.setFillColor(sf::Color(242, 176, 109));
+    history_panel.setOrigin(history_panel.getLocalBounds().getCenter());
+    history_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
+        option_panel.getPosition().y + option_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
+
+
+    history_scroll.updateSize({ side_panel_size_x, _height });
+    history_scroll.updatePos({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
+        option_panel.getPosition().y + option_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
+}
+
+void InGame::control_panel_resize(const float& _height) {
+    /*control_panel.setSize({ control_bar_size_x, _height });
     control_panel.setFillColor(sf::Color(242, 176, 109));
     control_panel.setOrigin(control_panel.getLocalBounds().getCenter());
-    control_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
-        option_panel.getPosition().y + option_panel.getSize().y / 2.f + control_panel.getSize().y / 2.f + inner_padding });
+    control_panel.setPosition({ board.getPos().x - board_size / 2 - inner_padding - control_bar_size_x / 2,
+        board.getPos().y + board_size/2.f - _height/2.f});*/
 
-    float _button_padding = side_panel_size_x / 15.f;
-    float _inner_button_padding = _button_padding / 1.5;
+    float _button_padding = side_panel_size_x / 10.f;
 
-    sf::Vector2f _button_size = { (side_panel_size_x - _inner_button_padding * 4) / 3.f, control_panel.getSize().y - _button_padding * 2 };
+    sf::Vector2f _button_size = { control_bar_size_x, (_height - _button_padding * 4) / 4 };
 
-    undo_button.updateSize(_button_size);
-    undo_button.updatePos({ control_panel.getPosition().x - _button_size.x - _inner_button_padding ,control_panel.getPosition().y });
-
-    redo_button.updateSize(_button_size);
-    redo_button.updatePos({ control_panel.getPosition().x ,control_panel.getPosition().y });
+    resign_button.updateSize(_button_size);
+    resign_button.updatePos({ board.getPos().x - board_size / 2 - inner_padding - control_bar_size_x / 2 ,board.getPos().y + board_size / 2.f - _button_size.y / 2.f });
 
     pass_button.updateSize(_button_size);
-    pass_button.updatePos({ control_panel.getPosition().x + _button_size.x + _inner_button_padding ,control_panel.getPosition().y });
+    pass_button.updatePos({ resign_button.getPos().x ,resign_button.getPos().y - _button_padding - _button_size.y});
 
-    float _button_text_size = std::min({ undo_button.getTextSizeFit(0.8), redo_button.getTextSizeFit(0.8), pass_button.getTextSizeFit(0.8) });
+    redo_button.updateSize(_button_size);
+    redo_button.updatePos({ pass_button.getPos().x ,pass_button.getPos().y - _button_padding - _button_size.y });
+
+    undo_button.updateSize(_button_size);
+    undo_button.updatePos({ redo_button.getPos().x ,redo_button.getPos().y - _button_padding - _button_size.y });
+
+    out_his_button.updateSize(_button_size);
+    out_his_button.updatePos({ undo_button.getPos().x ,undo_button.getPos().y - _button_padding - _button_size.y });
+
+    float _button_text_size = std::min({ undo_button.getTextSizeFit(0.9f), redo_button.getTextSizeFit(0.9f), pass_button.getTextSizeFit(0.9f), resign_button.getTextSizeFit(0.9f)});
 
     undo_button.updateTextSize(_button_text_size);
     redo_button.updateTextSize(_button_text_size);
     pass_button.updateTextSize(_button_text_size);
+    resign_button.updateTextSize(_button_text_size);
+    out_his_button.updateTextSizeFit(0.9f);
 }
 
-void InGame::history_panel_resize(const float& _total_height_panel) {
-    history_panel.setSize({ side_panel_size_x,
-        _total_height_panel - inner_padding * 3 - option_panel.getSize().y - mode_panel.getSize().y - control_panel.getSize().y });
-    history_panel.setFillColor(sf::Color(242, 176, 109));
-    history_panel.setOrigin(history_panel.getLocalBounds().getCenter());
-    history_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
-        control_panel.getPosition().y + control_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
+void InGame::score_bar_resize(const float &_height) {
+    float _margin = _height / 3.5;
 
-
-    history_scroll.updateSize({ side_panel_size_x,
-        _total_height_panel - inner_padding * 3 - option_panel.getSize().y - mode_panel.getSize().y - control_panel.getSize().y });
-    history_scroll.updatePos({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
-        control_panel.getPosition().y + control_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
-}
-
-void InGame::footer_bar_resize() {
-    float _tmp = (ui_cfg.window_size.x - board_size - inner_padding - side_panel_size_x) / 2;
-
-    float _box_size = board_size / 4;
-    black_score_box.updateBoxSize({ _box_size, status_bar_size_y });
-    black_score_box.updateBoxPos({ _tmp + _box_size / 2.f, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y / 2.f });
-    white_score_box.updateBoxSize({ _box_size, status_bar_size_y });
-    white_score_box.updateBoxPos({ _tmp - _box_size / 2.f + board_size, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y / 2.f });
+    sf::Vector2f _box_size = { control_bar_size_x, (_height - _margin) / 2.f};
+    black_score_box.updateBoxSize(_box_size);
+    black_score_box.updateBoxPos({ pass_button.getPos().x, header_bar.getPos().y - status_bar_size_y/2.f + _box_size.y/2.f});
+    white_score_box.updateBoxSize(_box_size);
+    white_score_box.updateBoxPos({ pass_button.getPos().x, black_score_box.getPos().y + _margin + _box_size.y});
 
     float _box_text_size = std::min(black_score_box.getTextSizeFit(0.9f), white_score_box.getTextSizeFit(0.9f));
     black_score_box.updateTextSize(_box_text_size);
@@ -421,42 +456,42 @@ void InGame::footer_bar_resize() {
 void InGame::resize() {
     float min_scale = std::min(ui_cfg.window_size.x, ui_cfg.window_size.y);
     
-    padding = min_scale / 10;
-    canvas_size = { ui_cfg.window_size.x - padding, ui_cfg.window_size.y - padding };
+    // Initial value
+    padding = min_scale / 20;
+    canvas_size = { ui_cfg.window_size.x - 10.f, ui_cfg.window_size.y - padding * 2 };
     inner_padding = (min_scale - padding) / 30;
+    status_bar_size_y = std::min(750.f, std::max(canvas_size.y / 17, 50.f));
     side_panel_size_x = std::min(ui_cfg.window_size.y / 4.f, std::max(canvas_size.x / 7, 100.f));
-    status_bar_size_y = std::min(500.f, std::max(canvas_size.y / 17, 75.f));
-    board_size = std::min(canvas_size.y - (status_bar_size_y+inner_padding) * 2, canvas_size.x - inner_padding - side_panel_size_x);
+    control_bar_size_x = side_panel_size_x * 0.55;
+    board_size = std::min(canvas_size.y - status_bar_size_y - inner_padding, canvas_size.x - inner_padding*2 - side_panel_size_x - control_bar_size_x);
 
     float _tmp = (ui_cfg.window_size.x - board_size - inner_padding - side_panel_size_x) / 2;
-    float _total_height_panel = status_bar_size_y * 2 + inner_padding * 2 + board_size;
+    float _total_height_panel = status_bar_size_y + inner_padding + board_size;
 
+    // Reize the middle component: header bar & board
     board.updateSize( board_size );
-    board.updatePos({_tmp + board_size / 2, ui_cfg.window_size.y / 2.f});
+    board.updatePos({ ui_cfg.window_size.x / 2.f - (side_panel_size_x- control_bar_size_x)/2.f, ui_cfg.window_size.y / 2.f + (inner_padding + status_bar_size_y) / 2.f});
     board.update();
-
+    
     header_bar.updateBoxSize({ board_size, status_bar_size_y });
-    header_bar.updateBoxPos({ _tmp + board_size / 2, ui_cfg.window_size.y / 2.f - board_size / 2.f - inner_padding - status_bar_size_y  / 2});
+    header_bar.updateBoxPos({ board.getPos().x, board.getPos().y - board_size / 2.f - inner_padding - status_bar_size_y / 2.f});
 	header_bar.updateTextSizeFit(0.9);
     
+
+    // Resize other component
+    mode_panel_resize( (_total_height_panel-inner_padding*2) * 1/7  );
+    option_panel_resize((_total_height_panel - inner_padding * 2) * 3 / 7 );
+    history_panel_resize((_total_height_panel - inner_padding * 2) * 3 / 7);
+    
+    control_panel_resize(_total_height_panel * 0.5);
+    score_bar_resize(_total_height_panel * 0.3);
+
     // Notification resize
-	float _tmp_noti_size = std::max(std::min(ui_cfg.window_size.x * 3 / 20.f, ui_cfg.window_size.y / 4.f), 180.f);
-	sf::Vector2f _noti_size = { _tmp_noti_size * 5 / 3.f, _tmp_noti_size };
+    float _tmp_noti_size = std::max(std::min(ui_cfg.window_size.x * 3 / 20.f, ui_cfg.window_size.y / 4.f), 180.f);
+    sf::Vector2f _noti_size = { _tmp_noti_size * 5 / 3.f, _tmp_noti_size };
     save_file_input.updateSize(_noti_size);
     save_file_input.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
 
     error_notification.updateSize(_noti_size);
     error_notification.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
-
-    mode_panel_resize(_total_height_panel);
-    option_panel_resize(_total_height_panel);
-    control_panel_resize(_total_height_panel);
-    history_panel_resize(_total_height_panel);
-
-    footer_bar.setSize({ board_size, status_bar_size_y });
-    footer_bar.setFillColor(sf::Color(242, 176, 109));
-    footer_bar.setOrigin(footer_bar.getLocalBounds().getCenter());
-    footer_bar.setPosition({ _tmp + board_size / 2, ui_cfg.window_size.y / 2.f + board_size / 2.f + inner_padding + status_bar_size_y  / 2});
-
-    footer_bar_resize();
 }
