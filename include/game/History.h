@@ -3,6 +3,7 @@
 #include<model/CellState.h>
 #include<model/Move.h>
 #include<model/Cell.h>
+#include<algorithm>
 
 class GameHistory {
 public:
