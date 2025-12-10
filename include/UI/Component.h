@@ -10,10 +10,6 @@ class BaseButton {
 public:
 
 	// Color for button
-	sf::Color normal_button_color{ 100, 100, 200 };
-	sf::Color hover_button_color{ 90, 90, 150 };
-	sf::Color press_button_color{ 62, 62, 89 };
-
 	BaseButton() = default;
 
 	// Return value
@@ -27,9 +23,12 @@ public:
 	void updateOutlineColor(const sf::Color& color) { button.setOutlineColor(color); };
 	void updatePos(const sf::Vector2f& _position) { position = _position; updateState(); };
 	void updateSize(const sf::Vector2f& _size) { size = _size; updateState(); };
-	void updateOpacity(const float& c) { normal_button_color.a = c, hover_button_color.a = c, press_button_color.a = c; };
 	void updateBorder(const float& thickness, const sf::Color& color) { button.setOutlineColor(color), button.setOutlineThickness(thickness); };
 	void updateRespondStr(const std::string& respond_str) { on_click_respond = respond_str; }
+	
+	void updateOpacity(const float& c) { button_color.a = c;  button.setFillColor(button_color); };
+	void updateColor(const sf::Color& _c) { button_color = _c; button.setFillColor(button_color); }
+	void updateTexture(const sf::Texture& _t) { button.setTexture(&_t); }
 
 	// Event check and update
 	void checkHover(const sf::Vector2i& mouse_pos);
@@ -41,11 +40,11 @@ public:
 	virtual void draw(sf::RenderWindow& window);
 
 	// Animation or effect function
-	virtual void onIdle() { button.setFillColor(normal_button_color); };
+	virtual void onIdle();
 
-	virtual void onHover() { button.setFillColor(hover_button_color); };
+	virtual void onHover();
 
-	virtual void onMouseHold() { button.setFillColor(press_button_color); };
+	virtual void onMouseHold();
 
 protected:
 	sf::RectangleShape button;
@@ -57,6 +56,8 @@ protected:
 
 	bool hovered = false;
 	bool mouse_hold = false;
+
+	sf::Color button_color = { 100, 100, 200 };
 };
 
 class TextButton : public BaseButton {

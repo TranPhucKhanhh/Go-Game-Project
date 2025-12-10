@@ -25,6 +25,13 @@ int main()
     asset_manager.loadFont("Momo", "/fonts/Momo_Trust_Display/MomoTrustDisplay-Regular.ttf");
 
     // Load texture
+
+    // Load icons
+    asset_manager.loadTexture("music", "/icon/music.png");
+    asset_manager.loadTexture("music-no", "/icon/music-no.png");
+    asset_manager.loadTexture("sound", "/icon/sound.png");
+    asset_manager.loadTexture("sound-no", "/icon/sound-no.png");
+
     asset_manager.loadTexture("dummy", "/dummy.png");
     asset_manager.loadTexture("white-stone-Default", "/stone/white-stone-Default.png");
     asset_manager.loadTexture("black-stone-Default", "/stone/black-stone-Default.png");

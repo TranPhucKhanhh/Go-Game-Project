@@ -27,6 +27,26 @@ void BaseButton::updateEffect() {
 	}
 }
 
+void BaseButton::onIdle() {
+	button.setFillColor(button_color);
+}
+
+void BaseButton::onHover() {
+	sf::Color _tmp = button_color;
+	_tmp.r *= 0.5;
+	_tmp.b *= 0.5;
+	_tmp.g *= 0.5;
+	button.setFillColor(_tmp);
+}
+
+void BaseButton::onMouseHold() {
+	sf::Color _tmp = button_color;
+	_tmp.r *= 0.2;
+	_tmp.b *= 0.2;
+	_tmp.g *= 0.2;
+	button.setFillColor(_tmp);
+}
+
 void BaseButton::draw(sf::RenderWindow& window) {
 	updateEffect();
 	window.draw(button);

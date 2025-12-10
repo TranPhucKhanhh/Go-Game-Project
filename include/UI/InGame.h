@@ -29,6 +29,7 @@ private:
     sf::RectangleShape footer_bar;
     TextBox header_bar;
 
+    BaseButton sound_button, music_button;
     TextButton new_button, save_button, reset_button, setting_button;
     TextButton undo_button, redo_button, pass_button, resign_button, out_his_button;
 
@@ -52,6 +53,7 @@ private:
     void resize(const sf::Vector2u& window_size);
 
     void updateHeaderBar();
+    void updateSoundMusic();
     void updateScoreBox(const std:: pair<float, float> &_score);
     void updateHistoryScroll();
     void mode_panel_resize(const float& _height);

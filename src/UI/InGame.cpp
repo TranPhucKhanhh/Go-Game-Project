@@ -49,6 +49,8 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 	reset_button.updateRespondStr("Reset");
 	save_button.updateRespondStr("Save");
     setting_button.updateRespondStr("Setting");
+    sound_button.updateRespondStr("Toggle Sound");
+    music_button.updateRespondStr("Toggle Music");
 
     white_score_box.updateTextColor(sf::Color::Black);
     black_score_box.updateBoxColor(sf::Color::Black);
@@ -97,6 +99,8 @@ void InGame::enter() {
     save_file_input.updateOnScreen(false);
     game_playable = true;
 	
+    // update sound and music button
+    updateSoundMusic();
 
     // Update history from game
 	history_scroll.clearContent();
@@ -120,6 +124,17 @@ void InGame::enter() {
     updateScoreBox(game.getScore());
 
     resize();
+}
+
+void InGame::updateSoundMusic() {
+    if (ui_cfg.background_music_volume == 0) music_button.updateTexture(asset_manager.getTexture("music-no"));
+    else music_button.updateTexture(asset_manager.getTexture("music"));
+
+    if (ui_cfg.sound_effect_volume == 0) sound_button.updateTexture(asset_manager.getTexture("sound-no"));
+    else sound_button.updateTexture(asset_manager.getTexture("sound"));
+
+    ui_cfg.music.setVolume(ui_cfg.background_music_volume);
+    ui_cfg.updateSoundEffectVolume(ui_cfg.sound_effect_volume);
 }
 
 void InGame::updateHeaderBar() {
@@ -195,6 +210,9 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             updateScoreBox(game.getScore());
         }
     }
+
+    sound_button.eventHandle(event, ui_cfg, event_respond);
+    music_button.eventHandle(event, ui_cfg, event_respond);
     
     new_button.eventHandle(event, ui_cfg, event_respond);
     reset_button.eventHandle(event, ui_cfg, event_respond);
@@ -280,6 +298,33 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         updateHeaderBar();
         updateScoreBox(game.getScore());
     }
+    else if (event_respond == "Toggle Music") {
+        if (ui_cfg.pre_background_music_volume == 0 && ui_cfg.background_music_volume == 0) {
+            ui_cfg.background_music_volume = 25;
+        }
+        else if (ui_cfg.background_music_volume == 0) {
+            std::swap(ui_cfg.background_music_volume, ui_cfg.pre_background_music_volume);
+        }
+        else {
+            ui_cfg.pre_background_music_volume = ui_cfg.background_music_volume;
+            ui_cfg.background_music_volume = 0;
+        }
+        updateSoundMusic();
+    }
+    else if (event_respond == "Toggle Sound") {
+        if (ui_cfg.pre_sound_effect_volume == 0 && ui_cfg.sound_effect_volume == 0) {
+            ui_cfg.sound_effect_volume = 25;
+        }
+        else if (ui_cfg.sound_effect_volume == 0) {
+            std::swap(ui_cfg.sound_effect_volume, ui_cfg.pre_sound_effect_volume);
+        }
+        else {
+            ui_cfg.pre_sound_effect_volume = ui_cfg.sound_effect_volume;
+            ui_cfg.sound_effect_volume = 0;
+        }
+        updateSoundMusic();
+    }
+    
 
     // Check if the game reach the end stage
     if (game.isGameEnd() && game_playable) {
@@ -314,6 +359,9 @@ void InGame::draw() {
     ui_cfg.window.draw(control_panel);
     ui_cfg.window.draw(history_panel);
     ui_cfg.window.draw(footer_bar);
+
+    sound_button.draw(ui_cfg.window);
+    music_button.draw(ui_cfg.window);
 
     new_button.draw(ui_cfg.window);
     reset_button.draw(ui_cfg.window);
@@ -476,7 +524,13 @@ void InGame::resize() {
     header_bar.updateBoxSize({ board_size, status_bar_size_y });
     header_bar.updateBoxPos({ board.getPos().x, board.getPos().y - board_size / 2.f - inner_padding - status_bar_size_y / 2.f});
 	header_bar.updateTextSizeFit(0.9);
+
+    // Resize the sound and music button
+    sound_button.updateSize({ padding * 0.9f, padding * 0.9f });
+    sound_button.updatePos({ board.getPos().x+board_size/2.f-sound_button.getSize().x/2.f, header_bar.getPos().y - status_bar_size_y / 2.f - sound_button.getSize().y / 2.f});
     
+    music_button.updateSize({ padding * 0.9f, padding * 0.9f });
+    music_button.updatePos({ sound_button.getPos().x - sound_button.getSize().x - inner_padding, sound_button.getPos().y});
 
     // Resize other component
     mode_panel_resize( (_total_height_panel-inner_padding*2) * 1/7  );

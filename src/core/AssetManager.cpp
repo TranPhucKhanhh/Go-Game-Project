@@ -19,6 +19,7 @@ bool AssetManager::loadTexture(const std::string& name, std::string path) {
 		std::cerr << "Can not find Texture " << name << " from path " << path << std::endl;
 		assert(0);
 	}
+	texture.setSmooth(true);
 	textures[name] = std::move(texture);
 	return true;
 }

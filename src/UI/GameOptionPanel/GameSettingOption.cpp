@@ -21,6 +21,7 @@ void GameOption::eventHandleSettingPanel(const sf::Event& event, std::string& re
 	background_music_slide.eventHandle(event, ui_cfg);
 	sound_effect_slide.eventHandle(event, ui_cfg);
 
+	// Update game music & sound according to the scroll
 	if (ui_cfg.background_music_volume != background_music_slide.value) {
 		ui_cfg.background_music_volume = background_music_slide.value;
 		music_volume_title.setString("Music Volume: " + std::to_string((int)ui_cfg.background_music_volume) + "%");

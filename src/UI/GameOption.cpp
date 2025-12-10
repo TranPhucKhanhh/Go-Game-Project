@@ -147,6 +147,11 @@ void GameOption::enter() {
 	board_design_scroll.updateIndex(0);
 	stone_design_scroll.updateIndex(0);
 	updateLoadNewButton();
+	// Update scroll value according to the game music & sound 
+	music_volume_title.setString("Music Volume: " + std::to_string((int)ui_cfg.background_music_volume) + "%");
+	sound_effect_volume_title.setString("Sound Effect Volume: " + std::to_string((int)ui_cfg.sound_effect_volume) + "%");
+	background_music_slide.value = ui_cfg.background_music_volume;
+	sound_effect_slide.value = ui_cfg.sound_effect_volume;
 	resize();
 }
 

@@ -23,8 +23,8 @@ struct UICfg {
     std::string stone_design = "Default";
 
     // Volumn state of the game audio
-    float background_music_volume = 0;
-    float sound_effect_volume = 25;
+    float background_music_volume = 0, pre_background_music_volume = 0;
+    float sound_effect_volume = 25, pre_sound_effect_volume = 0;
 
     std::string music_name = "The-Spunky-Princess";
     sf::Music music;
