@@ -4,7 +4,7 @@
 #include<iostream>
 
 enum class SoundTheme { Default, Minimal };
-const std::string BoardDesign[] = { "White color", "Cyan color", "Green color", "Black color", "Yellow color" };
+const std::string BoardDesign[] = { "White color", "Cyan color", "Green color", "Black color", "Yellow color", "Anime", "Wooden", "Forest"};
 const std::string StoneDesign[] = { "Default", "Fruit", "Animal1", "Animal2", "Animal3"};
 
 struct UICfg {

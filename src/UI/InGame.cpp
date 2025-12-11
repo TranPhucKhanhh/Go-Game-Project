@@ -8,6 +8,16 @@
 #include<iostream>
 #include<cmath>
 
+static void updateSpriteSize(sf::Sprite& _sprite, const float& _size) {
+    _sprite.setScale({ 1.f, 1.f });
+
+    sf::Vector2f _sprite_size = _sprite.getLocalBounds().size;
+
+    float _new_scale = std::min(_size / _sprite_size.x, _size / _sprite_size.y);
+
+    _sprite.setScale({ _new_scale , _new_scale });
+}
+
 static std::string convert_to_string(const float& num) {
     int val = floor(num);
     float epsilon = 0.3;
@@ -37,7 +47,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
     error_notification(_asset_manager.getFont("StackSansNotch-Regular")),
     mode_box(_asset_manager.getFont("StackSansNotch-Regular")),
-    board(_asset_manager) {
+    board(_asset_manager),
+    white_stone_image(_asset_manager.getTexture("dummy")),
+    black_stone_image(_asset_manager.getTexture("dummy")) {
    
     // Set the respond message for each button
 	undo_button.updateRespondStr("Undo");
@@ -90,6 +102,10 @@ void InGame::enter() {
     board.updateCellNumber(game.getGameCfg().board_size);
     board.updateBoardUI(ui_cfg.board_design, asset_manager);
     board.updateStoneUI(ui_cfg.stone_design, asset_manager);
+
+    // Update preview iamge of Black and White player
+    white_stone_image.setTexture(asset_manager.getTexture("white-stone-" + ui_cfg.stone_design), true);
+    black_stone_image.setTexture(asset_manager.getTexture("black-stone-" + ui_cfg.stone_design), true);
 
     // Run first time preventing bug
     sf::Event _d = sf::Event::Closed{};
@@ -253,7 +269,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             updateScoreBox(game.getScore());
         }
     }
-    if (event_respond == "Undo" && game_playable) {
+    if (event_respond == "Undo" && game_playable && !game.isGameEnd()) {
         game.undo();
         updateHeaderBar();
         updateScoreBox(game.getScore());
@@ -262,13 +278,13 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         history_scroll.deleteLastContent();
 
     }
-    else if (event_respond == "Redo" && game_playable) {
+    else if (event_respond == "Redo" && game_playable && !game.isGameEnd()) {
         game.redo();
         updateHeaderBar();
         updateScoreBox(game.getScore());
         updateHistoryScroll();
     }
-    else if (event_respond == "Pass" && game_playable) {
+    else if (event_respond == "Pass" && game_playable && !game.isGameEnd()) {
         game.pass();
         updateHeaderBar();
         updateScoreBox(game.getScore());
@@ -342,7 +358,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             header_bar.updateBoxColor(sf::Color::Black);
             header_bar.updateTextColor(sf::Color::White);
         }
-        else {
+        else { // Surely this won't happen but leaving it here cost nothing :D
             header_bar.updateStr("DRAW");
             header_bar.updateBoxColor(sf::Color::Magenta);
             header_bar.updateTextColor(sf::Color::Black);
@@ -359,6 +375,9 @@ void InGame::draw() {
     ui_cfg.window.draw(control_panel);
     ui_cfg.window.draw(history_panel);
     ui_cfg.window.draw(footer_bar);
+
+    ui_cfg.window.draw(black_stone_image);
+    ui_cfg.window.draw(white_stone_image);
 
     sound_button.draw(ui_cfg.window);
     music_button.draw(ui_cfg.window);
@@ -495,6 +514,15 @@ void InGame::score_bar_resize(const float &_height) {
     black_score_box.updateBoxPos({ pass_button.getPos().x, header_bar.getPos().y - status_bar_size_y/2.f + _box_size.y/2.f});
     white_score_box.updateBoxSize(_box_size);
     white_score_box.updateBoxPos({ pass_button.getPos().x, black_score_box.getPos().y + _margin + _box_size.y});
+
+    float _size = _margin;
+    updateSpriteSize(white_stone_image, _size);
+    white_stone_image.setOrigin(white_stone_image.getLocalBounds().getCenter());
+    white_stone_image.setPosition({ black_score_box.getPos().x, white_score_box.getPos().y + _box_size.y / 2.f + _size/2.f });
+
+    updateSpriteSize(black_stone_image, _size);
+    black_stone_image.setOrigin(black_stone_image.getLocalBounds().getCenter());
+    black_stone_image.setPosition({ black_score_box.getPos().x, black_score_box.getPos().y + _box_size.y / 2.f + _size/2.f });
 
     float _box_text_size = std::min(black_score_box.getTextSizeFit(0.9f), white_score_box.getTextSizeFit(0.9f));
     black_score_box.updateTextSize(_box_text_size);

@@ -164,6 +164,7 @@ void BoardUI::updateRadiusSprite(sf::Sprite& _sprite, const float& _size) {
 }
 
 void BoardUI::updateBoardUI(const std::string& _design, const AssetManager &asset_manager) {
+    board.setTexture(nullptr);
     if (_design == "White color") {
         text_color = line_color = sf::Color(0, 0, 0, 200);
         board.setFillColor(sf::Color(255,255,255));
@@ -184,6 +185,11 @@ void BoardUI::updateBoardUI(const std::string& _design, const AssetManager &asse
         text_color = line_color = sf::Color(0, 0, 0, 200);
         board.setFillColor(sf::Color(255, 255, 200));
 	}
+    else {
+        text_color = line_color = sf::Color(0, 0, 0, 200);
+        board.setFillColor(sf::Color(255, 255, 255, 255));
+        board.setTexture(&asset_manager.getTexture(_design));
+    }
 }
 
 void BoardUI::updateStoneUI(const std::string& _design, const AssetManager &asset_manager) {

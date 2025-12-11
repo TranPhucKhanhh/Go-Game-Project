@@ -36,6 +36,7 @@ private:
     TextBox white_score_box;
     TextBox black_score_box;
     TextBox mode_box;
+    sf::Sprite white_stone_image, black_stone_image;
 
     TextInputNotification save_file_input;
 	BaseNotification error_notification;
