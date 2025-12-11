@@ -22,7 +22,7 @@ static std::string convert_to_string(const float& num) {
 
 InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) : 
     asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
-    header_bar(_asset_manager.getFont("Roboto-Slab-Bold")),
+    header_bar(_asset_manager.getFont("RobotoSlab-Bold")),
     undo_button("Undo", _asset_manager.getFont("StackSansNotch-Regular")),
     redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular")), 
     pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular")),

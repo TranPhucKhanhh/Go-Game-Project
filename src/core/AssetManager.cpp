@@ -46,3 +46,47 @@ const sf::Texture& AssetManager::getTexture(const std::string& name) const {
 std::string AssetManager::getMusicPath(const std::string& name) const {
 	return musics.at(name);
 }
+
+void AssetManager::loadFontFromFolder(const std::string& _folder) {
+	std::string path = std::string(ASSET_DIR) + "/" + _folder;
+	if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path)) {
+		std::cerr << "Error: Folder '" << path << "' does not exist or is not a directory." << std::endl;
+		return;
+	}	
+
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()) {
+			std::string file_path = "/" + _folder + "/" + entry.path().filename().string();
+			AssetManager::loadFont(entry.path().filename().stem().string(), file_path);
+		}
+	}
+}
+
+void AssetManager::loadTextureFromFolder(const std::string &_folder) {
+	std::string path = std::string(ASSET_DIR) + "/" + _folder;
+	if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path)) {
+		std::cerr << "Error: Folder '" << path << "' does not exist or is not a directory." << std::endl;
+		return;
+	}
+
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()) {
+			std::string file_path = "/" + _folder + "/" + entry.path().filename().string();
+			AssetManager::loadTexture(entry.path().filename().stem().string(), file_path);
+		}
+	}
+}
+void AssetManager::loadMusicFromFolder(const std::string& _folder) {
+	std::string path = std::string(ASSET_DIR) + "/" + _folder;
+	if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path)) {
+		std::cerr << "Error: Folder '" << path << "' does not exist or is not a directory." << std::endl;
+		return;
+	}
+
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()) {
+			std::string file_path = "/" + _folder + "/"  + entry.path().filename().string();
+			AssetManager::loadMusic(entry.path().filename().stem().string(), file_path);
+		}
+	}
+}

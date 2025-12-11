@@ -11,6 +11,10 @@ public:
 	const sf::Font& getFont(const std::string& name) const;
 	const sf::Texture& getTexture(const std::string& name) const;
 	std::string getMusicPath(const std::string& name) const;
+
+	void loadFontFromFolder(const std::string& _folder);
+	void loadTextureFromFolder(const std::string& _folder);
+	void loadMusicFromFolder(const std::string& _folder);
 private:
 	std::unordered_map<std::string, sf::Font> fonts;
 	std::unordered_map<std::string, sf::Texture> textures;

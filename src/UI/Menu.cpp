@@ -9,7 +9,7 @@
 
 Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
     : asset_manager(_asset_manager), ui_cfg(ui_cfg),
-    start_button("START", _asset_manager.getFont("Roboto-Slab-Bold")), setting_button("SETTING", _asset_manager.getFont("Roboto-Slab-Bold")),
+    start_button("START", _asset_manager.getFont("RobotoSlab-Bold")), setting_button("SETTING", _asset_manager.getFont("RobotoSlab-Bold")),
     title(_asset_manager.getFont("Momo"), "Go Game") {
 
     title.setFillColor(sf::Color(0, 0, 0));
