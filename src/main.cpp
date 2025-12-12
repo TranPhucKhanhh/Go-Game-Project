@@ -24,6 +24,7 @@ int main()
     asset_manager.loadTextureFromFolder("stone");
     asset_manager.loadTextureFromFolder("component-texture");
     asset_manager.loadMusicFromFolder("music");
+    asset_manager.loadSoundFromFolder("sound-effect");
 
 	std::cerr << "Load all assets successfully." << std::endl;
 

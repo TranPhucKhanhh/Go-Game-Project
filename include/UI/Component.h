@@ -9,8 +9,8 @@
 class BaseButton {
 public:
 
-	// Color for button
-	BaseButton() = default;
+	BaseButton(UICfg& _ui_cfg) :  ui_cfg(_ui_cfg) {
+	}
 
 	// Return value
 	const sf::Vector2f getPos() const { return position; };
@@ -58,10 +58,13 @@ protected:
 	bool mouse_hold = false;
 
 	sf::Color button_color = { 100, 100, 200 };
+
+	UICfg &ui_cfg;
 };
 
 class ThumbButton : public BaseButton {
 public:
+	using BaseButton::BaseButton;
 	void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) override;
 	void updateEffect() override;
 protected:
@@ -75,7 +78,7 @@ public:
 	sf::Color normal_text_color{ 255, 255, 255 };
 	sf::Color hover_text_color{ 255, 255, 255 };
 
-	TextButton(const std::string& str, const sf::Font& font);
+	TextButton(const std::string& str, const sf::Font& font, UICfg& _ui_cfg);
 
 	// Return value
 	float getTextSizeFit(const float _ratio);
@@ -90,9 +93,34 @@ public:
 	// draw
 	void draw(sf::RenderWindow& window) override;
 
-private:
+protected:
 	sf::Text text;
 	unsigned int text_size = 0;
+};
+
+class TextureEffectButton : public TextButton {
+public:
+	using TextButton::TextButton;
+
+	void updateTextEffectColor(const sf::Color& _c) { text_idle_color = text_hover_color = text_hold_color = _c;  }
+	void updateTextEffectColor(const sf::Color& _c, const sf::Color& _c2, const sf::Color& _c3) { text_idle_color = _c; text_hover_color = _c2; text_hold_color = _c3; };
+
+	void onIdle() override;
+	void onHover() override;
+	void onMouseHold() override;
+	void updateEffect() override;
+
+	void updateIdleTex(const sf::Texture& _t) {idle_tex = _t;}
+	void updateHoverTex(const sf::Texture& _t) { hover_tex = _t; }
+	void updateHoldTex(const sf::Texture& _t) { hold_tex = _t; }
+	void updateForceTex(const int &a) { force_tex = a; }
+
+	int getForceTex() const { return force_tex; }
+private:
+	sf::Texture idle_tex, hover_tex, hold_tex;
+	sf::Color text_idle_color, text_hover_color, text_hold_color;
+
+	int force_tex = 0;
 };
 
 class BoardUI {
@@ -202,7 +230,7 @@ public:
 	sf::Color slide_color = sf::Color({ 255, 255, 255 });
 	sf::Color fill_color = sf::Color({ 173, 240, 199 });
 
-	Slider(const AssetManager& asset_manager);
+	Slider(const AssetManager &asset_manger, UICfg& _ui_cfg);
 
 	// Return value
 	sf::Vector2f getSize() const { return size; };
@@ -232,7 +260,7 @@ private:
 
 class Scroll {
 public:
-	Scroll() = default;
+	Scroll(UICfg& _ui_cfg) : thumb(_ui_cfg) { thumb.updateColor({ 101,115,126 }); };
 
 	// Return value
 	const sf::Vector2f getPos() const { return position; };
@@ -249,6 +277,8 @@ public:
 	void clearContent() { content.clear(); index = 0; updateState(); };
 	void updatePreviewSize(const int& _preview_size) { preview_size = _preview_size; updateState(); };
 	void updateIndex(const int& _index) { index = _index; updateState(); };
+	void updateThumbTexture(const sf::Texture& _t) { thumb.updateTexture(_t); }
+	void updateThumbColor(const sf::Color& _c) { thumb.updateColor(_c); };
 	void deleteLastContent();
 	void updateState();
 
@@ -266,7 +296,7 @@ private:
 	int pre_index = 0;
 
 	sf::RectangleShape container, placeholder;
-	BaseButton thumb;
+	ThumbButton thumb;
 	std::vector<TextButton> content;
 };
 
@@ -296,7 +326,7 @@ public:
 
 
 	void clearSelection() { selection.clear(); };
-	void addSelection(const TextButton& button) { selection.push_back(button); updateState();  };
+	void addSelection(const TextureEffectButton& button) { selection.push_back(button); updateState();  };
 	
 	// Update state, draw and event handle
 	virtual void updateState();
@@ -305,7 +335,7 @@ public:
 protected:
 	sf::RectangleShape container, background;
 	TextBox title, notification;
-	std::vector<TextButton> selection;
+	std::vector<TextureEffectButton> selection;
 
 	sf::Vector2f size, position, _selection_size;
 	bool on_screen = false;

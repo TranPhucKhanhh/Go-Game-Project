@@ -72,10 +72,15 @@ void Scroll::updateState() {
 	placeholder.setFillColor(placeholder_color);
 
 	// update content position
+	float _tmp = 100.f;
 	for (int i = index; i < index + preview_size && i < content.size(); i++) {
 		content[i].updateSize({ size.x - thumb.getSize().x, size.y / preview_size});
 		content[i].updatePos({ position.x - size.x / 2.f + (content[i].getSize().x) / 2.f, position.y - size.y / 2 + (i - index) * content[i].getSize().y + content[i].getSize().y / 2.f });
-		content[i].updateTextSizeFit(0.9f);
+		_tmp = std::min(content[i].getTextSizeFit(0.9f), _tmp);
+	}
+
+	for (int i = index; i < index + preview_size && i < content.size(); i++) {
+		content[i].updateTextSize(_tmp);
 	}
 }
 

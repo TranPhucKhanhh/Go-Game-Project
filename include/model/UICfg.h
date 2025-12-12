@@ -32,9 +32,14 @@ struct UICfg {
     std::string music_name = "The-Spunky-Princess";
     std::string sound_effect_name = "";
     sf::Music music;
+    sf::Sound button_click_sound, button_hover_sound;
 
-    UICfg(sf::Vector2u _window_size, sf::Vector2u _min_window_size, sf::RenderWindow& _window) : 
-        window_size(_window_size), min_window_size(_min_window_size), window(_window) {
+    UICfg(sf::Vector2u _window_size, sf::Vector2u _min_window_size, sf::RenderWindow& _window, const AssetManager &asset_manager) : 
+        window_size(_window_size), min_window_size(_min_window_size), window(_window),
+        button_click_sound(asset_manager.getSound("click-a")),
+        button_hover_sound(asset_manager.getSound("tap-a")) {
+        music.setVolume(background_music_volume);
+        updateSoundEffectVolume(sound_effect_volume);
     }
 
     void updateMusic(const AssetManager& asset_manager) {
@@ -48,7 +53,8 @@ struct UICfg {
     }
 
     void updateSoundEffectVolume(float volume) {
-		std::cout << "Sound effect volume updated to: " << volume << std::endl;
+        button_click_sound.setVolume(volume);
+        button_hover_sound.setVolume(volume);
     }
 
     void updateSoundEffect(const AssetManager& asset_manager) {

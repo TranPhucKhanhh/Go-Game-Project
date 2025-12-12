@@ -6,7 +6,7 @@ static std::string slide_texture = "slide_horizontal_grey";
 static std::string fill_texture = "slide_horizontal_color";
 static std::string handle_texture = "slide_hangle";
 
-Slider::Slider(const AssetManager& asset_manager) {
+Slider::Slider(const AssetManager& asset_manager, UICfg& _ui_cfg) : handle(_ui_cfg) {
 	
 	handle.updateColor({255,255,255});
 	handle.updateTexture(asset_manager.getTexture(handle_texture));

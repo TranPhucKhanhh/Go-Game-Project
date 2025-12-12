@@ -28,19 +28,20 @@ private:
     const AssetManager& asset_manager;
 
     sf::RectangleShape canvas;
-    TextButton start_game_button, go_back_button;
+    TextureEffectButton start_game_button, go_back_button;
     
 	// New game panel components
-    TextButton new_game_panel;
+    TextureEffectButton new_game_panel;
     sf::Text game_mode_title;
-    TextButton pvp_mode_button, ai_easy_button, ai_medium_button, ai_hard_button;
+    TextureEffectButton pvp_mode_button, ai_easy_button, ai_medium_button, ai_hard_button;
     sf::Text choose_side_title;
-    TextButton black_side_button, white_side_button;
+    TextureEffectButton black_side_button, white_side_button;
     sf::Text choose_board_size_title;
-    TextButton board_size_9_button, board_size_13_button, board_size_19_button;
+    TextureEffectButton board_size_9_button, board_size_13_button, board_size_19_button;
 
     // Load game panel components
-    TextButton load_game_panel, refresh_button, delete_button;
+    TextureEffectButton load_game_panel;
+    TextureEffectButton refresh_button, delete_button;
     Scroll load_game_scroll;
     BoardUI board_preview;
 	TextBox board_preview_title;
@@ -48,13 +49,13 @@ private:
     bool board_preview_show;
 
 	// Setting panel components
-    TextButton setting_panel;
+    TextureEffectButton setting_panel;
     Scroll music_scroll, effect_scroll;
 	sf::Text music_scroll_title, effect_scroll_title, music_volume_title, sound_effect_volume_title;
     Slider background_music_slide, sound_effect_slide;
 
 	// Customize panel components
-    TextButton customize_panel;
+    TextureEffectButton customize_panel;
     sf::Text board_design_title, stone_design_title, design_preview_title;
 	Scroll board_design_scroll, stone_design_scroll;
 	BoardUI customize_board_preview;

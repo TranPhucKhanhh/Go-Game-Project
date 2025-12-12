@@ -9,44 +9,44 @@
 void GameOption::drawNewPanel() {
 	ui_cfg.window.draw(game_mode_title);
 
-	pvp_mode_button.updateOpacity(100);
-	ai_easy_button.updateOpacity(100);
-	ai_medium_button.updateOpacity(100);
-	ai_hard_button.updateOpacity(100);
-	white_side_button.updateOpacity(100);
-	black_side_button.updateOpacity(100);
-	board_size_9_button.updateOpacity(100);
-	board_size_13_button.updateOpacity(100);
-	board_size_19_button.updateOpacity(100);
+	pvp_mode_button.updateForceTex(0);
+	ai_easy_button.updateForceTex(0);
+	ai_medium_button.updateForceTex(0);
+	ai_hard_button.updateForceTex(0);
+	white_side_button.updateForceTex(0);
+	black_side_button.updateForceTex(0);
+	board_size_9_button.updateForceTex(0);
+	board_size_13_button.updateForceTex(0);
+	board_size_19_button.updateForceTex(0);
 
 	if (game_mode == GameMode::PvP) {
-		pvp_mode_button.updateOpacity(255);
+		pvp_mode_button.updateForceTex(2);
 	}
 	else if (game_mode == GameMode::AIEasy) {
-		ai_easy_button.updateOpacity(255);
+		ai_easy_button.updateForceTex(2);
 	}
 	else if (game_mode == GameMode::AIMedium) {
-		ai_medium_button.updateOpacity(255);
+		ai_medium_button.updateForceTex(2);
 	}
 	else if (game_mode == GameMode::AIHard) {
-		ai_hard_button.updateOpacity(255);
+		ai_hard_button.updateForceTex(2);
 	}
 
 	if (side_chosen == CellState::White) {
-		white_side_button.updateOpacity(255);
+		white_side_button.updateForceTex(2);
 	}
 	else  {
-		black_side_button.updateOpacity(255);
+		black_side_button.updateForceTex(2);
 	}
 
 	if (board_size_chosen == 9) {
-		board_size_9_button.updateOpacity(255);
+		board_size_9_button.updateForceTex(2);
 	}
 	else if (board_size_chosen == 13) {
-		board_size_13_button.updateOpacity(255);
+		board_size_13_button.updateForceTex(2);
 	}
 	else if (board_size_chosen == 19) {
-		board_size_19_button.updateOpacity(255);
+		board_size_19_button.updateForceTex(2);
 	}
 
 

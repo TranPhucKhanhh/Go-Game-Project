@@ -30,8 +30,8 @@ private:
     TextBox header_bar;
 
     BaseButton sound_button, music_button;
-    TextButton new_button, save_button, reset_button, setting_button;
-    TextButton undo_button, redo_button, pass_button, resign_button, out_his_button;
+    TextureEffectButton new_button, save_button, reset_button, setting_button;
+    TextureEffectButton undo_button, redo_button, pass_button, resign_button, out_his_button;
 
     TextBox white_score_box;
     TextBox black_score_box;

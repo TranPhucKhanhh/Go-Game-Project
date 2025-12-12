@@ -83,8 +83,9 @@ void GameOption::loadGameFile() {
 	std::vector<std::string> save_files = game.loadAllSaveGameName();
 	load_game_scroll.clearContent();
 	for (int i = 0; i < save_files.size(); i++) {
-		TextButton _tmp(save_files[i], asset_manager.getFont("StackSansNotch-Regular"));
+		TextButton _tmp(save_files[i], asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
 		_tmp.updateRespondStr('-' + save_files[i]);
+		_tmp.updateColor({ 91, 164, 252 });
 		load_game_scroll.updateContent(_tmp);
 	}
 	load_game_scroll.updateIndex(0);

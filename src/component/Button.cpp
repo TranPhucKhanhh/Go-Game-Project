@@ -8,6 +8,9 @@ void BaseButton::checkHover(const sf::Vector2i& mouse_pos) {
 	sf::FloatRect shape_bound = button.getGlobalBounds();
 
 	if (shape_bound.contains((sf::Vector2f)mouse_pos)) {
+		if (hovered == false) {
+			ui_cfg.button_hover_sound.play();
+		}
 		hovered = true;
 	}
 	else {
@@ -58,8 +61,8 @@ void BaseButton::updateState() {
 	button.setPosition(position);
 }
 
-void BaseButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
-	checkHover(ui_cfg.mouse_pos);
+void BaseButton::eventHandle(const sf::Event& event, const UICfg& _ui_cfg, std::string& respond) {
+	checkHover(_ui_cfg.mouse_pos);
 	if (const auto* button = event.getIf<sf::Event::MouseButtonPressed>()) {
 		if (button->button == sf::Mouse::Button::Left)
 			mouse_hold = true;
@@ -67,6 +70,7 @@ void BaseButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::s
 	else if (event.is<sf::Event::MouseButtonReleased>()) {
 		if (hovered && mouse_hold) {
 			respond = on_click_respond;
+			ui_cfg.button_click_sound.play();
 		}
 		mouse_hold = false;
 	}
@@ -97,6 +101,36 @@ void ThumbButton::updateEffect() {
 	}
 }
 
+// TextureEffectButton function definition
+
+void TextureEffectButton::onIdle() {
+	button.setTexture(&idle_tex);
+	text.setFillColor(text_idle_color);
+}
+
+void TextureEffectButton::onHover() {
+	button.setTexture(&hover_tex);
+	text.setFillColor(text_hover_color);
+}
+
+void TextureEffectButton::onMouseHold() {
+	button.setTexture(&hold_tex);
+	text.setFillColor(text_hold_color);
+}
+
+void TextureEffectButton::updateEffect() {
+	if ((mouse_hold && hovered) || force_tex == 2) {
+		onMouseHold();
+	}
+
+	else if (hovered || force_tex == 1) {
+		onHover();
+	}
+	else {
+		onIdle();
+	}
+}
+
 // TextButton function definition
 
 void TextButton::updateTextSizeFit(const float _ratio) {
@@ -117,8 +151,10 @@ float TextButton::getTextSizeFit(const float _ratio) {
 	return ratio;
 }
 
-TextButton::TextButton(const std::string& str, const sf::Font& font) :
-	text(font, str) {
+TextButton::TextButton(const std::string& str, const sf::Font& font, UICfg& _ui_cfg)
+	: BaseButton(_ui_cfg)
+	, text(font, str) {
+
 }
 
 void TextButton::draw(sf::RenderWindow& window) {

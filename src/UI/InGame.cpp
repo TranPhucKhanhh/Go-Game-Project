@@ -37,15 +37,17 @@ static std::string convert_to_string(const float& num) {
 InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) : 
     asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
     header_bar(_asset_manager.getFont("RobotoSlab-Bold")),
-    undo_button("Undo", _asset_manager.getFont("StackSansNotch-Regular")),
-    redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular")), 
-    pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular")),
-    new_button("New Game", _asset_manager.getFont("StackSansNotch-Regular")),
-    reset_button("Reset Game", _asset_manager.getFont("StackSansNotch-Regular")),
-    resign_button("Resign", _asset_manager.getFont("StackSansNotch-Regular")),
-    out_his_button("Close history", _asset_manager.getFont("StackSansNotch-Regular")),
-    save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular")),
-    setting_button("Setting", _asset_manager.getFont("StackSansNotch-Regular")),
+    undo_button("Undo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    new_button("New Game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    reset_button("Reset Game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    resign_button("Resign", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    out_his_button("Close history", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    setting_button("Setting", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    sound_button(ui_cfg),
+    music_button(ui_cfg),
     white_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     black_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
@@ -54,7 +56,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     mode_box(_asset_manager.getFont("StackSansNotch-Regular")),
     board(_asset_manager),
     white_stone_image(_asset_manager.getTexture("dummy")),
-    black_stone_image(_asset_manager.getTexture("dummy")) {
+    black_stone_image(_asset_manager.getTexture("dummy")),
+    history_scroll(ui_cfg)
+{
    
     // Set the respond message for each button
 	undo_button.updateRespondStr("Undo");
@@ -85,25 +89,35 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     save_file_input.updateTitleStr("Save game file");
     save_file_input.updateNotificationStr("Input file name (max 20 words):");
     save_file_input.updateMaxInputLength(20);
-    TextButton _cancel("Cancel", _asset_manager.getFont("StackSansNotch-Regular"));
+    TextureEffectButton _cancel("Cancel", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
     _cancel.updateRespondStr("CloseNoti");
-    TextButton _save("Save", _asset_manager.getFont("StackSansNotch-Regular"));
+    _cancel.updateTextEffectColor(sf::Color::White);
+    _cancel.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_gradient-red"));
+    _cancel.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gloss-red"));
+    _cancel.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_flat-red"));
+    TextureEffectButton _save("Save", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
     _save.updateRespondStr("SaveCurrentGame");
+    _save.updateTextEffectColor(sf::Color::White);
+    _save.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_gradient-green"));
+    _save.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gloss-green"));
+    _save.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_flat-green"));
+    
     save_file_input.addSelection(_cancel);
     save_file_input.addSelection(_save);
 
     error_notification.updateTitleStr("ERROR");
     error_notification.container_color = sf::Color(255, 92, 92);
-    TextButton _close("Close", _asset_manager.getFont("StackSansNotch-Regular"));
-    _close.updateRespondStr("CloseNoti");
-    error_notification.addSelection(_close);
+    _cancel.updateStr("Close");
+    error_notification.addSelection(_cancel);
 
     win_notification.container_color = sf::Color(170, 255, 0);
-    TextButton _close2("Close", _asset_manager.getFont("StackSansNotch-Regular"));
-    TextButton _new("New Game", _asset_manager.getFont("StackSansNotch-Regular"));
-    _close2.updateRespondStr("CloseNoti");
+    TextureEffectButton _new("New Game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
     _new.updateRespondStr("New");
-    win_notification.addSelection(_close2);
+    _new.updateTextEffectColor(sf::Color::White);
+    _new.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_gradient-green"));
+    _new.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gloss-green"));
+    _new.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_flat-green"));
+    win_notification.addSelection(_cancel);
     win_notification.addSelection(_new);
 
 	// initialize the history
@@ -111,6 +125,52 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 
     // update the random
     std::srand(std::time(0));
+
+    // Update button effect
+    undo_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    undo_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    undo_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    undo_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    redo_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    redo_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    redo_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    redo_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    pass_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    pass_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    pass_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    pass_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    new_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    new_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    new_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    new_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    reset_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    reset_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    reset_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    reset_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    resign_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    resign_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    resign_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    resign_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    out_his_button.updateTextEffectColor(sf::Color::Black);
+    out_his_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_border-yellow"));
+    out_his_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_flat-yellow"));
+    out_his_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss-yellow"));
+
+    save_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    save_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    save_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    save_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    setting_button.updateTextEffectColor(sf::Color::Black);
+    setting_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    setting_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    setting_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
 }
 
 void InGame::enter() {
@@ -139,8 +199,9 @@ void InGame::enter() {
 	std::vector<std::string> _move_list = game.getMoveList();
 	for (size_t i = 0; i < _move_list.size(); i++) {
 		std::string _str = std::to_string(i + 1) + ". " + _move_list[i];
-        TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
+        TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
 		_move_btn.updateRespondStr("|" + std::to_string(i + 1));
+        _move_btn.updateColor({ 91, 164, 252 });
 		history_scroll.updateContent(_move_btn);
 	}
     history_scroll.updateIndex(std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize())); // Set the current index to the last move
@@ -215,8 +276,9 @@ void InGame::updateHistoryScroll() {
     if (history_scroll.getIndex() < std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize()))
         history_scroll.updateIndex(history_scroll.getIndex() + 1);
     std::string _str = std::to_string(game.getMoveListSize()) + ". " + game.getLastMove();
-    TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"));
+    TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
     _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize()));
+    _move_btn.updateColor({ 91, 164, 252 });
     history_scroll.updateContent(_move_btn);
 }
 
@@ -484,7 +546,7 @@ void InGame::option_panel_resize(const float& _height) {
     float _inner_button_padding = _button_padding / 1.5f;
 
     option_panel.setSize({ side_panel_size_x, _height });
-    option_panel.setFillColor(sf::Color(242, 176, 109));
+    option_panel.setFillColor(sf::Color::Transparent);
     option_panel.setOrigin(option_panel.getLocalBounds().getCenter());
     option_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
         mode_panel.getPosition().y + mode_panel.getSize().y / 2.f + option_panel.getSize().y / 2.f + inner_padding });

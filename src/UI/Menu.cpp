@@ -9,15 +9,24 @@
 
 Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
     : asset_manager(_asset_manager), ui_cfg(ui_cfg),
-    start_button("START", _asset_manager.getFont("RobotoSlab-Bold")), setting_button("SETTING", _asset_manager.getFont("RobotoSlab-Bold")),
+    start_button("START", _asset_manager.getFont("RobotoSlab-Bold"), ui_cfg), setting_button("SETTING", _asset_manager.getFont("RobotoSlab-Bold"), ui_cfg),
     title(_asset_manager.getFont("Momo"), "Go Game") {
 
     title.setFillColor(sf::Color(0, 0, 0));
 
     start_button.updateRespondStr("Start");
     start_button.updateTextSize(50);
+    start_button.updateTextEffectColor(sf::Color::Black, sf::Color::White, sf::Color::White);
+    start_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_border"));
+    start_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gradient"));
+    start_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+    
     setting_button.updateRespondStr("Setting");
     setting_button.updateTextSize(50);
+    setting_button.updateTextEffectColor(sf::Color::Black, sf::Color::White, sf::Color::White);
+    setting_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_border"));
+    setting_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gradient"));
+    setting_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
     
     resize();
 	
@@ -67,9 +76,11 @@ void Menu::resize() {
 
     start_button.updateSize(button_size);
     start_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
+    start_button.updateTextSizeFit(0.9f);
 
     setting_button.updateSize(button_size);
     setting_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f) });
+    setting_button.updateTextSizeFit(0.9f);
 
     title.setCharacterSize(std::min(ui_cfg.window_size.x, ui_cfg.window_size.y) / 7);
 

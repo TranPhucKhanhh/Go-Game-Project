@@ -19,7 +19,7 @@ public:
 
     void draw();
 private:
-	TextButton start_button, setting_button;
+	TextureEffectButton start_button, setting_button;
     sf::Text title;
 
     UICfg& ui_cfg;
