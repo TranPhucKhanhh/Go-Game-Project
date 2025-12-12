@@ -60,7 +60,7 @@ void UI::switchGameState(const std::string &respond) {
 
 void UI::run() {
     sf::View uiView(sf::FloatRect( { 0.f, 0.f }, (sf::Vector2f) window.getSize()));
-	ui_cfg.updateMusic(asset_manager.getMusicPath("The-Spunky-Princess"));
+	ui_cfg.updateMusic(asset_manager);
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())

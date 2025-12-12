@@ -61,6 +61,7 @@ public:
 	Board getExampleBoard(); // example_board use for previewing the design
 	int getBoardSize() const { return game_config.board_size; }
 	std::vector<std::string> getMoveList() { return history.getFullMove(game_config.board_size); }
+	CellState getResignPlayer() const { return resigned_player; }
 
 	bool isGameEnd() const { return game_end; }
 
@@ -81,6 +82,8 @@ private:
 	Board previewBoard, example_board; 
 
 	CellState resigned_player = CellState::Empty;
+
+	std::string last_game_state = "";
 
 	bool game_end;
 };

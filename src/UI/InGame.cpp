@@ -7,6 +7,10 @@
 #include<algorithm>
 #include<iostream>
 #include<cmath>
+#include <cstdlib>
+#include <ctime>
+
+static const std::string win_mess[] = {"Winner winner chicken dinner", "Your the Champion!", "We've got a WINNER!!", "EZ Game Amirite?"};
 
 static void updateSpriteSize(sf::Sprite& _sprite, const float& _size) {
     _sprite.setScale({ 1.f, 1.f });
@@ -46,6 +50,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     black_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
     error_notification(_asset_manager.getFont("StackSansNotch-Regular")),
+    win_notification(_asset_manager.getFont("StackSansNotch-Regular")),
     mode_box(_asset_manager.getFont("StackSansNotch-Regular")),
     board(_asset_manager),
     white_stone_image(_asset_manager.getTexture("dummy")),
@@ -93,8 +98,19 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     _close.updateRespondStr("CloseNoti");
     error_notification.addSelection(_close);
 
+    win_notification.container_color = sf::Color(170, 255, 0);
+    TextButton _close2("Close", _asset_manager.getFont("StackSansNotch-Regular"));
+    TextButton _new("New Game", _asset_manager.getFont("StackSansNotch-Regular"));
+    _close2.updateRespondStr("CloseNoti");
+    _new.updateRespondStr("New");
+    win_notification.addSelection(_close2);
+    win_notification.addSelection(_new);
+
 	// initialize the history
     history_scroll.updatePreviewSize(7);
+
+    // update the random
+    std::srand(std::time(0));
 }
 
 void InGame::enter() {
@@ -108,12 +124,12 @@ void InGame::enter() {
     black_stone_image.setTexture(asset_manager.getTexture("black-stone-" + ui_cfg.stone_design), true);
 
     // Run first time preventing bug
-    sf::Event _d = sf::Event::Closed{};
-    std::string _dt = "Test";
-    eventHandle(_d, _dt);
+    updateEventHandle();
     
     save_file_input.updateOnScreen(false);
-    game_playable = true;
+    error_notification.updateOnScreen(false);
+    win_notification.updateOnScreen(false);
+    if (!game.isGameEnd()) game_playable = true;
 	
     // update sound and music button
     updateSoundMusic();
@@ -154,17 +170,34 @@ void InGame::updateSoundMusic() {
 }
 
 void InGame::updateHeaderBar() {
-    if (game_playable) {
-        if (game.getCurrentPlayer() == CellState::White) {
-            header_bar.updateStr("WHITE TO MOVE");
+    if (game.isGameEnd()) {
+        std::pair<float, float> _score = game.getScore();
+
+        if (_score.first < _score.second) {
+            header_bar.updateStr("WHITE WINS");
             header_bar.updateBoxColor(sf::Color::White);
             header_bar.updateTextColor(sf::Color::Black);
         }
-        else {
-            header_bar.updateStr("BLACK TO MOVE");
+        else if (_score.first > _score.second) {
+            header_bar.updateStr("BLACK WINS");
             header_bar.updateBoxColor(sf::Color::Black);
             header_bar.updateTextColor(sf::Color::White);
         }
+        else { // Surely this won't happen but leaving it here cost nothing :D
+            header_bar.updateStr("DRAW");
+            header_bar.updateBoxColor(sf::Color::Magenta);
+            header_bar.updateTextColor(sf::Color::Black);
+        }
+    }
+    else if (game.getCurrentPlayer() == CellState::White) {
+        header_bar.updateStr("WHITE TO MOVE");
+        header_bar.updateBoxColor(sf::Color::White);
+        header_bar.updateTextColor(sf::Color::Black);
+    }
+    else {
+        header_bar.updateStr("BLACK TO MOVE");
+        header_bar.updateBoxColor(sf::Color::Black);
+        header_bar.updateTextColor(sf::Color::White);
     }
 }
 
@@ -210,6 +243,14 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             else {
 				save_file_input.updateOnScreen(false);
             }
+        }
+        return;
+    }
+
+    if (win_notification.onScreen()) {
+        win_notification.eventHandle(event, ui_cfg, event_respond);
+        if (event_respond == "New") {
+            respond = "GameNewOption";
         }
         return;
     }
@@ -263,7 +304,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             return;
         }
         else {
-            game_playable = true;
+            if (!game.isGameEnd()) game_playable = true;
             history_preview_index = -1;
             updateHeaderBar();
             updateScoreBox(game.getScore());
@@ -301,7 +342,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     else if (event_respond == "New") {
         respond = "GameNewOption";
     }
-    else if (event_respond == "Save" && game_playable) {
+    else if (event_respond == "Save" && game_playable && !game.isGameEnd()) {
         save_file_input.clearStr();
         save_file_input.updateOnScreen(true);
 	}
@@ -309,10 +350,13 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         respond = "OpenSetting";
     }
     else if (event_respond == "Close History") {
-        game_playable = true;
+        if (!game.isGameEnd()) game_playable = true;
         history_preview_index = -1;
         updateHeaderBar();
         updateScoreBox(game.getScore());
+    }
+    else if (event_respond == "Resign") {
+        game.resign();
     }
     else if (event_respond == "Toggle Music") {
         if (ui_cfg.pre_background_music_volume == 0 && ui_cfg.background_music_volume == 0) {
@@ -346,22 +390,28 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     if (game.isGameEnd() && game_playable) {
         game_playable = false;
 
-        std::pair<float, float> _score = game.getScore();
-        
-        if (_score.first < _score.second) {
-            header_bar.updateStr("WHITE WINS");
-            header_bar.updateBoxColor(sf::Color::White);
-            header_bar.updateTextColor(sf::Color::Black);
+        updateHeaderBar();
+
+        int random_num = (std::rand() % std::size(win_mess));
+        win_notification.updateOnScreen(true);
+        win_notification.updateTitleStr(win_mess[random_num]);
+        if (game.getResignPlayer() == CellState::White) {
+            win_notification.updateNotificationStr("Black wins - White resigned");
         }
-        else if (_score.first > _score.second) {
-            header_bar.updateStr("BLACK WINS");
-            header_bar.updateBoxColor(sf::Color::Black);
-            header_bar.updateTextColor(sf::Color::White);
+        else if (game.getResignPlayer() == CellState::Black) {
+            win_notification.updateNotificationStr("White wins - Black resigned");
         }
-        else { // Surely this won't happen but leaving it here cost nothing :D
-            header_bar.updateStr("DRAW");
-            header_bar.updateBoxColor(sf::Color::Magenta);
-            header_bar.updateTextColor(sf::Color::Black);
+        else {
+            std::pair<float, float> _score = game.getScore();
+            if (_score.first < _score.second) {
+                win_notification.updateNotificationStr("White wins by " + convert_to_string(_score.second- _score.first) + " points");
+            }
+            else if (_score.first > _score.second) {
+                win_notification.updateNotificationStr("Black wins by " + convert_to_string(_score.first - _score.second ) + " points");
+            }
+            else {
+                win_notification.updateNotificationStr("The creator of this game");
+            }
         }
     }
 }
@@ -411,6 +461,10 @@ void InGame::draw() {
     if (error_notification.onScreen()) {
         error_notification.draw(ui_cfg.window);
 	}
+
+    if (win_notification.onScreen()) {
+        win_notification.draw(ui_cfg.window);
+    }
 }
 
 void InGame::mode_panel_resize(const float& _height) {
@@ -576,4 +630,7 @@ void InGame::resize() {
 
     error_notification.updateSize(_noti_size);
     error_notification.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
+
+    win_notification.updateSize(_noti_size);
+    win_notification.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
 }

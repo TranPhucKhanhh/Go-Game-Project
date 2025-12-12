@@ -33,8 +33,11 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 
 	setting_panel("Setting", asset_manager.getFont("StackSansNotch-Regular")),
 	music_scroll_title(asset_manager.getFont("Momo"), "Choose your music: " + ui_cfg.music_name),
+	effect_scroll_title(asset_manager.getFont("Momo"), "In-game sound effect: " + ui_cfg.sound_effect_name),
 	music_volume_title(asset_manager.getFont("Momo"), "Music Volume: " + std::to_string((int)ui_cfg.background_music_volume) + "%"),
 	sound_effect_volume_title(asset_manager.getFont("Momo"), "Sound effect Volume: " + std::to_string((int)ui_cfg.sound_effect_volume) + "%"),
+	background_music_slide(_asset_manager),
+	sound_effect_slide(_asset_manager),
 
 	customize_panel("Customization", asset_manager.getFont("StackSansNotch-Regular")),
 	customize_board_preview(_asset_manager),
@@ -79,6 +82,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_preview_title.updateTextColor(sf::Color::Black);
 
 	music_scroll_title.setFillColor(sf::Color::Black);
+	effect_scroll_title.setFillColor(sf::Color::Black);
 	music_volume_title.setFillColor(sf::Color::Black);
 	sound_effect_volume_title.setFillColor(sf::Color::Black);
 
@@ -96,11 +100,19 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	loadGameFile();
 	background_music_slide.value = ui_cfg.background_music_volume;
 	sound_effect_slide.value = ui_cfg.sound_effect_volume;
+	
 	music_scroll.updatePreviewSize(5);
-	TextButton _music1("Puzzle-Dreams", asset_manager.getFont("StackSansNotch-Regular")); _music1.updateRespondStr("~Puzzle-Dreams");
-	TextButton _music2("The-Spunky-Princess", asset_manager.getFont("StackSansNotch-Regular")); _music2.updateRespondStr("~The-Spunky-Princess");
-	music_scroll.updateContent(_music1);
-	music_scroll.updateContent(_music2);
+	for (int i = 0; i < std::size(Music); i++) {
+		TextButton _music1(Music[i], asset_manager.getFont("StackSansNotch-Regular")); 
+		_music1.updateRespondStr("~" + Music[i]);
+		music_scroll.updateContent(_music1);
+	}
+	effect_scroll.updatePreviewSize(5);
+	for (int i = 0; i < std::size(SoundEffect); i++) {
+		TextButton _effect(SoundEffect[i], asset_manager.getFont("StackSansNotch-Regular"));
+		_effect.updateRespondStr("`" + SoundEffect[i]);
+		effect_scroll.updateContent(_effect);
+	}
 	
 	customize_board_preview.updateCellNumber(13);
 	board_design_scroll.updatePreviewSize(4);
@@ -138,12 +150,11 @@ void GameOption::enter() {
 	game_mode = GameMode::PvP;
 	side_chosen = CellState::Black;
 	board_size_chosen = 19;
-	sf::Event _d = sf::Event::Closed{};
-	std::string _dt = "Test";
-	eventHandle(_d, _dt);
+	updateEventHandle();
 	board_design_chosen = ui_cfg.board_design; 
 	stone_design_chosen = ui_cfg.stone_design;
 	music_scroll.updateIndex(0);
+	effect_scroll.updateIndex(0);
 	board_design_scroll.updateIndex(0);
 	stone_design_scroll.updateIndex(0);
 	updateLoadNewButton();

@@ -33,17 +33,17 @@ void BaseButton::onIdle() {
 
 void BaseButton::onHover() {
 	sf::Color _tmp = button_color;
-	_tmp.r *= 0.5;
-	_tmp.b *= 0.5;
-	_tmp.g *= 0.5;
+	_tmp.r *= 0.7;
+	_tmp.b *= 0.7;
+	_tmp.g *= 0.7;
 	button.setFillColor(_tmp);
 }
 
 void BaseButton::onMouseHold() {
 	sf::Color _tmp = button_color;
-	_tmp.r *= 0.2;
-	_tmp.b *= 0.2;
-	_tmp.g *= 0.2;
+	_tmp.r *= 0.5;
+	_tmp.b *= 0.5;
+	_tmp.g *= 0.5;
 	button.setFillColor(_tmp);
 }
 
@@ -69,6 +69,31 @@ void BaseButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::s
 			respond = on_click_respond;
 		}
 		mouse_hold = false;
+	}
+}
+
+// Thumbutton function definition
+void ThumbButton::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
+	checkHover(ui_cfg.mouse_pos);
+	if (const auto* button = event.getIf<sf::Event::MouseButtonPressed>()) {
+		if (button->button == sf::Mouse::Button::Left ) 
+			if (hovered) on_hold = mouse_hold = true;
+	}
+	else if (event.is<sf::Event::MouseButtonReleased>()) {
+		on_hold = false;
+		mouse_hold = false;
+	}
+}
+
+void ThumbButton::updateEffect() {
+	if (on_hold) {
+		onMouseHold();
+	}
+	else if (hovered) {
+		onHover();
+	}
+	else {
+		onIdle();
 	}
 }
 

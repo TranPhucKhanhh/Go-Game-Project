@@ -12,6 +12,7 @@ using json = nlohmann::json;
 void Game::start() {
 	//Init first state with board_size size, black to move
 	state.initializer(game_config.board_size);
+	resigned_player = CellState::Empty;
 	game_end = false;
 	std::cout << "Game initializer\n";
 }
@@ -35,6 +36,7 @@ void Game::redo() {
 void Game::reset() {
 	//Init same as the start of the game
 	state.initializer(game_config.board_size);
+	resigned_player = CellState::Empty;
 	//Clear all undo, redo, and board history
 	history.clear();   
 	game_end = false;

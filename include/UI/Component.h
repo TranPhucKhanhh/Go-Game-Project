@@ -33,7 +33,7 @@ public:
 	// Event check and update
 	void checkHover(const sf::Vector2i& mouse_pos);
 
-	void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond);
+	virtual void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond);
 	virtual void updateState();
 	virtual void updateEffect();
 
@@ -59,6 +59,15 @@ protected:
 
 	sf::Color button_color = { 100, 100, 200 };
 };
+
+class ThumbButton : public BaseButton {
+public:
+	void eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) override;
+	void updateEffect() override;
+protected:
+	bool on_hold = false;
+};
+
 
 class TextButton : public BaseButton {
 public:
@@ -193,7 +202,7 @@ public:
 	sf::Color slide_color = sf::Color({ 255, 255, 255 });
 	sf::Color fill_color = sf::Color({ 173, 240, 199 });
 
-	Slider() = default;
+	Slider(const AssetManager& asset_manager);
 
 	// Return value
 	sf::Vector2f getSize() const { return size; };
@@ -205,23 +214,20 @@ public:
 
 	void updateState();
 
-	void updateEffect();
-
 	void eventHandle(const sf::Event& event, const UICfg& ui_cfg);
 
 	void draw(sf::RenderWindow& window);
 private:
-	sf::RectangleShape slide;
-	sf::RectangleShape fill;
-	sf::CircleShape handle;
+	sf::RectangleShape slide, fill;
+	ThumbButton handle;
 
 	sf::Vector2i mouse_last_pos = { -1,-1 };
 	sf::Vector2f position = { 0,0 }, size = { 0,0 };
+	sf::Vector2u tex_size = { 0,0 };
 
 	float pre_value = 0;
 
 	bool hold = false;
-	bool hover = false;
 };
 
 class Scroll {

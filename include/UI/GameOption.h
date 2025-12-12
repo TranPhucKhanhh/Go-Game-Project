@@ -49,8 +49,8 @@ private:
 
 	// Setting panel components
     TextButton setting_panel;
-    Scroll music_scroll;
-	sf::Text music_scroll_title, music_volume_title, sound_effect_volume_title;
+    Scroll music_scroll, effect_scroll;
+	sf::Text music_scroll_title, effect_scroll_title, music_volume_title, sound_effect_volume_title;
     Slider background_music_slide, sound_effect_slide;
 
 	// Customize panel components
@@ -86,4 +86,11 @@ private:
 
     // helper functions
     void updateLoadNewButton();
+
+    // Special function to prevent bug in event handling
+    void updateEventHandle() {
+        sf::Event _d = sf::Event::Closed{};
+        std::string _dt = "Test";
+        eventHandle(_d, _dt);
+    }
 };

@@ -40,6 +40,7 @@ private:
 
     TextInputNotification save_file_input;
 	BaseNotification error_notification;
+    BaseNotification win_notification;
 
 	Scroll history_scroll;
 
@@ -70,4 +71,11 @@ private:
     float side_panel_size_x, control_bar_size_x;
     float board_size;
     float status_bar_size_y;
+
+    // Special function to prevent bug in event handling
+    void updateEventHandle() {
+        sf::Event _d = sf::Event::Closed{};
+        std::string _dt = "Test";
+        eventHandle(_d, _dt);
+    }
 };

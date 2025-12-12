@@ -26,4 +26,11 @@ private:
     const AssetManager& asset_manager;
 
     float margin;
+
+    // Special function to prevent bug in event handling
+    void updateEventHandle() {
+        sf::Event _d = sf::Event::Closed{};
+        std::string _dt = "Test";
+        eventHandle(_d, _dt);
+    }
 };

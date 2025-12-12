@@ -25,9 +25,7 @@ Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
 }
 
 void Menu::enter() {
-    sf::Event _d = sf::Event::Closed{};
-    std::string _dt = "Test";
-    eventHandle(_d, _dt);
+    updateEventHandle();
     resize();
 }
 
@@ -39,7 +37,6 @@ void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
     std::string respond = "";
     start_button.eventHandle(event, ui_cfg, respond);
     setting_button.eventHandle(event, ui_cfg, respond);
-
 
     if (respond == "Start") {
         event_respond = "GameNewOption";
