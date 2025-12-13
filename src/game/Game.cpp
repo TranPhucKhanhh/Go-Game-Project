@@ -72,7 +72,15 @@ void Game::placeStone(int x, int y) {
 
 void Game::placeStoneAI() {
 	Move move = AI.genMove(state.current_player, resigned_player);
+	//std::cout << move.x << " " << move.y << "\n";
 	if (resigned_player != CellState::Empty) return;
+	if (move.pass) {
+		std::vector<Cell> capture;
+		history.addMove(move, state.current_board, capture);
+		if (history.checkConsecutivePass()) game_end = true;
+		state.setNextPlayer();
+		return;
+	}
 	std::vector<Cell> capture;
 	state.placeWithOutValidating(move, capture, last_move_verdict);
 	history.addMove(move, state.current_board, capture);
