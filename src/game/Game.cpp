@@ -28,6 +28,9 @@ void Game::pass() {
 	state.setNextPlayer();
 	history.addMove(move, state.current_board, capture);
 	if (history.checkConsecutivePass()) game_end = true;
+	if (game_config.game_mode != GameMode::PvP) {
+		Game::placeStoneAI();
+	}
 }
 
 void Game::undo() {
@@ -42,6 +45,10 @@ void Game::reset() {
 	//Init same as the start of the game
 	state.initializer(game_config.board_size);
 	resigned_player = CellState::Empty;
+	if (game_config.game_mode != GameMode::PvP) {
+		GameMode level = game_config.game_mode;
+		AI.resetGame();
+	}
 	//Clear all undo, redo, and board history
 	history.clear();   
 	game_end = false;
@@ -73,7 +80,10 @@ void Game::placeStone(int x, int y) {
 void Game::placeStoneAI() {
 	Move move = AI.genMove(state.current_player, resigned_player);
 	//std::cout << move.x << " " << move.y << "\n";
-	if (resigned_player != CellState::Empty) return;
+	if (resigned_player != CellState::Empty) {
+		game_end = 1;
+		return;
+	}
 	if (move.pass) {
 		std::vector<Cell> capture;
 		history.addMove(move, state.current_board, capture);

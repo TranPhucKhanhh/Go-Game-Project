@@ -60,11 +60,13 @@ void AI::startGame(const int init_board_size, const GameMode init_level) {
 	katago.readResponse();
 	katago.send("boardsize " + intToString(board_size));
 	katago.readResponse();
-	katago.send("clearboard");
+	katago.send("clear_board");
 	katago.readResponse();
-	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 50");
-	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 500");
-	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 5000");
+	katago.send("kata-set-rule ko POSITIONAL");
+	katago.readResponse();
+	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 5");
+	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 50");
+	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 500");
 	katago.readResponse();
 }
 
@@ -75,11 +77,13 @@ void AI::resetGame() {
 	katago.readResponse();
 	katago.send("boardsize " + intToString(board_size));
 	katago.readResponse();
-	katago.send("clearboard");
+	katago.send("clear_board");
+	katago.readResponse(); 
+	katago.send("kata-set-rule ko POSITIONAL");
 	katago.readResponse();
-	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 50");
-	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 500");
-	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 5000");
+	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 5");
+	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 50");
+	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 500");
 	katago.readResponse();
 }
 

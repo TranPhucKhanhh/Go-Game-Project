@@ -373,7 +373,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
                 ui_cfg.stone_capture_sound.play();
             }
 
-            if (game.getGameCfg().game_mode != GameMode::PvP) {
+            if (game.getGameCfg().game_mode != GameMode::PvP && (game.getLastMoveVerdict() == MoveVerdict::Capture || game.getLastMoveVerdict() == MoveVerdict::Valid)) {
                 //  AI thinking screen
                 game.placeStoneAI();
                 ui_cfg.stone_place_sound.play();
