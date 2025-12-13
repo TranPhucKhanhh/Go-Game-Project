@@ -335,6 +335,13 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             if (game.getLastMoveVerdict() == MoveVerdict::Valid) {
                 ui_cfg.stone_place_sound.play();
             }
+            else if (game.getLastMoveVerdict() == MoveVerdict::Suicide ||
+                game.getLastMoveVerdict() == MoveVerdict::SuperKO) {
+                ui_cfg.stone_error_sound.play();
+            }
+            else if (game.getLastMoveVerdict() == MoveVerdict::Capture) {
+                ui_cfg.stone_capture_sound.play();
+            }
 
             updateHistoryScroll();
             updateHeaderBar();
