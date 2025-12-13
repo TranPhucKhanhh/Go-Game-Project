@@ -12,6 +12,11 @@ using json = nlohmann::json;
 void Game::start() {
 	//Init first state with board_size size, black to move
 	state.initializer(game_config.board_size);
+	//Check if in PvE mode
+	if (game_config.game_mode != GameMode::PvP) {
+		GameMode level = game_config.game_mode;
+		AI.startGame(game_config.board_size, level);
+	}
 	resigned_player = CellState::Empty;
 	game_end = false;
 	std::cout << "Game initializer\n";
@@ -94,6 +99,7 @@ void to_json(json& j, const Move& move) {
 
 void to_json(json& j, const GameCfg& config) {
 	j = json{
+		{"AI_side", config.AI_side},
 		{"board_size", config.board_size},
 		{"prev_state", config.prev_state},
 		{"state", config.state},
@@ -109,6 +115,7 @@ void from_json(const json& j, Move& move) {
 }
 
 void from_json(const json& j, GameCfg& config) {
+	config.AI_side = j.at("AI_side").get<CellState>();
 	config.board_size = j.at("board_size").get<int>();
 	config.prev_state = j.at("prev_state").get<GameState>();
 	config.state = j.at("state").get<GameState>();
