@@ -64,6 +64,8 @@ private:
     void history_panel_resize(const float& _height);
     void score_bar_resize(const float& _height);
 
+    void playAnimation();
+
     // Screen UI value
     float padding;
     float inner_padding;

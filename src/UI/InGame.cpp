@@ -228,6 +228,27 @@ void InGame::enter() {
     resize();
 }
 
+void InGame::playAnimation() {
+    if (play_animation == false) return;
+    float _size = move_validate.getSize().x;
+    float _time = timer.getElapsedTime().asSeconds();
+    float _time_do_animation = 0.5;
+    float _time_idle = 0.4;
+    float _time_fade = 0.25;
+    if ( _time <= _time_do_animation) {
+        move_validate.updateBoxPos({mode_panel.getPosition().x + _size - (_size * _time / _time_do_animation),mode_panel.getPosition().y});
+    }
+    else if (_time <= _time_idle + _time_do_animation) {
+    }
+    else if (_time <= _time_idle + _time_do_animation + _time_fade) {
+        move_validate.updateBoxPos({ mode_panel.getPosition().x,mode_panel.getPosition().y + mode_panel.getPosition().y * (_time/(_time_idle + _time_do_animation + _time_fade)) });
+    }
+    else {
+        play_animation = false;
+    }
+    move_validate.draw(ui_cfg.window);
+}
+
 void InGame::updateSoundMusic() {
     if (ui_cfg.background_music_volume == 0) music_button.updateTexture(asset_manager.getTexture("music-no"));
     else music_button.updateTexture(asset_manager.getTexture("music"));
@@ -333,12 +354,25 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         if (event.is<sf::Event::MouseButtonReleased>() && board.isHoverValid()) {
             board.placeStone(ui_cfg.mouse_pos, game);
 
+            updateHistoryScroll();
+
             if (game.getLastMoveVerdict() == MoveVerdict::Valid) {
                 ui_cfg.stone_place_sound.play();
             }
             else if (game.getLastMoveVerdict() == MoveVerdict::Suicide ||
                 game.getLastMoveVerdict() == MoveVerdict::SuperKO) {
                 ui_cfg.stone_error_sound.play();
+                play_animation = true;
+                timer.restart();
+
+                if (game.getLastMoveVerdict() == MoveVerdict::Suicide) {
+                    move_validate.updateStr("Suicide Threat");
+                }
+                else {
+                    move_validate.updateStr("SuperKO Threat");
+                }
+                move_validate.updateTextSizeFit(0.9f);
+                move_validate.updateBoxOpacity(200);
             }
             else if (game.getLastMoveVerdict() == MoveVerdict::Capture) {
                 ui_cfg.stone_capture_sound.play();
@@ -547,6 +581,8 @@ void InGame::draw() {
     history_scroll.draw(ui_cfg.window);
     mode_box.draw(ui_cfg.window);
 
+    playAnimation();
+
     if (save_file_input.onScreen()) {
         save_file_input.draw(ui_cfg.window);
     }
@@ -730,4 +766,8 @@ void InGame::resize() {
     exit_button.updateSize({ (float)side_panel_size_x, padding * 0.9f });
     exit_button.updatePos({ (float)mode_panel.getPosition().x,  mode_panel.getPosition().y - mode_panel.getSize().y / 2.f - exit_button.getSize().y / 2.f });
     exit_button.updateTextSizeFit(0.9f);
+
+    move_validate.updateBoxSize({ side_panel_size_x , side_panel_size_x  * 2/7});
+    move_validate.updateBoxTexture(asset_manager.getTexture("button_rectangle_depth_gradient-red"));
+    move_validate.updateTextColor(sf::Color::White);
 }
