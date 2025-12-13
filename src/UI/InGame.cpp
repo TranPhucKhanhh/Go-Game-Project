@@ -238,12 +238,7 @@ void InGame::playAnimation() {
     if ( _time <= _time_do_animation) {
         move_validate.updateBoxPos({mode_panel.getPosition().x + _size - (_size * _time / _time_do_animation),mode_panel.getPosition().y});
     }
-    else if (_time <= _time_idle + _time_do_animation) {
-    }
-    else if (_time <= _time_idle + _time_do_animation + _time_fade) {
-        move_validate.updateBoxPos({ mode_panel.getPosition().x,mode_panel.getPosition().y + mode_panel.getPosition().y * (_time/(_time_idle + _time_do_animation + _time_fade)) });
-    }
-    else {
+    else if (_time > _time_idle + _time_do_animation + _time_fade){
         play_animation = false;
     }
     move_validate.draw(ui_cfg.window);
