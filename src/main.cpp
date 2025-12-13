@@ -3,6 +3,7 @@
 #include<model/UICfg.h>
 #include<core/AssetManager.h>
 #include<iostream>
+#include<AI/AI.h>
 
 const unsigned int WINDOW_START_WIDTH = 1280u;
 const unsigned int WINDOW_START_HEIGHT = 720u;
@@ -44,8 +45,8 @@ int main()
     // Start the game
     Game game;
 
-
 	game.start();
+    runAI();
 
     // Run UI
 	UI ui(game, asset_manager, { WINDOW_START_WIDTH, WINDOW_START_HEIGHT }, { WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT }, TITLE);

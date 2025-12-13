@@ -46,3 +46,5 @@ target_include_directories(GoGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_compile_definitions(GoGame PRIVATE ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
 target_compile_definitions(GoGame PRIVATE SAVEGAME_DIR="${CMAKE_SOURCE_DIR}/saved")
+target_compile_definitions(GoGame PRIVATE KATAGO_DIR="${CMAKE_SOURCE_DIR}/Katago")
+
