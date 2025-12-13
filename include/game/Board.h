@@ -4,6 +4,7 @@
 #include<model/Move.h>
 #include<vector>
 #include<iostream>
+#include<model/MoveVerdict.h>
 
 class Board {
 public:
