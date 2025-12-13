@@ -41,14 +41,15 @@ void Game::reset() {
 }
 
 void Game::placeStone(int x, int y) {
+	std::cout << x << " " << y << "\n";
 	Move move(x, y, state.current_player, 0);
 	std::vector<Cell> capture;
-	if (state.validateMove(move, capture) == 0) return;
+	if (state.validateMove(move, capture, last_move_verdict) == 0) return;
 	for (auto i : capture) {
 		//std::cout << i.x << " " << i.y << " " << (i.state == CellState::Black ? "Black" : "White") << "\n";
 		state.current_board[i.x][i.y] = CellState::Empty;
 	}
-	if (history.checkSuperKO(state.current_board)) {
+	if (history.checkSuperKO(state.current_board, last_move_verdict)) {
 		state.current_board[x][y] = CellState::Empty;
 		for (auto i : capture) {
 			state.current_board[i.x][i.y] = i.state;
@@ -219,6 +220,9 @@ void Game::print() {
 	state.current_board.printBoard(state.current_board);
 }
 
+std::string Game::getAILastMove() {
+	return last_AI_move;
+}
 
 Board Game::getExampleBoard() {
 	if (example_board.size() != 13) {

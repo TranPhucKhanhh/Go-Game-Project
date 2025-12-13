@@ -4,10 +4,11 @@
 
 static std::string conv[19] = { "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"};
 
-bool GameHistory::checkSuperKO(const Board& current) {
+bool GameHistory::checkSuperKO(const Board& current, MoveVerdict& last_move_verdict) {
 	for (Board b : board) {
 		if (current == b) {
 			//std::cout << "OH FUCK\n";
+			last_move_verdict = MoveVerdict::SuperKO;
 			return 1;
 		}
 	}

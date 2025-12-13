@@ -1,0 +1,1 @@
+enum class MoveVerdict { SuperKO, Valid, Suicide, Capture };

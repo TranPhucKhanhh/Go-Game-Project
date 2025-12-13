@@ -96,7 +96,7 @@ void Board::placeStoneWithoutValidating(const Move& move, Board& board, std::vec
 	if (liberty != 0) getCapture(move, board, capture);
 }
 
-bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture) {
+bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture, MoveVerdict& last_move_verdict) {
 	if (isOutOfRange(move, board.size())) return 0;
 	if (isOccupied(move, board)) return 0;
 
@@ -109,10 +109,15 @@ bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capt
 	int liberty = countLiberty(move, board);
 	if (liberty != 0) {
 		getCapture(move, board, capture);
+		if (capture.size()) last_move_verdict = MoveVerdict::Capture;
 		return 1;
 	}
+	last_move_verdict = MoveVerdict::Suicide;
 	//Place in no liberty but can capture is also valid
-	if (canCapture(move, board, capture)) return 1;
+	if (canCapture(move, board, capture)) {
+		last_move_verdict = MoveVerdict::Capture;
+		return 1;
+	}
 	board[move.x][move.y] = CellState::Empty;
 	return 0;
 }

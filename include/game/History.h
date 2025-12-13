@@ -9,7 +9,7 @@ class GameHistory {
 public:
 	void clear();
 	bool checkConsecutivePass();
-	bool checkSuperKO(const Board& current_board);
+	bool checkSuperKO(const Board& current_board, MoveVerdict& last_move_verdict);
 	void undoMove(Board& current_board, CellState& current_player);
 	void redoMove(Board& current_board, CellState& current_player);
 	void addMove(const Move& move, const Board& current_board, const std::vector<Cell>& turn_capture);

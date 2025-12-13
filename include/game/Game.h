@@ -7,6 +7,7 @@
 #include<model/GameState.h>
 #include<JSON/json.hpp>
 #include<string.h>
+#include<model/MoveVerdict.h>
 
 using json = nlohmann::json;
 
@@ -54,6 +55,8 @@ public:
 	std::string getLastMove();
 
 	// Return value
+	std::string getAILastMove();
+	MoveVerdict getLastMoveVerdict() const { return last_move_verdict; }
 	CellState getCurrentPlayer() const { return state.current_player; };
 	GameCfg& getGameCfg() { return game_config; }
 	Board getPreviewBoard() const { return previewBoard; };
@@ -81,6 +84,10 @@ private:
 	Board previewBoard, example_board; 
 
 	CellState resigned_player = CellState::Empty;
+
+	MoveVerdict last_move_verdict = MoveVerdict::Valid;
+
+	std::string last_AI_move = "";
 
 	bool game_end;
 };
