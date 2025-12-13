@@ -3,6 +3,7 @@
 #include<UI/Component.h>
 #include<model/UICfg.h>
 #include<model/CellState.h>
+#include<model/MoveVerdict.h>
 #include<game/Game.h>
 #include<algorithm>
 #include<iostream>
@@ -330,6 +331,10 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         }
         if (event.is<sf::Event::MouseButtonReleased>()) {
             board.placeStone(ui_cfg.mouse_pos, game);
+
+            if (game.getLastMoveVerdict() == MoveVerdict::Valid) {
+                ui_cfg.stone_place_sound.play();
+            }
 
             updateHistoryScroll();
             updateHeaderBar();

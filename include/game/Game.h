@@ -88,7 +88,7 @@ private:
 
 	CellState resigned_player = CellState::Empty;
 
-	MoveVerdict last_move_verdict = MoveVerdict::Valid;
+	MoveVerdict last_move_verdict = MoveVerdict::Invalid;
 
 	std::string last_AI_move = "";
 

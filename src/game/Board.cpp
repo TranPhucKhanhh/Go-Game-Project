@@ -97,8 +97,14 @@ void Board::placeStoneWithoutValidating(const Move& move, Board& board, std::vec
 }
 
 bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture, MoveVerdict& last_move_verdict) {
-	if (isOutOfRange(move, board.size())) return 0;
-	if (isOccupied(move, board)) return 0;
+	if (isOutOfRange(move, board.size())) {
+		last_move_verdict = MoveVerdict::Invalid;
+		return 0;
+	}
+	if (isOccupied(move, board)) {
+		last_move_verdict = MoveVerdict::Invalid;
+		return 0;
+	}
 
 	//Temporary add move to board
 	//Will be removed if it is invalid, and keep if it is valid
@@ -110,6 +116,7 @@ bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capt
 	if (liberty != 0) {
 		getCapture(move, board, capture);
 		if (capture.size()) last_move_verdict = MoveVerdict::Capture;
+		else last_move_verdict = MoveVerdict::Valid;
 		return 1;
 	}
 	last_move_verdict = MoveVerdict::Suicide;
