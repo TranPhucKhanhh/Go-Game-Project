@@ -9,18 +9,18 @@
 GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 	asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
 
-	start_game_button("Start a new game", asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+	start_game_button("Start a new game", asset_manager.getFont("Spicy-Sale"), ui_cfg),
 	new_game_panel("New game", asset_manager.getFont("RobotoSlab-Bold"), ui_cfg),
-	go_back_button("Back", asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
-	game_mode_title(asset_manager.getFont("Momo"), "Select game mode:"),
+	go_back_button("Back", asset_manager.getFont("Spicy-Sale"), ui_cfg),
+	game_mode_title(asset_manager.getFont("RobotoSlab-Bold"), "Select game mode:"),
 	pvp_mode_button("PvP", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	ai_easy_button("AI easy", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	ai_medium_button("AI medium", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	ai_hard_button("AI hard", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
-	choose_side_title(asset_manager.getFont("Momo"), "Choose your side:"),
+	choose_side_title(asset_manager.getFont("RobotoSlab-Bold"), "Choose your side:"),
 	black_side_button("Black", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	white_side_button("White", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
-	choose_board_size_title(asset_manager.getFont("Momo"), "Choose your board size:"),
+	choose_board_size_title(asset_manager.getFont("RobotoSlab-Bold"), "Choose your board size:"),
 	board_size_9_button("9 x 9", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	board_size_13_button("13 x 13", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	board_size_19_button("19 x 19", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
@@ -242,19 +242,19 @@ void GameOption::enter() {
 	game_mode = GameMode::PvP;
 	side_chosen = CellState::Black;
 	board_size_chosen = 19;
-	updateEventHandle();
 	board_design_chosen = ui_cfg.board_design; 
 	stone_design_chosen = ui_cfg.stone_design;
 	music_scroll.updateIndex(0);
 	effect_scroll.updateIndex(0);
 	board_design_scroll.updateIndex(0);
 	stone_design_scroll.updateIndex(0);
-	updateLoadNewButton();
 	// Update scroll value according to the game music & sound 
 	music_volume_title.setString("Music Volume: " + std::to_string((int)ui_cfg.background_music_volume) + "%");
 	sound_effect_volume_title.setString("Sound Effect Volume: " + std::to_string((int)ui_cfg.sound_effect_volume) + "%");
 	background_music_slide.value = ui_cfg.background_music_volume;
 	sound_effect_slide.value = ui_cfg.sound_effect_volume;
+	updateLoadNewButton();
+	updateEventHandle();
 	resize();
 }
 

@@ -21,6 +21,7 @@ public:
 private:
 	TextureEffectButton start_button, setting_button;
     sf::Text title;
+    TextBox credit;
 
     UICfg& ui_cfg;
     const AssetManager& asset_manager;

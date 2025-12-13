@@ -36,7 +36,7 @@ static std::string convert_to_string(const float& num) {
 
 InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) : 
     asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
-    header_bar(_asset_manager.getFont("RobotoSlab-Bold")),
+    header_bar(_asset_manager.getFont("Spicy-Sale")),
     undo_button("Undo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
@@ -50,10 +50,10 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     music_button(ui_cfg),
     white_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
     black_score_box(_asset_manager.getFont("StackSansNotch-Regular")),
-    save_file_input(_asset_manager.getFont("StackSansNotch-Regular")),
-    error_notification(_asset_manager.getFont("StackSansNotch-Regular")),
-    win_notification(_asset_manager.getFont("StackSansNotch-Regular")),
-    mode_box(_asset_manager.getFont("StackSansNotch-Regular")),
+    save_file_input(_asset_manager.getFont("RobotoSlab-Bold")),
+    error_notification(_asset_manager.getFont("RobotoSlab-Bold")),
+    win_notification(_asset_manager.getFont("RobotoSlab-Bold")),
+    mode_box(_asset_manager.getFont("StackSansNotch-Bold")),
     board(_asset_manager),
     white_stone_image(_asset_manager.getTexture("dummy")),
     black_stone_image(_asset_manager.getTexture("dummy")),
@@ -167,7 +167,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     save_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
     save_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
 
-    setting_button.updateTextEffectColor(sf::Color::Black);
+    setting_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
     setting_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
     setting_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
     setting_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));

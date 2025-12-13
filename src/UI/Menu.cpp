@@ -9,10 +9,16 @@
 
 Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
     : asset_manager(_asset_manager), ui_cfg(ui_cfg),
-    start_button("START", _asset_manager.getFont("RobotoSlab-Bold"), ui_cfg), setting_button("SETTING", _asset_manager.getFont("RobotoSlab-Bold"), ui_cfg),
-    title(_asset_manager.getFont("Momo"), "Go Game") {
+    start_button("START", _asset_manager.getFont("Metal-Glass"), ui_cfg), 
+    setting_button("SETTING", _asset_manager.getFont("Metal-Glass"), ui_cfg),
+    title(_asset_manager.getFont("Spicy-Sale"), "Go Game"),
+    credit(_asset_manager.getFont("RobotoSlab-Bold"))
+{
 
     title.setFillColor(sf::Color(0, 0, 0));
+    credit.updateBoxColor(sf::Color::Transparent);
+    credit.updateTextColor(sf::Color::Black);
+    credit.updateStr("Created by Tran Phuc Khanh and Ly Tuan Kiet");
 
     start_button.updateRespondStr("Start");
     start_button.updateTextSize(50);
@@ -64,6 +70,8 @@ void Menu::draw() {
     
     ui_cfg.window.draw(title);
 
+    credit.draw(ui_cfg.window);
+
 }
 
 void Menu::resize() {
@@ -88,4 +96,8 @@ void Menu::resize() {
     title.setOrigin({ title_bound.position.x + title_bound.size.x / 2.f, title_bound.position.y + title_bound.size.y / 2.f });
     title.setPosition({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f - (button_size.y + margin + title_bound.size.y) });
 
+
+    credit.updateBoxSize({ ui_cfg.window_size.x * 0.8f, ui_cfg.window_size.y / 20.f});
+    credit.updateBoxPos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y - credit.getSize().y });
+    credit.updateTextSizeFit(0.9f);
 }
