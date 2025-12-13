@@ -105,7 +105,6 @@ bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capt
 		last_move_verdict = MoveVerdict::Invalid;
 		return 0;
 	}
-
 	//Temporary add move to board
 	//Will be removed if it is invalid, and keep if it is valid
 	//Super-KO will be checked later

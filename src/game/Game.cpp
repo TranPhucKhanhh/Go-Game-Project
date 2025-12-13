@@ -63,10 +63,20 @@ void Game::placeStone(int x, int y) {
 		}
 		return;
 	}
+	if (game_config.game_mode != GameMode::PvP) AI.syncMove(move);
 	history.addMove(move, state.current_board, capture);
 	state.setNextPlayer();
 	//std::cout << "Placing stone in: " << x << " " << y << "\n";
 	//state.printPlayer();
+}
+
+void Game::placeStoneAI() {
+	Move move = AI.genMove(state.current_player, resigned_player);
+	if (resigned_player != CellState::Empty) return;
+	std::vector<Cell> capture;
+	state.placeWithOutValidating(move, capture, last_move_verdict);
+	history.addMove(move, state.current_board, capture);
+	state.setNextPlayer();
 }
 
 std::pair<float, float> Game::getScore() {

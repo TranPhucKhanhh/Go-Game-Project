@@ -47,6 +47,7 @@ public:
 	void reset();
 	void resign();
 	void placeStone(int x, int y);
+	void placeStoneAI();
 	bool saveGame(const std::string& name);
 	bool loadPreviewGame(const std::string& name);
 	bool loadGame(const std::string& name);
