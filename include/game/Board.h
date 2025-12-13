@@ -4,6 +4,7 @@
 #include<model/Move.h>
 #include<vector>
 #include<iostream>
+#include<model/MoveVerdict.h>
 
 class Board {
 public:
@@ -46,7 +47,7 @@ public:
 	//ValidateMove, if move is valid update the board of InGameState
 	//Super-KO is NOT check here
 	//Return the capture list for future use
-	bool validateMove(const Move& move, Board& board, std::vector<Cell>& capture);
+	bool validateMove(const Move& move, Board& board, std::vector<Cell>& capture, MoveVerdict& last_move_verdict);
 	void calculateScore(const Board& board, int& black_score, int& white_score);
 	void placeStoneWithoutValidating(const Move& move, Board& board, std::vector<Cell>& capture);
 	void loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board);

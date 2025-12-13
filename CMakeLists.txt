@@ -38,7 +38,7 @@ add_executable(GoGame
                         src/game/Board.cpp
                         src/game/Game.cpp
                         src/game/History.cpp
-   )
+    "src/AI/KatagoLink.cpp" "include/model/MoveVerdict.h")
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics SFML::Audio)
@@ -46,3 +46,5 @@ target_include_directories(GoGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_compile_definitions(GoGame PRIVATE ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
 target_compile_definitions(GoGame PRIVATE SAVEGAME_DIR="${CMAKE_SOURCE_DIR}/saved")
+target_compile_definitions(GoGame PRIVATE KATAGO_DIR="${CMAKE_SOURCE_DIR}/Katago")
+

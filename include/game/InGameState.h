@@ -24,8 +24,8 @@ struct InGameState {
 		else next = CellState::Black;
 		return next;
 	}
-	bool validateMove(const Move& move, std::vector<Cell>& capture) {
-		return current_board.validateMove(move, current_board, capture);
+	bool validateMove(const Move& move, std::vector<Cell>& capture, MoveVerdict& last_move_verdict) {
+		return current_board.validateMove(move, current_board, capture, last_move_verdict);
 	}
 	void printPlayer() {
 		std::cout << "Current player is: ";
