@@ -109,6 +109,9 @@ void UI::run() {
                 || respond == "LoadNewGame" || respond == "GoBack") {
 				UI::switchGameState(respond);
             }
+            else if (respond == "GameExit") {
+                window.close();
+            }
         }
 
         GameState current_state = game.getGameState();

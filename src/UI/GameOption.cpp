@@ -10,6 +10,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
 
 	start_game_button("Start a new game", asset_manager.getFont("Spicy-Sale"), ui_cfg),
+	exit_button("Exit game", asset_manager.getFont("Spicy-Sale"), ui_cfg),
 	new_game_panel("New game", asset_manager.getFont("RobotoSlab-Bold"), ui_cfg),
 	go_back_button("Back", asset_manager.getFont("Spicy-Sale"), ui_cfg),
 	game_mode_title(asset_manager.getFont("RobotoSlab-Bold"), "Select game mode:"),
@@ -70,6 +71,7 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	refresh_button.updateRespondStr("Refresh");
 	go_back_button.updateRespondStr("GoBack");
 	delete_button.updateRespondStr("Delete");
+	exit_button.updateRespondStr("Exit");
 
 	// Initialzize the basic color and outline
 	canvas.setFillColor({ 221,221,221 });
@@ -107,6 +109,11 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	start_game_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_gradient-red"));
 	start_game_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gloss-red"));
 	start_game_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_flat-red"));
+
+	exit_button.updateTextEffectColor(sf::Color::White);
+	exit_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_gradient-red"));
+	exit_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gloss-red"));
+	exit_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_flat-red"));
 
 	new_game_panel.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
 	new_game_panel.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
@@ -267,7 +274,6 @@ void GameOption::draw() {
 	load_game_panel.updateForceTex(0);
 	setting_panel.updateForceTex(0);
 	customize_panel.updateForceTex(0);
-
 	if (panel == SettingPanel::NewGame) {
 		new_game_panel.updateForceTex(2);
 		drawNewPanel();
@@ -289,6 +295,7 @@ void GameOption::draw() {
 		start_game_button.draw(ui_cfg.window);
 	}
 	go_back_button.draw(ui_cfg.window);
+	exit_button.draw(ui_cfg.window);
 	new_game_panel.draw(ui_cfg.window);
 	load_game_panel.draw(ui_cfg.window);
 	setting_panel.draw(ui_cfg.window);
@@ -306,6 +313,7 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 	setting_panel.eventHandle(event, ui_cfg, event_respond);
 	customize_panel.eventHandle(event, ui_cfg, event_respond);
 	go_back_button.eventHandle(event, ui_cfg, event_respond);
+	exit_button.eventHandle(event, ui_cfg, event_respond);
 
 	if (panel == SettingPanel::NewGame) {
 		eventHandleNewPanel(event, event_respond);
@@ -352,6 +360,9 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 	else if (event_respond == "GoBack") {
 		respond = "GoBack";
 	}
+	else if (event_respond == "Exit") {
+		respond = "GameExit";
+	}
 
 	// Change the start game button text according to the panel
 	if (event_respond == "NewGame" || event_respond == "LoadGame") {
@@ -388,6 +399,9 @@ void GameOption::resize() {
 	start_game_button.updatePos({ canvas.getPosition().x, canvas.getPosition().y + canvas_size.y / 2.f - _button_panel_size.y / 2.f});
 	go_back_button.updateSize({ _button_panel_size.x, std::min(margin * 0.7f, _button_panel_size.y * 0.7f)});
 	go_back_button.updatePos({ new_game_panel.getPos().x, new_game_panel.getPos().y - _button_panel_size .y/2.f - go_back_button.getSize().y/2.f - 7.f});
+	exit_button.updateSize(go_back_button.getSize());
+	exit_button.updatePos({ customize_panel.getPos().x , go_back_button.getPos().y});
+	exit_button.updateTextSizeFit(0.9f);
 
 	float _ratio = 1;
 	float _min_button_text_size = std::min({ new_game_panel.getTextSizeFit(_ratio),load_game_panel.getTextSizeFit(_ratio),setting_panel.getTextSizeFit(_ratio),customize_panel.getTextSizeFit(_ratio) });

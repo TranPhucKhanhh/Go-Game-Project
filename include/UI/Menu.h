@@ -19,7 +19,7 @@ public:
 
     void draw();
 private:
-	TextureEffectButton start_button, setting_button;
+	TextureEffectButton start_button, setting_button, exit_game_button;
     sf::Text title;
     TextBox credit;
 

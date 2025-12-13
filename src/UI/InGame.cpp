@@ -37,6 +37,7 @@ static std::string convert_to_string(const float& num) {
 InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) : 
     asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
     header_bar(_asset_manager.getFont("Spicy-Sale")),
+    exit_button("Exit Game", _asset_manager.getFont("Spicy-Sale"), ui_cfg),
     undo_button("Undo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     pass_button("Pass", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
@@ -61,6 +62,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 {
    
     // Set the respond message for each button
+    exit_button.updateRespondStr("Exit");
 	undo_button.updateRespondStr("Undo");
 	redo_button.updateRespondStr("Redo");
 	pass_button.updateRespondStr("Pass");
@@ -127,6 +129,11 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     std::srand(std::time(0));
 
     // Update button effect
+    exit_button.updateTextEffectColor(sf::Color::White);
+    exit_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_gradient-red"));
+    exit_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gloss-red"));
+    exit_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_flat-red"));
+
     undo_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
     undo_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
     undo_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
@@ -338,6 +345,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     save_button.eventHandle(event, ui_cfg, event_respond);
     setting_button.eventHandle(event, ui_cfg, event_respond);
 
+    exit_button.eventHandle(event, ui_cfg, event_respond);
     undo_button.eventHandle(event, ui_cfg, event_respond);
     redo_button.eventHandle(event, ui_cfg, event_respond);
     pass_button.eventHandle(event, ui_cfg, event_respond);
@@ -446,6 +454,9 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         }
         updateSoundMusic();
     }
+    else if (event_respond == "Exit") {
+        respond = "GameExit";
+    }
     
 
     // Check if the game reach the end stage
@@ -494,6 +505,7 @@ void InGame::draw() {
     sound_button.draw(ui_cfg.window);
     music_button.draw(ui_cfg.window);
 
+    exit_button.draw(ui_cfg.window);
     new_button.draw(ui_cfg.window);
     reset_button.draw(ui_cfg.window);
     save_button.draw(ui_cfg.window);
@@ -695,4 +707,8 @@ void InGame::resize() {
 
     win_notification.updateSize(_noti_size);
     win_notification.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
+
+    exit_button.updateSize({ (float)side_panel_size_x, padding * 0.9f });
+    exit_button.updatePos({ (float)mode_panel.getPosition().x,  mode_panel.getPosition().y - mode_panel.getSize().y / 2.f - exit_button.getSize().y / 2.f });
+    exit_button.updateTextSizeFit(0.9f);
 }

@@ -28,7 +28,7 @@ private:
     const AssetManager& asset_manager;
 
     sf::RectangleShape canvas;
-    TextureEffectButton start_game_button, go_back_button;
+    TextureEffectButton start_game_button, go_back_button, exit_button;
     
 	// New game panel components
     TextureEffectButton new_game_panel;

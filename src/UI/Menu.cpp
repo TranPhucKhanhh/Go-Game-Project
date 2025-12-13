@@ -11,6 +11,7 @@ Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
     : asset_manager(_asset_manager), ui_cfg(ui_cfg),
     start_button("START", _asset_manager.getFont("Metal-Glass"), ui_cfg), 
     setting_button("SETTING", _asset_manager.getFont("Metal-Glass"), ui_cfg),
+    exit_game_button("Exit Game", _asset_manager.getFont("Spicy-Sale"), ui_cfg),
     title(_asset_manager.getFont("Spicy-Sale"), "Go Game"),
     credit(_asset_manager.getFont("RobotoSlab-Bold"))
 {
@@ -21,18 +22,22 @@ Menu::Menu(const AssetManager& _asset_manager, UICfg& ui_cfg)
     credit.updateStr("Created by Tran Phuc Khanh and Ly Tuan Kiet");
 
     start_button.updateRespondStr("Start");
-    start_button.updateTextSize(50);
     start_button.updateTextEffectColor(sf::Color::Black, sf::Color::White, sf::Color::White);
     start_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_border"));
     start_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gradient"));
     start_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
     
     setting_button.updateRespondStr("Setting");
-    setting_button.updateTextSize(50);
     setting_button.updateTextEffectColor(sf::Color::Black, sf::Color::White, sf::Color::White);
     setting_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_border"));
     setting_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gradient"));
     setting_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+
+    exit_game_button.updateRespondStr("Exit");
+    exit_game_button.updateTextEffectColor(sf::Color::White);
+    exit_game_button.updateIdleTex(asset_manager.getTexture("button_rectangle_depth_gradient-red"));
+    exit_game_button.updateHoverTex(asset_manager.getTexture("button_rectangle_depth_gloss-red"));
+    exit_game_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_flat-red"));
     
     resize();
 	
@@ -52,12 +57,16 @@ void Menu::eventHandle(const sf::Event &event, std::string& event_respond) {
     std::string respond = "";
     start_button.eventHandle(event, ui_cfg, respond);
     setting_button.eventHandle(event, ui_cfg, respond);
+    exit_game_button.eventHandle(event, ui_cfg, respond);
 
     if (respond == "Start") {
         event_respond = "GameNewOption";
     }
     else if (respond == "Setting") {
         event_respond = "OpenSetting";
+    }
+    else if (respond == "Exit") {
+        event_respond = "GameExit";
     }
 }
 
@@ -67,6 +76,8 @@ void Menu::draw() {
     start_button.draw(ui_cfg.window);
     
     setting_button.draw(ui_cfg.window);
+
+    exit_game_button.draw(ui_cfg.window);
     
     ui_cfg.window.draw(title);
 
@@ -80,15 +91,19 @@ void Menu::resize() {
     button_size.x = std::min(500.f, std::max(scale, 300.f));
     button_size.y = std::min(166.f, std::max(scale / 3.f, 100.f));
 
-    margin = std::min(150.f, std::max(ui_cfg.window_size.y / 14.f, 50.f));
+    margin = ui_cfg.window_size.y / 28.f;
 
     start_button.updateSize(button_size);
-    start_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f });
+    start_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f - margin});
     start_button.updateTextSizeFit(0.9f);
 
     setting_button.updateSize(button_size);
-    setting_button.updatePos({ ui_cfg.window_size.x / 2.f, ui_cfg.window_size.y / 2.f + (button_size.y + margin + button_size.y / 2.f) });
+    setting_button.updatePos({ ui_cfg.window_size.x / 2.f, start_button.getPos().y + margin + button_size.y });
     setting_button.updateTextSizeFit(0.9f);
+
+    exit_game_button.updateSize(button_size);
+    exit_game_button.updatePos({ ui_cfg.window_size.x / 2.f, setting_button.getPos().y + margin + button_size.y});
+    exit_game_button.updateTextSizeFit(0.9f);
 
     title.setCharacterSize(std::min(ui_cfg.window_size.x, ui_cfg.window_size.y) / 7);
 
