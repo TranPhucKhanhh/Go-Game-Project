@@ -341,15 +341,12 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 		panel = SettingPanel::Customization;
 	}
 	else if (event_respond == "StartGame") {
-		if (game_mode == GameMode::PvP) {
-			game.getGameCfg().board_size = board_size_chosen;
-			game.start();
-			game.reset();
-			respond = "StartNewGame";
-		}
-		else {
-			std::cerr << "Other game mode has't implemented yet!" << std::endl;
-		}
+		game.getGameCfg().board_size = board_size_chosen;
+		game.getGameCfg().game_mode = game_mode;
+		game.getGameCfg().AI_side = CellState::White;
+		game.start();
+		game.reset();
+		respond = "StartNewGame";
 	}
 	else if (event_respond == "LoadNewGame") {
 		if (board_preview_show) {

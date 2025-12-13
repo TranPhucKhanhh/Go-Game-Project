@@ -38,6 +38,7 @@ static std::string convert_to_string(const float& num) {
 InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) : 
     asset_manager(_asset_manager), game(_game), ui_cfg(ui_cfg),
     header_bar(_asset_manager.getFont("Spicy-Sale")),
+    move_validate(_asset_manager.getFont("RobotoSlab-Bold")),
     exit_button("Exit Game", _asset_manager.getFont("Spicy-Sale"), ui_cfg),
     undo_button("Undo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     redo_button("Redo", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
@@ -341,6 +342,12 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             }
             else if (game.getLastMoveVerdict() == MoveVerdict::Capture) {
                 ui_cfg.stone_capture_sound.play();
+            }
+
+            if (game.getGameCfg().game_mode != GameMode::PvP) {
+                //  AI thinking screen
+                game.placeStoneAI();
+                ui_cfg.stone_place_sound.play();
             }
 
             updateHistoryScroll();

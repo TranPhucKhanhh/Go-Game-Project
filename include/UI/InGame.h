@@ -27,7 +27,7 @@ private:
     sf::RectangleShape control_panel;
     sf::RectangleShape history_panel;
     sf::RectangleShape footer_bar;
-    TextBox header_bar;
+    TextBox header_bar, move_validate;
 
     BaseButton sound_button, music_button;
     TextureEffectButton new_button, save_button, reset_button, setting_button, exit_button;
@@ -78,4 +78,7 @@ private:
         std::string _dt = "Test";
         eventHandle(_d, _dt);
     }
+
+    sf::Clock timer;
+    bool play_animation = false;
 };
