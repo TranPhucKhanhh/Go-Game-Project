@@ -6,15 +6,16 @@
 static std::string conv[19] = { "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T" };
 
 static void parseResponse(std::string& s) {
-	int p = 0;
+	std::string res = "";
 	for (int i = 0; s[i] != '\0'; i++) {
 		if (s[i] == '\n' || s[i] == '\r') continue;
 		if (s[i] == ' ') {
 			if (i > 0 && (s[i - 1] == '\n' || s[i - 1] == ' ' || s[i - 1] == '\r')) continue;
 		}
-		s[p++] = s[i];
+		res += s[i];
 	}
-	if (p > 0 && s[p - 1] == ' ') s[--p] = '\0';
+	if (res.size() && res.back() == ' ') res.pop_back();
+	s = res;
 }
 
 static std::string intToString(int n) {
@@ -115,6 +116,8 @@ static Move stringToMove(const CellState& current_player, std::string& s, int bo
 	Move m;
 	m.x = s[2] - 'A' - (s[2] >= 'J' ? 1 : 0);
 	m.y = board_size - stringToInt(s.substr(3));
+	std::cout << s.size() << "\n";
+	//std::cout << s.substr(3) << " " << board_size - stringToInt(s.substr(3)) << "\n";
 	m.pass = 0;
 	m.player = current_player;
 	return m;
@@ -126,11 +129,12 @@ Move AI::genMove(const CellState& current_player, CellState& resigned_player) {
 	katago.send(s);
 	std::string response = katago.readResponse();
 	parseResponse(response);
-	if (response == "resign") {
+	std::cout << response << "\n";
+	if (response == "= resign") {
 		resigned_player = current_player;
 		return Move(-1, -1, CellState::Empty, 0);
 	}
-	if (response == "pass") {
+	if (response == "= pass") {
 		return Move(-1, -1, CellState::Empty, 1);
 	}
 	return stringToMove(current_player, response, board_size);
