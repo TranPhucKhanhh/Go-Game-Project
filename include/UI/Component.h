@@ -131,6 +131,7 @@ public:
 	// Return value
 	sf::Vector2f getPos() const { return position; }
 	sf::Vector2f getSize() const { return { canvas_size,canvas_size }; }
+	bool isHoverValid() const { return hoverOnStone; }
 	
 	// Update the board UI 
 	void updateCellNumber(const int& size) { board_cell_number = size; }

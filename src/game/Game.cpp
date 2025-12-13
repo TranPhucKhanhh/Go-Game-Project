@@ -51,7 +51,6 @@ void Game::placeStone(int x, int y) {
 	std::cout << x << " " << y << "\n";
 	Move move(x, y, state.current_player, 0);
 	std::vector<Cell> capture;
-	std::cerr << (last_move_verdict == MoveVerdict::Valid) << std::endl;
 	if (state.validateMove(move, capture, last_move_verdict) == 0) return;
 	for (auto i : capture) {
 		//std::cout << i.x << " " << i.y << " " << (i.state == CellState::Black ? "Black" : "White") << "\n";
@@ -65,7 +64,6 @@ void Game::placeStone(int x, int y) {
 		return;
 	}
 	history.addMove(move, state.current_board, capture);
-	std::cerr << (last_move_verdict == MoveVerdict::Valid) << std::endl;
 	state.setNextPlayer();
 	//std::cout << "Placing stone in: " << x << " " << y << "\n";
 	//state.printPlayer();

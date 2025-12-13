@@ -329,7 +329,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         if (event.is<sf::Event::MouseMoved>()) {
             board.hoverStone(ui_cfg.mouse_pos, game);
         }
-        if (event.is<sf::Event::MouseButtonReleased>()) {
+        if (event.is<sf::Event::MouseButtonReleased>() && board.isHoverValid()) {
             board.placeStone(ui_cfg.mouse_pos, game);
 
             if (game.getLastMoveVerdict() == MoveVerdict::Valid) {
