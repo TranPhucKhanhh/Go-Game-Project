@@ -46,53 +46,65 @@ int main()
     Game game;
 
 	game.start();
-    //try {
-    //    std::string base = KATAGO_DIR;
-    //    std::string exe = base + "\\katago.exe";
-    //    std::string model = base + "\\model.bin.gz";
-    //    std::string cfg = base + "\\default_gtp.cfg";
+    try {
+        std::string base = KATAGO_DIR;
+        std::string exe = base + "\\katago.exe";
+        std::string model = base + "\\model.bin.gz";
+        std::string cfg = base + "\\default_gtp.cfg";
 
-    //    KatagoLink kg;
-    //    kg.start(
-    //        ".",        // current directory doesn't matter anymore
-    //        exe,        // FULL PATH
-    //        model,      // FULL PATH
-    //        cfg,        // FULL PATH
-    //        true
-    //    );
-    //}
-    //catch (const std::exception& e) {
-    //    std::cerr << "KATAGO_DIR = " << KATAGO_DIR << "\n";
+        KatagoLink kg;
+        kg.start(
+            ".",        
+            exe,        // FULL PATH
+            model,      // FULL PATH
+            cfg,        // FULL PATH
+            true
+        );
+    }
+    catch (const std::exception& e) {
+        std::cerr << "KATAGO_DIR = " << KATAGO_DIR << "\n";
 
-    //    std::cerr << "Katago start failed: " << e.what() << std::endl;
-    //    return 0;
-    //}
+        std::cerr << "Katago start failed: " << e.what() << std::endl;
+        return 0;
+    }
 
-    //std::string base = KATAGO_DIR;
-    //std::string exe = base + "\\katago.exe";
-    //std::string model = base + "\\model.bin.gz";
-    //std::string cfg = base + "\\default_gtp.cfg";
+    std::string base = KATAGO_DIR;
+    std::string exe = base + "\\katago.exe";
+    std::string model = base + "\\model.bin.gz";
+    std::string cfg = base + "\\default_gtp.cfg";
 
-    //KatagoLink kg;
-    //kg.start(
-    //    ".",        // current directory doesn't matter anymore
-    //    exe,        // FULL PATH
-    //    model,      // FULL PATH
-    //    cfg,        // FULL PATH
-    //    true
-    //);
+    KatagoLink kg;
+    kg.start(
+        ".",        
+        exe,        // FULL PATH
+        model,      // FULL PATH
+        cfg,        // FULL PATH
+        true
+    );
+    //kg.send("kata-set-param maxVisits 50");
+    //std::cerr << kg.readResponse();
 
     //kg.send("boardsize 19");
-    //std::cerr << kg.readResponse() << "\n";
+    //std::cerr << kg.readResponse();
 
     //kg.send("clear_board");
-    //std::cerr << kg.readResponse() << "\n";
+    //std::cerr << kg.readResponse();
 
     //kg.send("genmove b");
-    //std::cerr << kg.readResponse() << "\n";
+    //std::cerr << kg.readResponse();
 
     //kg.send("Hoho");
-    //std::cerr << kg.readResponse() << "\n";
+    //std::cerr << kg.readResponse();
+
+    //kg.send("play W D11");
+    //std::cerr << kg.readResponse();
+
+    //kg.send("genmove B");
+    //std::string s = kg.readResponse();
+    //std::cerr << s.size() << "\n";
+    //for (int i = 0; i < s.size(); i++) {
+    //    std::cerr << i << " " << s.size() << " " << int(s[i]) << " " << s[i] << "\n";
+    //}
 
     //Run UI
 	UI ui(game, asset_manager, { WINDOW_START_WIDTH, WINDOW_START_HEIGHT }, { WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT }, TITLE);

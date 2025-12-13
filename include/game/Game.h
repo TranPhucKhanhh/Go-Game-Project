@@ -8,6 +8,7 @@
 #include<JSON/json.hpp>
 #include<string.h>
 #include<model/MoveVerdict.h>
+#include<AI/AI.h>
 
 using json = nlohmann::json;
 
@@ -16,6 +17,7 @@ struct GameCfg {
 	GameState prev_state = GameState::Menu;
 	GameState state = GameState::Menu;
 	GameMode game_mode = GameMode::PvP;
+	CellState AI_side = CellState::White;
 	int board_size = 13;
 	float komi = 7.5;	
 };
@@ -88,6 +90,8 @@ private:
 	MoveVerdict last_move_verdict = MoveVerdict::Valid;
 
 	std::string last_AI_move = "";
+
+	AI AI;
 
 	bool game_end;
 };
