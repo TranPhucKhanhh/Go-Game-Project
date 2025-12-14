@@ -24,10 +24,11 @@ struct InGameState {
 		else next = CellState::Black;
 		return next;
 	}
-	void placeWithOutValidating(const Move& move, std::vector<Cell>& capture, MoveVerdict& last_move_verdict) {
+	void placeWithoutValidating(const Move& move, std::vector<Cell>& capture, MoveVerdict& last_move_verdict) {
 		current_board.placeStoneWithoutValidating(move, current_board, capture);
 		if (capture.size()) last_move_verdict = MoveVerdict::Capture;
 		else last_move_verdict = MoveVerdict::Valid;
+		//std::cout << "captured size: " << capture.size() << "\n";
 		for (auto i : capture) {
 			current_board[i.x][i.y] = CellState::Empty;
 		}

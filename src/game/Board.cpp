@@ -92,8 +92,8 @@ static bool canCapture(const Move& move,const Board& board, std::vector<Cell>& c
 
 void Board::placeStoneWithoutValidating(const Move& move, Board& board, std::vector<Cell>& capture) {
 	board[move.x][move.y] = move.player;
-	int liberty = countLiberty(move, board);
-	if (liberty != 0) getCapture(move, board, capture);
+	//int liberty = countLiberty(move, board);
+	getCapture(move, board, capture);
 }
 
 bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture, MoveVerdict& last_move_verdict) {
@@ -173,7 +173,7 @@ void Board::loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& c
 		std::vector<Cell> turn_capture;
 		if (m.pass == 0) current_board.placeStoneWithoutValidating(m, current_board, turn_capture);
 		for (const Cell& i : turn_capture) {
-			current_board[i.x][i.y] = i.state;
+			current_board[i.x][i.y] = CellState::Empty;
 		}
 	}
 }
