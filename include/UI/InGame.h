@@ -19,6 +19,12 @@ public:
     void resize();
 
     void draw();
+
+    // helper function
+    void updateHeaderBar();
+    void updateScoreBox(const std::pair<float, float>& _score);
+    void updateHistoryScroll();
+
 private:
     BoardUI board;
     sf::RectangleShape side_panel;
@@ -54,10 +60,7 @@ private:
 
     void resize(const sf::Vector2u& window_size);
 
-    void updateHeaderBar();
     void updateSoundMusic();
-    void updateScoreBox(const std:: pair<float, float> &_score);
-    void updateHistoryScroll();
     void mode_panel_resize(const float& _height);
     void control_panel_resize(const float& _height);
     void option_panel_resize(const float& _height);
