@@ -1,13 +1,15 @@
+#pragma once
 #include<game/History.h>
 #include<iostream>
 #include<algorithm>
 
 static std::string conv[19] = { "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"};
 
-bool GameHistory::checkSuperKO(const Board& current) {
+bool GameHistory::checkSuperKO(const Board& current, MoveVerdict& last_move_verdict) {
 	for (Board b : board) {
 		if (current == b) {
 			//std::cout << "OH FUCK\n";
+			last_move_verdict = MoveVerdict::SuperKO;
 			return 1;
 		}
 	}
@@ -44,6 +46,58 @@ void GameHistory::undoMove(Board& current_board, CellState& current_player) {
 	board.pop_back();
 }
 
+void GameHistory::undoMoveAIMode(Board& current_board, CellState& current_player, AI& AI) {
+	//Player move first
+	if (current_player == CellState::Black) {
+		if (move.empty()) return;
+	}
+	//AI move first
+	if (current_player == CellState::White) {
+		if (move.size() < 2) return;
+	}
+
+	if (current_player == CellState::Black) current_player = CellState::White;
+	else current_player = CellState::Black;
+
+	Move m = move.back(); move.pop_back();
+	undo.push_back(m);
+
+	if (m.pass == 0) {
+		std::vector<Cell> restore_list = capture.back(); capture.pop_back();
+		restore.push_back(restore_list);
+
+		current_board[m.x][m.y] = CellState::Empty;
+		for (auto i : restore_list) {
+			int x = i.x;
+			int y = i.y;
+			current_board[x][y] = i.state;
+		}
+		board.pop_back();
+	}
+
+	if (current_player == CellState::Black) current_player = CellState::White;
+	else current_player = CellState::Black;
+
+	m = move.back(); move.pop_back();
+	undo.push_back(m);
+
+	if (m.pass == 0) {
+		std::vector<Cell> restore_list = capture.back(); capture.pop_back();
+		restore.push_back(restore_list);
+
+		current_board[m.x][m.y] = CellState::Empty;
+		for (auto i : restore_list) {
+			int x = i.x;
+			int y = i.y;
+			current_board[x][y] = i.state;
+		}
+		board.pop_back();
+	}
+
+	AI.undo();
+	AI.undo();
+}
+
 void GameHistory::redoMove(Board& current_board, CellState& current_player) {
 	if (undo.empty()) return;
 	if (current_player == CellState::Black) current_player = CellState::White;
@@ -66,6 +120,51 @@ void GameHistory::redoMove(Board& current_board, CellState& current_player) {
 	board.push_back(current_board);
 }
 
+void GameHistory::redoMoveAIMode(Board& current_board, CellState& current_player, AI& AI) {
+	//Player move first
+	if (current_player == CellState::Black) {
+		if (undo.empty()) return;
+	}
+	//AI move first
+	if (current_player == CellState::White) {
+		if (undo.size() < 2) return;
+	}
+
+	Move m = undo.back(); undo.pop_back();
+	move.push_back(m);
+	AI.syncMove(m);
+
+	if (m.pass == 0) {
+		std::vector<Cell> capture_list = restore.back(); restore.pop_back();
+		capture.push_back(capture_list);
+
+		current_board[m.x][m.y] = m.player;
+		for (auto i : capture_list) {
+			int x = i.x;
+			int y = i.y;
+			current_board[x][y] = CellState::Empty;
+		}
+		board.push_back(current_board);
+	}
+
+	m = undo.back(); undo.pop_back();
+	move.push_back(m);
+	AI.syncMove(m);
+
+	if (m.pass == 0) {
+		std::vector<Cell> capture_list = restore.back(); restore.pop_back();
+		capture.push_back(capture_list);
+
+		current_board[m.x][m.y] = m.player;
+		for (auto i : capture_list) {
+			int x = i.x;
+			int y = i.y;
+			current_board[x][y] = CellState::Empty;
+		}
+		board.push_back(current_board);
+	}
+}
+
 void GameHistory::clear() {
 	board.clear();
 	capture.clear();
@@ -86,7 +185,7 @@ void GameHistory::loadFromMoveList(const std::vector<Move>& move_list, Board& cu
 		current_player = m.player == CellState::Black ? CellState::White : CellState::Black;
 		if (m.pass == 0) current_board.placeStoneWithoutValidating(m, current_board, turn_capture);
 		for (const Cell& i : turn_capture) {
-			current_board[i.x][i.y] = i.state;
+			current_board[i.x][i.y] = CellState::Empty;
 		}
 		GameHistory::addMove(m, current_board, turn_capture);
 	}
@@ -97,7 +196,7 @@ void GameHistory::loadPreviewFromMoveList(const std::vector<Move>& move_list, Bo
 		std::vector<Cell> turn_capture;
 		if (m.pass == 0) current_board.placeStoneWithoutValidating(m, current_board, turn_capture);
 		for (const Cell& i : turn_capture) {
-			current_board[i.x][i.y] = i.state;
+			current_board[i.x][i.y] = CellState::Empty;
 		}
 	}
 }

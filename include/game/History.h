@@ -3,15 +3,18 @@
 #include<model/CellState.h>
 #include<model/Move.h>
 #include<model/Cell.h>
+#include<AI/AI.h>
 #include<algorithm>
 
 class GameHistory {
 public:
 	void clear();
 	bool checkConsecutivePass();
-	bool checkSuperKO(const Board& current_board);
+	bool checkSuperKO(const Board& current_board, MoveVerdict& last_move_verdict);
 	void undoMove(Board& current_board, CellState& current_player);
 	void redoMove(Board& current_board, CellState& current_player);
+	void undoMoveAIMode(Board& current_board, CellState& current_player, AI& AI);
+	void redoMoveAIMode(Board& current_board, CellState& current_player, AI& AI);
 	void addMove(const Move& move, const Board& current_board, const std::vector<Cell>& turn_capture);
 	void loadFromMoveList(const std::vector<Move>& move_list, Board& current_board, CellState& current_player);
 	void loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board);

@@ -33,11 +33,15 @@ struct UICfg {
     std::string sound_effect_name = "";
     sf::Music music;
     sf::Sound button_click_sound, button_hover_sound;
+    sf::Sound stone_place_sound, stone_error_sound, stone_capture_sound;
 
     UICfg(sf::Vector2u _window_size, sf::Vector2u _min_window_size, sf::RenderWindow& _window, const AssetManager &asset_manager) : 
         window_size(_window_size), min_window_size(_min_window_size), window(_window),
         button_click_sound(asset_manager.getSound("click-a")),
-        button_hover_sound(asset_manager.getSound("tap-a")) {
+        button_hover_sound(asset_manager.getSound("tap-a")),
+        stone_place_sound(asset_manager.getSound("Default-stone-place")),
+        stone_error_sound(asset_manager.getSound("Default-stone-place-no")),
+        stone_capture_sound(asset_manager.getSound("Default-stone-capture")) {
         music.setVolume(background_music_volume);
         updateSoundEffectVolume(sound_effect_volume);
     }
@@ -55,6 +59,9 @@ struct UICfg {
     void updateSoundEffectVolume(float volume) {
         button_click_sound.setVolume(volume);
         button_hover_sound.setVolume(volume);
+        stone_place_sound.setVolume(volume);
+        stone_error_sound.setVolume(volume);
+        stone_capture_sound.setVolume(volume);
     }
 
     void updateSoundEffect(const AssetManager& asset_manager) {

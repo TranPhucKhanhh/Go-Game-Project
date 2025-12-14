@@ -27,7 +27,7 @@ private:
     sf::RectangleShape control_panel;
     sf::RectangleShape history_panel;
     sf::RectangleShape footer_bar;
-    TextBox header_bar;
+    TextBox header_bar, move_validate;
 
     BaseButton sound_button, music_button;
     TextureEffectButton new_button, save_button, reset_button, setting_button, exit_button;
@@ -64,6 +64,8 @@ private:
     void history_panel_resize(const float& _height);
     void score_bar_resize(const float& _height);
 
+    void playAnimation();
+
     // Screen UI value
     float padding;
     float inner_padding;
@@ -78,4 +80,7 @@ private:
         std::string _dt = "Test";
         eventHandle(_d, _dt);
     }
+
+    sf::Clock timer;
+    bool play_animation = false;
 };

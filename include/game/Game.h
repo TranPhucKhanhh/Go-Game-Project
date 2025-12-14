@@ -7,6 +7,8 @@
 #include<model/GameState.h>
 #include<JSON/json.hpp>
 #include<string.h>
+#include<model/MoveVerdict.h>
+#include<AI/AI.h>
 
 using json = nlohmann::json;
 
@@ -15,6 +17,7 @@ struct GameCfg {
 	GameState prev_state = GameState::Menu;
 	GameState state = GameState::Menu;
 	GameMode game_mode = GameMode::PvP;
+	CellState AI_side = CellState::White;
 	int board_size = 13;
 	float komi = 7.5;	
 };
@@ -44,6 +47,7 @@ public:
 	void reset();
 	void resign();
 	void placeStone(int x, int y);
+	void placeStoneAI();
 	bool saveGame(const std::string& name);
 	bool loadPreviewGame(const std::string& name);
 	bool loadGame(const std::string& name);
@@ -54,6 +58,8 @@ public:
 	std::string getLastMove();
 
 	// Return value
+	std::string getAILastMove();
+	MoveVerdict getLastMoveVerdict() const { return last_move_verdict; }
 	CellState getCurrentPlayer() const { return state.current_player; };
 	GameCfg& getGameCfg() { return game_config; }
 	Board getPreviewBoard() const { return previewBoard; };
@@ -83,7 +89,11 @@ private:
 
 	CellState resigned_player = CellState::Empty;
 
-	std::string last_game_state = "";
+	MoveVerdict last_move_verdict = MoveVerdict::Invalid;
+
+	std::string last_AI_move = "";
+
+	AI AI;
 
 	bool game_end;
 };

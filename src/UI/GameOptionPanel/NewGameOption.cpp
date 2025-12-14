@@ -32,7 +32,7 @@ void GameOption::drawNewPanel() {
 		ai_hard_button.updateForceTex(2);
 	}
 
-	if (side_chosen == CellState::White) {
+	if (side_chosen == CellState::Black) {
 		white_side_button.updateForceTex(2);
 	}
 	else  {
@@ -101,10 +101,10 @@ void GameOption::eventHandleNewPanel(const sf::Event& event, std::string& respon
 		resizeNewPanel();
 	}
 	else if (event_respond == "WhiteSide") {
-		side_chosen = CellState::White;
+		side_chosen = CellState::Black;
 	}
 	else if (event_respond == "BlackSide") {
-		side_chosen = CellState::Black;
+		side_chosen = CellState::White;
 	}
 	else if (event_respond == "9x9") {
 		board_size_chosen = 9;

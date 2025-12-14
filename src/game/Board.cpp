@@ -92,14 +92,19 @@ static bool canCapture(const Move& move,const Board& board, std::vector<Cell>& c
 
 void Board::placeStoneWithoutValidating(const Move& move, Board& board, std::vector<Cell>& capture) {
 	board[move.x][move.y] = move.player;
-	int liberty = countLiberty(move, board);
-	if (liberty != 0) getCapture(move, board, capture);
+	//int liberty = countLiberty(move, board);
+	getCapture(move, board, capture);
 }
 
-bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture) {
-	if (isOutOfRange(move, board.size())) return 0;
-	if (isOccupied(move, board)) return 0;
-
+bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capture, MoveVerdict& last_move_verdict) {
+	if (isOutOfRange(move, board.size())) {
+		last_move_verdict = MoveVerdict::Invalid;
+		return 0;
+	}
+	if (isOccupied(move, board)) {
+		last_move_verdict = MoveVerdict::Invalid;
+		return 0;
+	}
 	//Temporary add move to board
 	//Will be removed if it is invalid, and keep if it is valid
 	//Super-KO will be checked later
@@ -109,10 +114,16 @@ bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capt
 	int liberty = countLiberty(move, board);
 	if (liberty != 0) {
 		getCapture(move, board, capture);
+		if (capture.size()) last_move_verdict = MoveVerdict::Capture;
+		else last_move_verdict = MoveVerdict::Valid;
 		return 1;
 	}
+	last_move_verdict = MoveVerdict::Suicide;
 	//Place in no liberty but can capture is also valid
-	if (canCapture(move, board, capture)) return 1;
+	if (canCapture(move, board, capture)) {
+		last_move_verdict = MoveVerdict::Capture;
+		return 1;
+	}
 	board[move.x][move.y] = CellState::Empty;
 	return 0;
 }
@@ -162,7 +173,7 @@ void Board::loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& c
 		std::vector<Cell> turn_capture;
 		if (m.pass == 0) current_board.placeStoneWithoutValidating(m, current_board, turn_capture);
 		for (const Cell& i : turn_capture) {
-			current_board[i.x][i.y] = i.state;
+			current_board[i.x][i.y] = CellState::Empty;
 		}
 	}
 }

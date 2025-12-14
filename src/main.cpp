@@ -15,7 +15,7 @@ const std::string TITLE = "Go game";
 int main()
 {
     // Load all the asset 
-	AssetManager asset_manager;
+    AssetManager asset_manager;
 
     // Load fonts
     asset_manager.loadFontFromFolder("fonts");
@@ -26,17 +26,17 @@ int main()
     asset_manager.loadMusicFromFolder("music");
     asset_manager.loadSoundFromFolder("sound-effect");
 
-	std::cerr << "Load all assets successfully." << std::endl;
+    std::cerr << "Load all assets successfully." << std::endl;
 
     // Start the game
     Game game;
 
 
-	game.start();
+    game.start();
 
     // Run UI
-	UI ui(game, asset_manager, { WINDOW_START_WIDTH, WINDOW_START_HEIGHT }, { WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT }, TITLE);
-	ui.run();
-	
+    UI ui(game, asset_manager, { WINDOW_START_WIDTH, WINDOW_START_HEIGHT }, { WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT }, TITLE);
+    ui.run();
+
     return 0;
 }
