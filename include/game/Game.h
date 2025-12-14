@@ -56,6 +56,7 @@ public:
 	int getMoveListSize();
 	Board getKthBoard(const int k);
 	std::string getLastMove();
+	std::string getKthMove(const int k);
 
 	// Return value
 	std::string getAILastMove();

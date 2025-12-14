@@ -230,6 +230,21 @@ std::string GameHistory::getLastMove(const int board_size) {
 	return s;
 }
 
+std::string GameHistory::getKthMove(const int k, const int board_size) {
+	if (move.size() < k) return "";
+	Move m = move[k - 1];
+	std::string s = "";
+	std::string lastPlayer = (m.player == CellState::Black ? "b" : "w");
+	if (m.pass) {
+		s = lastPlayer + " pass";
+		return s;
+	}
+	s = lastPlayer + " " + conv[m.x] + intToString(board_size - m.y);
+	//std::cout << s << "\n";
+	//std::cout << m.x << " " << m.y << "\n";
+	return s;
+}
+
 std::vector<std::string> GameHistory::getFullMove(const int board_size) {
 	if (move.empty()) return { };
 

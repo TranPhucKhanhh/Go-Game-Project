@@ -253,6 +253,10 @@ int Game::getMoveListSize() {
 	return history.getMoveListSize();
 }
 
+std::string Game::getKthMove(const int k) {
+	return history.getKthMove(k, game_config.board_size);
+}
+
 Board Game::getKthBoard(const int k) {
 	return previewBoard = history.getKthBoard(k);
 }
