@@ -101,8 +101,8 @@ void Game::placeStoneAI() {
 	state.placeWithoutValidating(move, capture, last_move_verdict);
 	history.addMove(move, state.current_board, capture);
 	state.setNextPlayer();
-	AI.showBoard();
-	Game::print();
+	//AI.showBoard();
+	//Game::print();
 }
 
 std::pair<float, float> Game::getScore() {
