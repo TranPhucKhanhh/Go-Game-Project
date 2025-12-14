@@ -18,7 +18,7 @@ struct UICfg {
     std::string title;
     
     sf::RenderWindow& window;
-
+    bool AI_in_turn = false;
 
 	// Adio & Theme settings
     SoundTheme sound_theme = SoundTheme::Minimal;  // temporarily set to minimal

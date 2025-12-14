@@ -8,6 +8,9 @@
 #include<UI/Loading.h>
 #include<model/UICfg.h>
 #include<core/AssetManager.h>
+#include <thread>
+#include <atomic>
+#include <mutex>
 
 class UI {
 public:
@@ -15,6 +18,8 @@ public:
 
     // UI initialize
     void run();
+
+    ~UI();
 
 private:
     UICfg ui_cfg;
@@ -31,4 +36,14 @@ private:
 	std::string respond;
 
 	void switchGameState(const std::string& respond);
+
+    // Handle AI thread
+    std::thread ai_thread;
+    std::atomic<bool> ai_running{ false };
+    std::atomic<bool> ai_finished{ false };
+
+    std::mutex game_mutex;     // protects Game access (main thread + AI thread)
+
+    void startAIAsync();
+    void stopAIThread();
 };
