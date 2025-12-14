@@ -7,7 +7,7 @@
 enum class SoundTheme { Default, Minimal };
 const std::string BoardDesign[] = { "White color", "Cyan color", "Green color", "Black color", "Yellow color", "Anime", "Wooden", "Forest"};
 const std::string StoneDesign[] = { "Default", "Fruit", "Animal1", "Animal2", "Animal3"};
-const std::string SoundEffect[] = {"123", "123"};
+const std::string SoundEffect[] = {"Default", "Digital"};
 const std::string Music[] = { "Puzzle-Dreams", "The-Spunky-Princess"};
 
 struct UICfg {
@@ -30,7 +30,7 @@ struct UICfg {
     float sound_effect_volume = 25, pre_sound_effect_volume = 0;
 
     std::string music_name = "The-Spunky-Princess";
-    std::string sound_effect_name = "";
+    std::string sound_effect_name = "Default";
     sf::Music music;
     sf::Sound button_click_sound, button_hover_sound;
     sf::Sound stone_place_sound, stone_error_sound, stone_capture_sound;
@@ -65,6 +65,8 @@ struct UICfg {
     }
 
     void updateSoundEffect(const AssetManager& asset_manager) {
-        std::cerr << "Set sound effect to " << sound_effect_name << std::endl;
+        stone_place_sound.setBuffer(asset_manager.getSound(sound_effect_name + "-stone-place"));
+        stone_error_sound.setBuffer(asset_manager.getSound(sound_effect_name + "-stone-place-no"));
+        stone_capture_sound.setBuffer(asset_manager.getSound(sound_effect_name + "-stone-capture"));
     }
 };
