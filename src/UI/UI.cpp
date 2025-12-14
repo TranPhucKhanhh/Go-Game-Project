@@ -8,6 +8,13 @@
 #include<string>
 #include<iostream>
 #include<vector>
+#include <thread>
+#include <atomic>
+#include <mutex>
+
+UI::~UI() {
+    stopAIThread();
+}
 
 UI::UI(Game& game, const AssetManager& _asset_manager, const sf::Vector2u& window_size, const sf::Vector2u& min_size, const std::string& title)
     : game(game), asset_manager(_asset_manager), window(sf::VideoMode(window_size), title),
@@ -20,6 +27,36 @@ UI::UI(Game& game, const AssetManager& _asset_manager, const sf::Vector2u& windo
     window.setMinimumSize(ui_cfg.min_window_size);
 
 	std::cerr << "UI initialized successfully." << std::endl;
+}
+
+void UI::startAIAsync()
+{
+    if (ai_running.load(std::memory_order_acquire))
+        return;
+
+    if (ai_thread.joinable())
+        ai_thread.join();
+
+    ai_running.store(true, std::memory_order_release);
+    ai_finished.store(false, std::memory_order_release);
+
+    ai_thread = std::thread([this]()
+        {
+            // Protect Game because main thread is drawing/reading game state.
+            {
+                std::lock_guard<std::mutex> lk(game_mutex);
+                game.placeStoneAI(); // unchanged AI code
+            }
+
+            ai_finished.store(true, std::memory_order_release);
+            ai_running.store(false, std::memory_order_release);
+        });
+}
+
+void UI::stopAIThread()
+{
+    if (ai_thread.joinable())
+        ai_thread.join();
 }
 
 void UI::switchGameState(const std::string &respond) {
@@ -67,7 +104,7 @@ void UI::run() {
         {
             if (event->is<sf::Event::Closed>()) window.close();
 
-            if (const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) ui_cfg. mouse_pos = mouse_move->position;
+            if (const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) ui_cfg.mouse_pos = mouse_move->position;
 
             if (const auto* resized = event->getIf<sf::Event::Resized>()) {
                 ui_cfg.window_size = window.getSize();
@@ -76,7 +113,7 @@ void UI::run() {
                 // Set the view in window to the exact current window's pixel
                 uiView.setSize((sf::Vector2f)ui_cfg.window_size);
                 uiView.setCenter({ uiView.getSize().x * 0.5f, uiView.getSize().y * 0.5f });
-                
+
                 uiView.setViewport(sf::FloatRect({ 0.f, 0.f }, { 1.f, 1.f }));
 
                 window.setView(uiView);
@@ -93,16 +130,16 @@ void UI::run() {
             // Handle the event for GameState
             GameState current_state = game.getGameState();
             respond = "";
-            switch (current_state) {
-            case GameState::Menu:
+
+            if (current_state == GameState::Menu) {
                 menu.eventHandle(*event, respond);
-                break;
-            case GameState::Playing:
+            }
+            else if (current_state == GameState::Playing) {
+                std::scoped_lock lock(game_mutex);
                 in_game.eventHandle(*event, respond);
-                break;
-            case GameState::Setting:
+            }
+            else if (current_state == GameState::Setting) {
                 game_setting.eventHandle(*event, respond);
-				break;
             }
 
             if (respond == "GameNewOption" || respond == "StartNewGame" || respond == "OpenSetting" 
@@ -112,19 +149,43 @@ void UI::run() {
             else if (respond == "GameExit") {
                 window.close();
             }
+            else if (respond == "StartAI") {
+                startAIAsync();
+            }
+        }
+
+        if (ai_finished.exchange(false, std::memory_order_acq_rel)) {
+            // AI has made its move; update UI safely on main thread
+            {
+                std::lock_guard<std::mutex> lk(game_mutex);
+
+                ui_cfg.stone_place_sound.play();
+                ui_cfg.AI_in_turn = false;
+
+                // refresh in-game UI elements after AI move
+                in_game.updateHistoryScroll();
+                in_game.updateHeaderBar();
+                in_game.updateScoreBox(game.getScore());
+            }
         }
 
         GameState current_state = game.getGameState();
-        switch (current_state) {
+        if (current_state == GameState::Playing) {
+            std::scoped_lock lock(game_mutex);
+            in_game.draw();
+        }
+        else {
+            switch (current_state) {
             case GameState::Menu:
                 menu.draw();
                 break;
-            case GameState::Playing:
-                in_game.draw();
-                break;
             case GameState::Setting:
-				game_setting.draw();
+                game_setting.draw();
                 break;
+            case GameState::Playing:
+                // handled above
+                break;
+            }
         }
 
         window.display();   

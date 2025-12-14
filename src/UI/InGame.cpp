@@ -342,7 +342,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         return;
     }
 
-    if (game_playable) {
+    if (game_playable && !ui_cfg.AI_in_turn) {
         if (event.is<sf::Event::MouseMoved>()) {
             board.hoverStone(ui_cfg.mouse_pos, game);
         }
@@ -375,8 +375,13 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
 
             if (game.getGameCfg().game_mode != GameMode::PvP && (game.getLastMoveVerdict() == MoveVerdict::Capture || game.getLastMoveVerdict() == MoveVerdict::Valid)) {
                 //  AI thinking screen
-                game.placeStoneAI();
-                ui_cfg.stone_place_sound.play();
+                ui_cfg.AI_in_turn = true;
+                header_bar.updateStr("AI is thinking!!");
+                header_bar.updateBoxColor(sf::Color::Cyan);
+                header_bar.updateTextColor(sf::Color::Black);
+
+                respond = "StartAI";                  
+                return;
             }
 
             updateHistoryScroll();
@@ -401,6 +406,8 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     if (history_preview_index != -1) out_his_button.eventHandle(event, ui_cfg, event_respond);
 
 	history_scroll.eventHandle(event, ui_cfg, event_respond);
+
+    if (ui_cfg.AI_in_turn) return;
 
     if (event_respond != "") {
 		std::cerr << "clicked: " << event_respond << std::endl;
