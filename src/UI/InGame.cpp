@@ -290,16 +290,14 @@ void InGame::updateScoreBox(const std::pair<float, float>& _score) {
 }
 
 void InGame::updateHistoryScroll() {
-    std::cerr << "updarte his: " << history_scroll.getContentSize() << " " << game.getMoveListSize() << std::endl;
     if (history_scroll.getContentSize() == game.getMoveListSize()) return;
 
     while (history_scroll.getContentSize() < game.getMoveListSize()) {
         if (history_scroll.getIndex() < std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize()))
             history_scroll.updateIndex(history_scroll.getIndex() + 1);
-        //std::cerr << history_scroll.getContentSize() << " " << game.getMoveListSize() << std::endl;
         std::string _str = std::to_string(history_scroll.getContentSize() + 1) + ". " + game.getKthMove(history_scroll.getContentSize() + 1);
         TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
-        _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize()));
+        _move_btn.updateRespondStr("|" + std::to_string(history_scroll.getContentSize() + 1));
         _move_btn.updateColor({ 91, 164, 252 });
         history_scroll.updateContent(_move_btn);
     }
