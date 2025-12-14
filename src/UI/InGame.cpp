@@ -244,6 +244,22 @@ void InGame::playAnimation() {
     move_validate.draw(ui_cfg.window);
 }
 
+void InGame::playAnimation() {
+    if (play_animation == false) return;
+    float _size = move_validate.getSize().x;
+    float _time = timer.getElapsedTime().asSeconds();
+    float _time_do_animation = 0.5;
+    float _time_idle = 0.4;
+    float _time_fade = 0.25;
+    if ( _time <= _time_do_animation) {
+        move_validate.updateBoxPos({mode_panel.getPosition().x + _size - (_size * _time / _time_do_animation),mode_panel.getPosition().y});
+    }
+    else if (_time > _time_idle + _time_do_animation + _time_fade){
+        play_animation = false;
+    }
+    move_validate.draw(ui_cfg.window);
+}
+
 void InGame::updateSoundMusic() {
     if (ui_cfg.background_music_volume == 0) music_button.updateTexture(asset_manager.getTexture("music-no"));
     else music_button.updateTexture(asset_manager.getTexture("music"));

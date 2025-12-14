@@ -12,11 +12,6 @@ using json = nlohmann::json;
 void Game::start() {
 	//Init first state with board_size size, black to move
 	state.initializer(game_config.board_size);
-	//Check if in PvE mode
-	if (game_config.game_mode != GameMode::PvP) {
-		GameMode level = game_config.game_mode;
-		AI.startGame(game_config.board_size, level);
-	}
 	resigned_player = CellState::Empty;
 	game_end = false;
 	std::cout << "Game initializer\n";
@@ -34,28 +29,39 @@ void Game::pass() {
 }
 
 void Game::undo() {
+	if (game_config.game_mode != GameMode::PvP) {
+		history.undoMoveAIMode(state.current_board, state.current_player, AI);
+		return;
+	}
 	history.undoMove(state.current_board, state.current_player);
 }
 
 void Game::redo() {
+	if (game_config.game_mode != GameMode::PvP) {
+		history.redoMoveAIMode(state.current_board, state.current_player, AI);
+		return;
+	}
 	history.redoMove(state.current_board, state.current_player);
 }
 
 void Game::reset() {
 	//Init same as the start of the game
 	state.initializer(game_config.board_size);
-	resigned_player = CellState::Empty;
 	if (game_config.game_mode != GameMode::PvP) {
 		GameMode level = game_config.game_mode;
-		AI.resetGame();
+		AI.startGame(game_config.board_size, level);
+		if (game_config.AI_side == CellState::Black) {
+			Game::placeStoneAI();
+		}
 	}
 	//Clear all undo, redo, and board history
 	history.clear();   
+	resigned_player =  CellState::Empty;
 	game_end = false;
 }
 
 void Game::placeStone(int x, int y) {
-	std::cout << x << " " << y << "\n";
+	//std::cout << x << " " << y << "\n";
 	Move move(x, y, state.current_player, 0);
 	std::vector<Cell> capture;
 	if (state.validateMove(move, capture, last_move_verdict) == 0) return;
@@ -92,9 +98,11 @@ void Game::placeStoneAI() {
 		return;
 	}
 	std::vector<Cell> capture;
-	state.placeWithOutValidating(move, capture, last_move_verdict);
+	state.placeWithoutValidating(move, capture, last_move_verdict);
 	history.addMove(move, state.current_board, capture);
 	state.setNextPlayer();
+	AI.showBoard();
+	Game::print();
 }
 
 std::pair<float, float> Game::getScore() {
@@ -154,7 +162,10 @@ bool Game::saveGame(const std::string& name) {
 	std::vector<Move> move_history = history.getMoveHistory();
 	json j_move_history = move_history;
 	json j_config = Game::game_config;
-
+	namespace fs = std::filesystem;
+	if (!fs::exists(SAVEGAME_DIR)) {
+		fs::create_directories(SAVEGAME_DIR);
+	}
 	std::string path = std::string(SAVEGAME_DIR) + '/' + name;
 	std::ofstream fout(path);
 	if (!fout.is_open()) {
@@ -182,6 +193,10 @@ bool Game::loadGame(const std::string& name) {
 	game_config = json_config;
 	Game::reset();
 	history.loadFromMoveList(move_history, state.current_board, state.current_player);
+	if (game_config.game_mode != GameMode::PvP) {
+		AI.loadSavedGame(move_history, game_config.board_size, game_config.game_mode);
+		//AI.showBoard();
+	}
 	fin.close();
 	return 1;
 }
@@ -262,6 +277,7 @@ std::string Game::getAILastMove() {
 }
 
 Board Game::getExampleBoard() {
+	//std::cout << "Hello\n";
 	if (example_board.size() != 13) {
 		example_board = Board(13);
 		//Place some stones for preview

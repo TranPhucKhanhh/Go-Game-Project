@@ -64,9 +64,9 @@ void AI::startGame(const int init_board_size, const GameMode init_level) {
 	katago.readResponse();
 	katago.send("kata-set-rule ko POSITIONAL");
 	katago.readResponse();
-	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 5");
-	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 50");
-	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 500");
+	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 1");
+	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 10");
+	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 100");
 	katago.readResponse();
 }
 
@@ -81,9 +81,9 @@ void AI::resetGame() {
 	katago.readResponse(); 
 	katago.send("kata-set-rule ko POSITIONAL");
 	katago.readResponse();
-	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 5");
-	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 50");
-	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 500");
+	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 1");
+	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 10");
+	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 100");
 	katago.readResponse();
 }
 
@@ -142,4 +142,23 @@ Move AI::genMove(const CellState& current_player, CellState& resigned_player) {
 		return Move(-1, -1, CellState::Empty, 1);
 	}
 	return stringToMove(current_player, response, board_size);
+}
+
+void AI::undo() {
+	katago.send("undo");
+	katago.readResponse();
+}
+
+void AI::loadSavedGame(const std::vector<Move>& move_history, const int init_board_size, const GameMode init_level) {
+	AI::startGame(init_board_size, init_level);
+	for (const Move& m : move_history) {
+		AI::syncMove(m);
+		//AI::showBoard();
+	}
+}
+
+void AI::showBoard() {
+	katago.send("showboard");
+	std::string s = katago.readResponse();
+	std::cout << s;
 }
