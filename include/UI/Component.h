@@ -201,6 +201,9 @@ public:
 	void updateBoxPos(const sf::Vector2f& _position) { position = _position; update(); };
 	void updateBoxSize(const sf::Vector2f& _size) { box.setSize(_size); update(); };
 	void updateBoxColor(const sf::Color& color) { box.setFillColor(color); }
+	void updateBoxTexture(const sf::Texture& _t) { box.setTexture(&_t); }
+	void updateBoxOpacity(const uint8_t& c) { sf::Color _color = { 255,255,255,c };  box.setFillColor(_color); };
+
 	void updateOutlineThickness(const float& thickness) { box.setOutlineThickness(thickness); };
 	void updateOutlineColor(const sf::Color& color) { box.setOutlineColor(color); };
 
