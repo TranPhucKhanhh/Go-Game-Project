@@ -205,16 +205,9 @@ void InGame::enter() {
 
     // Update history from game
 	history_scroll.clearContent();
-	std::vector<std::string> _move_list = game.getMoveList();
-	for (size_t i = 0; i < _move_list.size(); i++) {
-		std::string _str = std::to_string(i + 1) + ". " + _move_list[i];
-        TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
-		_move_btn.updateRespondStr("|" + std::to_string(i + 1));
-        _move_btn.updateColor({ 91, 164, 252 });
-		history_scroll.updateContent(_move_btn);
-	}
-    history_scroll.updateIndex(std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize())); // Set the current index to the last move
-	
+    std::cerr << "Hello from This" << std::endl;
+    updateHistoryScroll();
+	    
     // update the mode
     if (game.getGameCfg().game_mode == GameMode::PvP) mode_box.updateStr("Mode: PvP");
     else if (game.getGameCfg().game_mode == GameMode::AIEasy) mode_box.updateStr("Mode: AI easy");
@@ -297,14 +290,19 @@ void InGame::updateScoreBox(const std::pair<float, float>& _score) {
 }
 
 void InGame::updateHistoryScroll() {
+    std::cerr << "updarte his: " << history_scroll.getContentSize() << " " << game.getMoveListSize() << std::endl;
     if (history_scroll.getContentSize() == game.getMoveListSize()) return;
-    if (history_scroll.getIndex() < std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize()))
-        history_scroll.updateIndex(history_scroll.getIndex() + 1);
-    std::string _str = std::to_string(game.getMoveListSize()) + ". " + game.getLastMove();
-    TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
-    _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize()));
-    _move_btn.updateColor({ 91, 164, 252 });
-    history_scroll.updateContent(_move_btn);
+
+    while (history_scroll.getContentSize() < game.getMoveListSize()) {
+        if (history_scroll.getIndex() < std::max(0, (int)game.getMoveListSize() - (int)history_scroll.getPreviewSize()))
+            history_scroll.updateIndex(history_scroll.getIndex() + 1);
+        //std::cerr << history_scroll.getContentSize() << " " << game.getMoveListSize() << std::endl;
+        std::string _str = std::to_string(history_scroll.getContentSize() + 1) + ". " + game.getKthMove(history_scroll.getContentSize() + 1);
+        TextButton _move_btn(_str, asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
+        _move_btn.updateRespondStr("|" + std::to_string(game.getMoveListSize()));
+        _move_btn.updateColor({ 91, 164, 252 });
+        history_scroll.updateContent(_move_btn);
+    }
 }
 
 void InGame::eventHandle(const sf::Event& event, std::string& respond) {
@@ -442,6 +440,8 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
 
 		// updat the history scroll
         history_scroll.deleteLastContent();
+        if (game.getGameCfg().game_mode != GameMode::PvP ) 
+            history_scroll.deleteLastContent();
 
     }
     else if (event_respond == "Redo" && game_playable && !game.isGameEnd()) {

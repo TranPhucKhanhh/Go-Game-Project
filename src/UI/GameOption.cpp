@@ -345,7 +345,6 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 		game.getGameCfg().game_mode = game_mode;
 		game.getGameCfg().AI_side = side_chosen;
 		game.start();
-		game.reset();
 		respond = "StartNewGame";
 	}
 	else if (event_respond == "LoadNewGame") {
