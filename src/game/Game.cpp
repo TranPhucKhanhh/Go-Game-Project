@@ -12,6 +12,13 @@ using json = nlohmann::json;
 void Game::start() {
 	//Init first state with board_size size, black to move
 	state.initializer(game_config.board_size);
+	if (game_config.game_mode != GameMode::PvP) {
+		GameMode level = game_config.game_mode;
+		AI.startGame(game_config.board_size, level);
+		if (game_config.AI_side == CellState::Black) {
+			Game::placeStoneAI();
+		}
+	}
 	resigned_player = CellState::Empty;
 	game_end = false;
 	std::cout << "Game initializer\n";
