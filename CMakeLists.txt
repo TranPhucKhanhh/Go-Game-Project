@@ -12,6 +12,16 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
+include(FetchContent)
+
+FetchContent_Declare(
+    TinyProcessLib
+    GIT_REPOSITORY https://github.com/eidheim/tiny-process-library.git
+    GIT_TAG master
+    GIT_SHALLOW ON
+)
+FetchContent_MakeAvailable(TinyProcessLib)
+
 add_executable(GoGame 
                         src/main.cpp
                         src/component/Button.cpp
@@ -38,7 +48,9 @@ add_executable(GoGame
                         src/game/Board.cpp
                         src/game/Game.cpp
                         src/game/History.cpp
-   )
+    "src/AI/KatagoLink.cpp" "include/model/MoveVerdict.h")
+
+target_include_directories(GoGame PRIVATE ${tinyprocesslib_SOURCE_DIR}/include)
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics SFML::Audio)
@@ -46,3 +58,5 @@ target_include_directories(GoGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_compile_definitions(GoGame PRIVATE ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
 target_compile_definitions(GoGame PRIVATE SAVEGAME_DIR="${CMAKE_SOURCE_DIR}/saved")
+target_compile_definitions(GoGame PRIVATE KATAGO_DIR="${CMAKE_SOURCE_DIR}/Katago")
+
