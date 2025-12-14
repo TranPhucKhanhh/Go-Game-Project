@@ -1,6 +1,7 @@
 {
-    "board_size": 19,
-    "game_mode": 0,
+    "AI_side": 3,
+    "board_size": 9,
+    "game_mode": 1,
     "prev_state": 1,
     "state": 2
 }
@@ -8,103 +9,97 @@
     {
         "pass": false,
         "player": 2,
-        "x": 10,
-        "y": 10
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 8,
-        "y": 5
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 16,
-        "y": 8
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 14,
-        "y": 5
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 8,
-        "y": 9
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 9,
-        "y": 6
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 10,
-        "y": 7
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 11,
-        "y": 5
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 11,
+        "x": 3,
         "y": 4
     },
     {
         "pass": false,
         "player": 3,
-        "x": 13,
-        "y": 7
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 13,
-        "y": 11
-    },
-    {
-        "pass": false,
-        "player": 3,
         "x": 5,
-        "y": 10
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 5,
-        "y": 6
-    },
-    {
-        "pass": false,
-        "player": 3,
-        "x": 8,
         "y": 4
     },
     {
         "pass": false,
         "player": 2,
-        "x": 10,
-        "y": 5
+        "x": 4,
+        "y": 6
     },
     {
         "pass": false,
         "player": 3,
-        "x": 11,
-        "y": 7
-    },
-    {
-        "pass": false,
-        "player": 2,
-        "x": 10,
+        "x": 5,
         "y": 2
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 6,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 6,
+        "y": 5
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 2,
+        "y": 7
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 2,
+        "y": 2
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 2,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 7,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 2,
+        "y": 4
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 5,
+        "y": 6
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 1,
+        "y": 3
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 1,
+        "y": 2
+    },
+    {
+        "pass": false,
+        "player": 2,
+        "x": 8,
+        "y": 4
+    },
+    {
+        "pass": false,
+        "player": 3,
+        "x": 4,
+        "y": 3
     }
 ]
