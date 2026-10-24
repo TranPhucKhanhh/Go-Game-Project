@@ -41,7 +41,7 @@ private:
 
     TextBox white_score_box;
     TextBox black_score_box;
-    TextBox mode_box;
+    TextBox mode_box, move_info_box;
     sf::Sprite white_stone_image, black_stone_image;
 
     TextInputNotification save_file_input;
@@ -55,12 +55,14 @@ private:
     const AssetManager& asset_manager;
 
     int history_preview_index = -1;
+    std::string move_info_text = "Move 0: Start";
 
     bool game_playable;
 
     void resize(const sf::Vector2u& window_size);
 
     void updateSoundMusic();
+    void updateMoveInfo();
     void mode_panel_resize(const float& _height);
     void control_panel_resize(const float& _height);
     void option_panel_resize(const float& _height);

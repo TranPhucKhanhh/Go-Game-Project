@@ -27,10 +27,11 @@ void Game::start() {
 void Game::pass() {
 	Move move(-1, -1, state.current_player, 1);
 	std::vector<Cell> capture;
+	if (game_config.game_mode != GameMode::PvP) AI.syncMove(move);
 	state.setNextPlayer();
 	history.addMove(move, state.current_board, capture);
 	if (history.checkConsecutivePass()) game_end = true;
-	if (game_config.game_mode != GameMode::PvP) {
+	if (game_config.game_mode != GameMode::PvP && !game_end) {
 		Game::placeStoneAI();
 	}
 }

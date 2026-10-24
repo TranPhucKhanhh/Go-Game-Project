@@ -4,7 +4,9 @@
 #include<game/Board.h>
 #include<game/Game.h>
 #include<model/UICfg.h>
+#include<model/Move.h>
 #include<functional>
+#include<optional>
 
 class BaseButton {
 public:
@@ -126,7 +128,8 @@ private:
 class BoardUI {
 public:
 	BoardUI(const AssetManager &_asset_manager);
-	void draw(sf::RenderWindow& window, const Board& current_board);
+	void draw(sf::RenderWindow& window, const Board& current_board,
+		const std::optional<Move>& last_move = std::nullopt, bool show_hover = false);
 
 	// Return value
 	sf::Vector2f getPos() const { return position; }
@@ -155,6 +158,8 @@ public:
 	void updateStone();
 
 private:
+	void drawStarPoints(sf::RenderWindow& window) const;
+
 	sf::RectangleShape canvas;
 	sf::RectangleShape board;
 	sf::Texture board_background;

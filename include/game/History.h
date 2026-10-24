@@ -5,6 +5,7 @@
 #include<model/Cell.h>
 #include<AI/AI.h>
 #include<algorithm>
+#include<optional>
 
 class GameHistory {
 public:
@@ -21,6 +22,7 @@ public:
 	std::string getLastMove(const int board_size);
 	std::string getKthMove(const int k, const int board_size);
 	std::vector<Move> getMoveHistory();
+	std::optional<Move> getMoveAt(int index) const; // Zero-based; empty if out of range.
 	std::vector<std::string> getFullMove(const int board_size);
 	int getMoveListSize();
 	Board getKthBoard(const int k);

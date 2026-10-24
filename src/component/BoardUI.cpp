@@ -3,6 +3,7 @@
 #include<core/AssetManager.h>
 #include<model/CellState.h>
 #include<game/Game.h>
+#include<algorithm>
 #include<iostream>
 #include<cmath>
 
@@ -28,7 +29,29 @@ void BoardUI::updateSize(const float& size) {
     predict_stone.setColor(sf::Color(255,255,255, 200));
 }
 
-void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {
+void BoardUI::drawStarPoints(sf::RenderWindow& window) const {
+    if (board_cell_number != 9 && board_cell_number != 13 && board_cell_number != 19) return;
+
+    const int near_index = board_cell_number == 9 ? 2 : 3;
+    const int middle = board_cell_number / 2;
+    const int far_index = board_cell_number - 1 - near_index;
+    const float radius = std::max(2.f, grid_size * 0.09f);
+    sf::CircleShape point(radius);
+    point.setOrigin({ radius, radius });
+    point.setFillColor(line_color);
+
+    for (int x : { near_index, middle, far_index }) {
+        for (int y : { near_index, middle, far_index }) {
+            // Small boards use four corner points and the center; 19x19 uses all nine.
+            if (board_cell_number != 19 && ((x == middle) != (y == middle))) continue;
+            point.setPosition({ start_position.x + x * grid_size, start_position.y + y * grid_size });
+            window.draw(point);
+        }
+    }
+}
+
+void BoardUI::draw(sf::RenderWindow& window, const Board& current_board,
+    const std::optional<Move>& last_move, bool show_hover) {
     window.draw(canvas);
     window.draw(board);
     
@@ -69,7 +92,9 @@ void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {
         window.draw(number_text);
     }
 
-    if (hoverOnStone) {
+    drawStarPoints(window);
+
+    if (show_hover && hoverOnStone) {
         window.draw(predict_stone);
     }
 
@@ -85,6 +110,27 @@ void BoardUI::draw(sf::RenderWindow& window, const Board& current_board) {
                 window.draw(stone);
             }
         }
+    }
+
+    if (last_move && !last_move->pass &&
+        (last_move->player == CellState::Black || last_move->player == CellState::White) &&
+        last_move->x >= 0 && last_move->y >= 0 &&
+        last_move->x < current_board.size() && last_move->y < current_board.size() &&
+        current_board[last_move->x][last_move->y] == last_move->player) {
+        const float radius = grid_size * 0.19f;
+        sf::CircleShape marker(radius);
+        marker.setOrigin({ radius, radius });
+        marker.setPosition({ start_position.x + last_move->x * grid_size,
+            start_position.y + last_move->y * grid_size });
+        marker.setFillColor(sf::Color::Transparent);
+
+        // A white ring with a black outer rim remains visible on every stone design.
+        marker.setOutlineColor(sf::Color::Black);
+        marker.setOutlineThickness(std::max(2.f, grid_size * 0.06f));
+        window.draw(marker);
+        marker.setOutlineColor(sf::Color::White);
+        marker.setOutlineThickness(std::max(1.f, grid_size * 0.025f));
+        window.draw(marker);
     }
 }
 

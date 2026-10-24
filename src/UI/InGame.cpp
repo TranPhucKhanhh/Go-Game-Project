@@ -57,6 +57,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     error_notification(_asset_manager.getFont("RobotoSlab-Bold")),
     win_notification(_asset_manager.getFont("RobotoSlab-Bold")),
     mode_box(_asset_manager.getFont("StackSansNotch-Bold")),
+    move_info_box(_asset_manager.getFont("StackSansNotch-Regular")),
     board(_asset_manager),
     white_stone_image(_asset_manager.getTexture("dummy")),
     black_stone_image(_asset_manager.getTexture("dummy")),
@@ -84,6 +85,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
 
 	mode_box.updateBoxColor(sf::Color({ 0, 0, 0, 0 }));
     mode_box.updateTextColor(sf::Color::Black);
+    move_info_box.updateBoxColor(sf::Color::Transparent);
+    move_info_box.updateTextColor(sf::Color::Black);
+    move_info_box.updateStr(move_info_text);
 
     resize();
 
@@ -290,6 +294,9 @@ void InGame::updateScoreBox(const std::pair<float, float>& _score) {
 }
 
 void InGame::updateHistoryScroll() {
+    while (history_scroll.getContentSize() > game.getMoveListSize()) {
+        history_scroll.deleteLastContent();
+    }
     if (history_scroll.getContentSize() == game.getMoveListSize()) return;
 
     while (history_scroll.getContentSize() < game.getMoveListSize()) {
@@ -436,10 +443,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         updateHeaderBar();
         updateScoreBox(game.getScore());
 
-		// updat the history scroll
-        history_scroll.deleteLastContent();
-        if (game.getGameCfg().game_mode != GameMode::PvP ) 
-            history_scroll.deleteLastContent();
+        updateHistoryScroll();
 
     }
     else if (event_respond == "Redo" && game_playable && !game.isGameEnd()) {
@@ -542,6 +546,21 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     }
 }
 
+void InGame::updateMoveInfo() {
+    const int move_number = history_preview_index == -1 ? game.getMoveListSize() : history_preview_index + 1;
+    std::string description = move_number == 0 ? "Start" : game.getKthMove(move_number);
+    if (!description.empty()) {
+        if (description[0] == 'b') description[0] = 'B';
+        else if (description[0] == 'w') description[0] = 'W';
+    }
+    const std::string label = "Move " + std::to_string(move_number) + ": " + description;
+    if (label != move_info_text) {
+        move_info_text = label;
+        move_info_box.updateStr(move_info_text);
+        move_info_box.updateTextSizeFit(0.9f);
+    }
+}
+
 void InGame::draw() {
     ui_cfg.window.clear(sf::Color(240, 217, 181));
 
@@ -575,11 +594,18 @@ void InGame::draw() {
     white_score_box.draw(ui_cfg.window);
     black_score_box.draw(ui_cfg.window);
 
-    if (history_preview_index != -1) board.draw(ui_cfg.window, game.getPreviewBoard());
-    else board.draw(ui_cfg.window, game.getCurrentBoard());
+    if (history_preview_index != -1) {
+        board.draw(ui_cfg.window, game.getPreviewBoard(), game.getMoveAt(history_preview_index));
+    }
+    else {
+        board.draw(ui_cfg.window, game.getCurrentBoard(), game.getMoveAt(game.getMoveListSize() - 1),
+            game_playable && !ui_cfg.AI_in_turn);
+    }
 
     history_scroll.draw(ui_cfg.window);
     mode_box.draw(ui_cfg.window);
+    updateMoveInfo();
+    move_info_box.draw(ui_cfg.window);
 
     playAnimation();
 
@@ -603,9 +629,13 @@ void InGame::mode_panel_resize(const float& _height) {
     mode_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2, 
         header_bar.getPos().y - status_bar_size_y / 2.f + _height /2.f});
 
-    mode_box.updateBoxPos(mode_panel.getPosition());
-    mode_box.updateBoxSize({ mode_panel.getSize().x * 0.8f, mode_panel.getSize().y * 0.8f });
+    mode_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y - _height * 0.22f });
+    mode_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.36f });
     mode_box.updateTextSizeFit(1.f);
+
+    move_info_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y + _height * 0.22f });
+    move_info_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.36f });
+    move_info_box.updateTextSizeFit(0.9f);
 }
 
 void InGame::option_panel_resize(const float& _height) {

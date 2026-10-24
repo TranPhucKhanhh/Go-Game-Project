@@ -9,6 +9,7 @@
 #include<string.h>
 #include<model/MoveVerdict.h>
 #include<AI/AI.h>
+#include<optional>
 
 using json = nlohmann::json;
 
@@ -57,6 +58,7 @@ public:
 	Board getKthBoard(const int k);
 	std::string getLastMove();
 	std::string getKthMove(const int k);
+	std::optional<Move> getMoveAt(int index) const { return history.getMoveAt(index); }
 
 	// Return value
 	std::string getAILastMove();

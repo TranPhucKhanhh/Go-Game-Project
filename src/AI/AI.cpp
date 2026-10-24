@@ -139,7 +139,7 @@ Move AI::genMove(const CellState& current_player, CellState& resigned_player) {
 		return Move(-1, -1, CellState::Empty, 0);
 	}
 	if (response == "= pass") {
-		return Move(-1, -1, CellState::Empty, 1);
+		return Move(-1, -1, current_player, 1);
 	}
 	return stringToMove(current_player, response, board_size);
 }

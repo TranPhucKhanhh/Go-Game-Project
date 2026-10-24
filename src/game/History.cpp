@@ -31,12 +31,10 @@ void GameHistory::undoMove(Board& current_board, CellState& current_player) {
 	Move m = move.back(); move.pop_back();
 	undo.push_back(m);
 
-	if (m.pass == 1) return;
-
 	std::vector<Cell> restore_list = capture.back(); capture.pop_back();
 	restore.push_back(restore_list);
 	
-	current_board[m.x][m.y] = CellState::Empty;
+	if (!m.pass) current_board[m.x][m.y] = CellState::Empty;
 	for (auto i : restore_list) {
 		int x = i.x;
 		int y = i.y;
@@ -46,52 +44,10 @@ void GameHistory::undoMove(Board& current_board, CellState& current_player) {
 }
 
 void GameHistory::undoMoveAIMode(Board& current_board, CellState& current_player, AI& AI) {
-	//Player move first
-	if (current_player == CellState::Black) {
-		if (move.empty()) return;
-	}
-	//AI move first
-	if (current_player == CellState::White) {
-		if (move.size() < 2) return;
-	}
-
-	if (current_player == CellState::Black) current_player = CellState::White;
-	else current_player = CellState::Black;
-
-	Move m = move.back(); move.pop_back();
-	undo.push_back(m);
-
-	if (m.pass == 0) {
-		std::vector<Cell> restore_list = capture.back(); capture.pop_back();
-		restore.push_back(restore_list);
-
-		current_board[m.x][m.y] = CellState::Empty;
-		for (auto i : restore_list) {
-			int x = i.x;
-			int y = i.y;
-			current_board[x][y] = i.state;
-		}
-		board.pop_back();
-	}
-
-	if (current_player == CellState::Black) current_player = CellState::White;
-	else current_player = CellState::Black;
-
-	m = move.back(); move.pop_back();
-	undo.push_back(m);
-
-	if (m.pass == 0) {
-		std::vector<Cell> restore_list = capture.back(); capture.pop_back();
-		restore.push_back(restore_list);
-
-		current_board[m.x][m.y] = CellState::Empty;
-		for (auto i : restore_list) {
-			int x = i.x;
-			int y = i.y;
-			current_board[x][y] = i.state;
-		}
-		board.pop_back();
-	}
+	// Undo a complete human/AI pair; keep an AI opening move when it is the only move.
+	if (move.size() < 2) return;
+	undoMove(current_board, current_player);
+	undoMove(current_board, current_player);
 
 	AI.undo();
 	AI.undo();
@@ -105,12 +61,10 @@ void GameHistory::redoMove(Board& current_board, CellState& current_player) {
 	Move m = undo.back(); undo.pop_back();
 	move.push_back(m);
 
-	if (m.pass == 1) return;
-
 	std::vector<Cell> capture_list = restore.back(); restore.pop_back();
 	capture.push_back(capture_list);
 
-	current_board[m.x][m.y] = m.player;
+	if (!m.pass) current_board[m.x][m.y] = m.player;
 	for (auto i : capture_list) {
 		int x = i.x;
 		int y = i.y;
@@ -120,48 +74,14 @@ void GameHistory::redoMove(Board& current_board, CellState& current_player) {
 }
 
 void GameHistory::redoMoveAIMode(Board& current_board, CellState& current_player, AI& AI) {
-	//Player move first
-	if (current_player == CellState::Black) {
-		if (undo.empty()) return;
-	}
-	//AI move first
-	if (current_player == CellState::White) {
-		if (undo.size() < 2) return;
-	}
-
-	Move m = undo.back(); undo.pop_back();
-	move.push_back(m);
+	if (undo.size() < 2) return;
+	Move m = undo.back();
+	redoMove(current_board, current_player);
 	AI.syncMove(m);
 
-	if (m.pass == 0) {
-		std::vector<Cell> capture_list = restore.back(); restore.pop_back();
-		capture.push_back(capture_list);
-
-		current_board[m.x][m.y] = m.player;
-		for (auto i : capture_list) {
-			int x = i.x;
-			int y = i.y;
-			current_board[x][y] = CellState::Empty;
-		}
-		board.push_back(current_board);
-	}
-
-	m = undo.back(); undo.pop_back();
-	move.push_back(m);
+	m = undo.back();
+	redoMove(current_board, current_player);
 	AI.syncMove(m);
-
-	if (m.pass == 0) {
-		std::vector<Cell> capture_list = restore.back(); restore.pop_back();
-		capture.push_back(capture_list);
-
-		current_board[m.x][m.y] = m.player;
-		for (auto i : capture_list) {
-			int x = i.x;
-			int y = i.y;
-			current_board[x][y] = CellState::Empty;
-		}
-		board.push_back(current_board);
-	}
 }
 
 void GameHistory::clear() {
@@ -202,6 +122,11 @@ void GameHistory::loadPreviewFromMoveList(const std::vector<Move>& move_list, Bo
 
 std::vector<Move> GameHistory::getMoveHistory() {
 	return move;
+}
+
+std::optional<Move> GameHistory::getMoveAt(int index) const {
+	if (index < 0 || index >= static_cast<int>(move.size())) return std::nullopt;
+	return move[index];
 }
 
 static std::string intToString(int n) {
