@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(GoGame LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -11,16 +11,6 @@ FetchContent_Declare(SFML
     EXCLUDE_FROM_ALL
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
-
-include(FetchContent)
-
-FetchContent_Declare(
-    TinyProcessLib
-    GIT_REPOSITORY https://github.com/eidheim/tiny-process-library.git
-    GIT_TAG master
-    GIT_SHALLOW ON
-)
-FetchContent_MakeAvailable(TinyProcessLib)
 
 add_executable(GoGame 
                         src/main.cpp
@@ -49,8 +39,6 @@ add_executable(GoGame
                         src/game/Game.cpp
                         src/game/History.cpp
     "src/AI/KatagoLink.cpp" "include/model/MoveVerdict.h")
-
-target_include_directories(GoGame PRIVATE ${tinyprocesslib_SOURCE_DIR}/include)
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
 target_link_libraries(GoGame PRIVATE SFML::Graphics SFML::Audio)

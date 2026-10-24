@@ -1,4 +1,3 @@
-#pragma once
 #include<game/Game.h>
 #include<vector>
 #include<iostream>
@@ -118,9 +117,9 @@ std::pair<float, float> Game::getScore() {
 	int white_score = 0;
 	float KOMI = game_config.komi;
 	state.current_board.calculateScore(state.current_board, black_score, white_score);
-	if (resigned_player == CellState::Empty) return std::make_pair(black_score, white_score + KOMI);
 	if (resigned_player == CellState::Black) return std::make_pair(-1, white_score + KOMI);
 	if (resigned_player == CellState::White) return std::make_pair(black_score, -1);
+	return std::make_pair(black_score, white_score + KOMI);
 }
 
 std::pair<float, float> Game::getScoreFromBoard(Board board) {

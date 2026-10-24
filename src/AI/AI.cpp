@@ -1,5 +1,5 @@
-#pragma once
 #include<AI/AI.h>
+#include<algorithm>
 #include<string>
 #include<iostream>
 

@@ -1,4 +1,3 @@
-#pragma once
 #include <game/Board.h>
 #include <model/Move.h>
 #include <model/Cell.h>

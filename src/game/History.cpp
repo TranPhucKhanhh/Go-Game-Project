@@ -1,4 +1,3 @@
-#pragma once
 #include<game/History.h>
 #include<iostream>
 #include<algorithm>

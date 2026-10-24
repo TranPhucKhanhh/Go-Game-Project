@@ -5,3 +5,5 @@ out
 .vs
 .vscode
 Katago/
+AGENTS.md
+.agents/
