@@ -337,6 +337,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         if (event_respond == "SaveCurrentGame") {
 			int check = game.saveGame(save_file_input.getInputStr());
             if (check == 0) {
+				error_notification.updateTitleStr("ERROR");
 				error_notification.updateNotificationStr("Failed to save file");
 				error_notification.updateOnScreen(true);
             }
@@ -373,17 +374,19 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             else if (game.getLastMoveVerdict() == MoveVerdict::Suicide ||
                 game.getLastMoveVerdict() == MoveVerdict::SuperKO) {
                 ui_cfg.stone_error_sound.play();
-                play_animation = true;
-                timer.restart();
-
+                error_notification.updateTitleStr("Move rejected");
                 if (game.getLastMoveVerdict() == MoveVerdict::Suicide) {
-                    move_validate.updateStr("Suicide Threat");
+                    error_notification.updateNotificationStr(
+                        "Suicide is not allowed.\nYour group would have no liberties\nand this move captures no stones.");
                 }
                 else {
-                    move_validate.updateStr("SuperKO Threat");
+                    error_notification.updateNotificationStr(
+                        "Superko: this repeats an earlier board.\nRepeated positions are forbidden.\nChoose a different move or pass.");
                 }
-                move_validate.updateTextSizeFit(0.9f);
-                move_validate.updateBoxOpacity(200);
+                // Refit the multi-line explanation after changing its text.
+                error_notification.updateSize(error_notification.getSize());
+                error_notification.updateOnScreen(true);
+                return;
             }
             else if (game.getLastMoveVerdict() == MoveVerdict::Capture) {
                 ui_cfg.stone_capture_sound.play();
