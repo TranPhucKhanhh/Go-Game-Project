@@ -39,6 +39,15 @@ After all the preparations are finished, from the root of the project go to the 
 
 More detail instructions are inside the `INTRUCTIONS.md` file
 
+## Beginner assistance
+
+Assistance is on by default. Use **Assistance: ON/OFF** in the game side panel to show or hide the learning overlays.
+
+- Hover over a stone to outline its connected group and mark its empty neighboring intersections in green. The side panel shows the number of stones and distinct liberties; a liberty shared by several stones counts once.
+- Red-orange outlines mark groups in **atari** (exactly one liberty). Hovering such a group also shows `ATARI` in the readout.
+- Assistance follows the displayed position, including captures, undo/redo and history previews. It does not play a move or change the rules.
+- Rejected suicide and superko moves open an English explanation. Close it to continue playing; these explanations remain available when assistance is off.
+
 ## Full repository on Github
 
 The Github link to the full project with instruction is: https://github.com/TranPhucKhanhh/Go-Game-Project.git
