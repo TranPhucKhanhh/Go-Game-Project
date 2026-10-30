@@ -134,6 +134,75 @@ void BoardUI::draw(sf::RenderWindow& window, const Board& current_board,
     }
 }
 
+std::optional<sf::Vector2i> BoardUI::intersectionAt(const sf::Vector2i& mouse_pos) const {
+    if (grid_size <= 0.f || board_cell_number <= 0) return std::nullopt;
+    const float x = (mouse_pos.x - start_position.x) / grid_size;
+    const float y = (mouse_pos.y - start_position.y) / grid_size;
+    const int column = static_cast<int>(std::round(x));
+    const int row = static_cast<int>(std::round(y));
+    if (column < 0 || row < 0 || column >= board_cell_number || row >= board_cell_number ||
+        std::abs(x - column) > inner_percent || std::abs(y - row) > inner_percent)
+        return std::nullopt;
+    return sf::Vector2i{ column, row };
+}
+
+std::string BoardUI::drawAssistance(sf::RenderWindow& window, const Board& current_board,
+    const sf::Vector2i& mouse_pos) const {
+    if (current_board.size() != board_cell_number) return "Hover stones for liberties";
+    const sf::Color danger(230, 75, 35);
+    const sf::Color selected(0, 170, 235);
+    const sf::Color liberty(130, 245, 85);
+    auto ring = [&](const Cell& cell, sf::Color color, float scale) {
+        const float radius = grid_size * scale;
+        sf::CircleShape marker(radius);
+        marker.setOrigin({ radius, radius });
+        marker.setPosition({ start_position.x + cell.x * grid_size,
+            start_position.y + cell.y * grid_size });
+        marker.setFillColor(sf::Color::Transparent);
+        marker.setOutlineColor(sf::Color::Black);
+        marker.setOutlineThickness(std::max(3.f, grid_size * 0.09f));
+        window.draw(marker);
+        marker.setOutlineColor(color);
+        marker.setOutlineThickness(std::max(1.5f, grid_size * 0.045f));
+        window.draw(marker);
+    };
+
+    // Recompute from the displayed position: captures, undo and history cannot leave stale rings.
+    std::vector<std::vector<bool>> seen(current_board.size(),
+        std::vector<bool>(current_board.size(), false));
+    for (int x = 0; x < current_board.size(); ++x) {
+        for (int y = 0; y < current_board.size(); ++y) {
+            if (seen[x][y] || current_board[x][y] == CellState::Empty) continue;
+            const GroupInfo group = current_board.inspectGroup(x, y);
+            for (const Cell& cell : group.stones) {
+                seen[cell.x][cell.y] = true;
+                if (group.liberties.size() == 1) ring(cell, danger, 0.42f);
+            }
+        }
+    }
+
+    const auto point = intersectionAt(mouse_pos);
+    if (!point) return "Hover stones | Red: atari";
+    const GroupInfo group = current_board.inspectGroup(point->x, point->y);
+    if (group.stones.empty()) return "Hover stones | Red: atari";
+    for (const Cell& cell : group.stones)
+        ring(cell, group.liberties.size() == 1 ? danger : selected, 0.35f);
+    for (const Cell& cell : group.liberties) {
+        const float radius = grid_size * 0.13f;
+        sf::CircleShape dot(radius);
+        dot.setOrigin({ radius, radius });
+        dot.setPosition({ start_position.x + cell.x * grid_size,
+            start_position.y + cell.y * grid_size });
+        dot.setFillColor(liberty);
+        dot.setOutlineColor(sf::Color::Black);
+        dot.setOutlineThickness(std::max(1.f, grid_size * 0.035f));
+        window.draw(dot);
+    }
+    return std::to_string(group.stones.size()) + " stones | " +
+        std::to_string(group.liberties.size()) + " liberties" +
+        (group.liberties.size() == 1 ? " | ATARI" : "");
+}
+
 void BoardUI::hoverStone(const sf::Vector2i& mouse_pos, const Game& game) {
     if (board.getGlobalBounds().contains((sf::Vector2f)mouse_pos)) {
         sf::Vector2f _tmp = { mouse_pos.x - start_position.x + board_padding - grid_size / 2, mouse_pos.y - start_position.y + board_padding - grid_size / 2};

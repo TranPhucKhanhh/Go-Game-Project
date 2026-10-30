@@ -130,6 +130,8 @@ public:
 	BoardUI(const AssetManager &_asset_manager);
 	void draw(sf::RenderWindow& window, const Board& current_board,
 		const std::optional<Move>& last_move = std::nullopt, bool show_hover = false);
+	std::string drawAssistance(sf::RenderWindow& window, const Board& current_board,
+		const sf::Vector2i& mouse_pos) const;
 
 	// Return value
 	sf::Vector2f getPos() const { return position; }
@@ -159,6 +161,7 @@ public:
 
 private:
 	void drawStarPoints(sf::RenderWindow& window) const;
+	std::optional<sf::Vector2i> intersectionAt(const sf::Vector2i& mouse_pos) const;
 
 	sf::RectangleShape canvas;
 	sf::RectangleShape board;
