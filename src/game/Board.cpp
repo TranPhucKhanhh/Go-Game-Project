@@ -19,6 +19,29 @@ static bool isOutOfRange(int x, int y, int board_size) {
 	return x < 0 || y < 0 || x >= board_size || y >= board_size;
 }
 
+GroupInfo Board::inspectGroup(int x, int y) const {
+	GroupInfo result;
+	if (isOutOfRange(x, y, size())) return result;
+	const CellState color = grid[x][y];
+	if (color != CellState::Black && color != CellState::White) return result;
+	// Local state keeps inspection separate from move validation's traversal state.
+	std::vector<std::vector<bool>> seen(size(), std::vector<bool>(size(), false));
+	seen[x][y] = true;
+	result.stones.emplace_back(x, y, color);
+	for (std::size_t index = 0; index < result.stones.size(); ++index) {
+		const Cell cell = result.stones[index];
+		for (int direction = 0; direction < 4; ++direction) {
+			const int nx = cell.x + dx[direction], ny = cell.y + dy[direction];
+			if (isOutOfRange(nx, ny, size()) || seen[nx][ny]) continue;
+			seen[nx][ny] = true;
+			if (grid[nx][ny] == color) result.stones.emplace_back(nx, ny, color);
+			else if (grid[nx][ny] == CellState::Empty)
+				result.liberties.emplace_back(nx, ny, CellState::Empty);
+		}
+	}
+	return result;
+}
+
 static bool isOccupied(const Move& move,const Board& board) {
 	return board[move.x][move.y] != CellState::Empty;
 }

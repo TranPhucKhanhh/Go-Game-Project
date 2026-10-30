@@ -6,6 +6,11 @@
 #include<iostream>
 #include<model/MoveVerdict.h>
 
+struct GroupInfo {
+	std::vector<Cell> stones;
+	std::vector<Cell> liberties;
+};
+
 class Board {
 public:
 	Board() = default;
@@ -45,6 +50,8 @@ public:
 	Board(Board&& other) noexcept = default;
 
 	//ValidateMove, if move is valid update the board of InGameState
+	// Read-only inspection; every connected stone and empty neighbor is returned once.
+	GroupInfo inspectGroup(int x, int y) const;
 	//Super-KO is NOT check here
 	//Return the capture list for future use
 	bool validateMove(const Move& move, Board& board, std::vector<Cell>& capture, MoveVerdict& last_move_verdict);
