@@ -204,37 +204,16 @@ std::string BoardUI::drawAssistance(sf::RenderWindow& window, const Board& curre
 }
 
 void BoardUI::hoverStone(const sf::Vector2i& mouse_pos, const Game& game) {
-    if (board.getGlobalBounds().contains((sf::Vector2f)mouse_pos)) {
-        sf::Vector2f _tmp = { mouse_pos.x - start_position.x + board_padding - grid_size / 2, mouse_pos.y - start_position.y + board_padding - grid_size / 2};
-        _tmp = { std::max(0.f, _tmp.x), std::max(0.f, _tmp.y) };        
-        float _x = abs(_tmp.x - (std::floor(_tmp.x / grid_size) * grid_size + grid_size / 2));
-        float _y = abs(_tmp.y - (std::floor(_tmp.y / grid_size) * grid_size + grid_size / 2));
-        
-        if (_x > grid_size * inner_percent || _y > grid_size * inner_percent) {
-            hoverOnStone = 0;
-            return;
-        }
-        
-        int max_board_size = game.getBoardSize();
-
-        pos.x = std::min(max_board_size-1, (int) std::floor(_tmp.x / grid_size));
-        pos.y = std::min(max_board_size-1, (int) std::floor(_tmp.y / grid_size));
-        if (game.getCurrentBoard()[pos.x][pos.y] != CellState::Empty) {
-            hoverOnStone = 0;
-            return;
-        }
-
-
-        if (game.getCurrentPlayer() == CellState::White) predict_stone.setTexture(white_texture, true);
-        else predict_stone.setTexture(black_texture, true);
-        BoardUI::updateStone();
-
-        predict_stone.setPosition({ start_position.x + grid_size * pos.x, start_position.y + grid_size * pos.y });
-        hoverOnStone = 1;
-    }
-    else {
-        hoverOnStone = 0;
-    }
+    hoverOnStone = false;
+    const auto point = intersectionAt(mouse_pos);
+    if (!point || game.getBoardSize() != board_cell_number ||
+        game.getCurrentBoard()[point->x][point->y] != CellState::Empty) return;
+    pos = *point;
+    if (game.getCurrentPlayer() == CellState::White) predict_stone.setTexture(white_texture, true);
+    else predict_stone.setTexture(black_texture, true);
+    updateStone();
+    predict_stone.setPosition({ start_position.x + grid_size * pos.x, start_position.y + grid_size * pos.y });
+    hoverOnStone = true;
 }
 
 void BoardUI::placeStone(const sf::Vector2i& mouse_pos, Game& game) const {

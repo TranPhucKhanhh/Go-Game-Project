@@ -47,6 +47,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     reset_button("Reset Game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     resign_button("Resign", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     out_his_button("Close history", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    assistance_button("Assistance: ON", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     setting_button("Setting", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     sound_button(ui_cfg),
@@ -58,6 +59,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     win_notification(_asset_manager.getFont("RobotoSlab-Bold")),
     mode_box(_asset_manager.getFont("StackSansNotch-Bold")),
     move_info_box(_asset_manager.getFont("StackSansNotch-Regular")),
+    assistance_info_box(_asset_manager.getFont("StackSansNotch-Regular")),
     board(_asset_manager),
     white_stone_image(_asset_manager.getTexture("dummy")),
     black_stone_image(_asset_manager.getTexture("dummy")),
@@ -77,6 +79,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     setting_button.updateRespondStr("Setting");
     sound_button.updateRespondStr("Toggle Sound");
     music_button.updateRespondStr("Toggle Music");
+    assistance_button.updateRespondStr("Toggle Assistance");
 
     white_score_box.updateTextColor(sf::Color::Black);
     black_score_box.updateBoxColor(sf::Color::Black);
@@ -88,6 +91,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     move_info_box.updateBoxColor(sf::Color::Transparent);
     move_info_box.updateTextColor(sf::Color::Black);
     move_info_box.updateStr(move_info_text);
+    assistance_info_box.updateBoxColor(sf::Color::Transparent);
+    assistance_info_box.updateTextColor(sf::Color::Black);
+    assistance_info_box.updateStr("Hover stones | Red: atari");
 
     resize();
 
@@ -184,6 +190,10 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     setting_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
     setting_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
     setting_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+    assistance_button.updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+    assistance_button.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+    assistance_button.updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+    assistance_button.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
 }
 
 void InGame::enter() {
@@ -202,7 +212,7 @@ void InGame::enter() {
     save_file_input.updateOnScreen(false);
     error_notification.updateOnScreen(false);
     win_notification.updateOnScreen(false);
-    if (!game.isGameEnd()) game_playable = true;
+    game_playable = !game.isGameEnd();
 	
     // update sound and music button
     updateSoundMusic();
@@ -349,7 +359,10 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         if (event.is<sf::Event::MouseMoved>()) {
             board.hoverStone(ui_cfg.mouse_pos, game);
         }
-        if (event.is<sf::Event::MouseButtonReleased>() && board.isHoverValid()) {
+        const auto* click = event.getIf<sf::Event::MouseButtonReleased>();
+        if (click && click->button == sf::Mouse::Button::Left)
+            board.hoverStone(ui_cfg.mouse_pos, game);
+        if (click && click->button == sf::Mouse::Button::Left && board.isHoverValid()) {
             board.placeStone(ui_cfg.mouse_pos, game);
 
             updateHistoryScroll();
@@ -400,6 +413,15 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     reset_button.eventHandle(event, ui_cfg, event_respond);
     save_button.eventHandle(event, ui_cfg, event_respond);
     setting_button.eventHandle(event, ui_cfg, event_respond);
+    assistance_button.eventHandle(event, ui_cfg, event_respond);
+
+    // This display preference is safe to change even while the AI is taking a turn.
+    if (event_respond == "Toggle Assistance") {
+        assistance_enabled = !assistance_enabled;
+        assistance_button.updateStr(assistance_enabled ? "Assistance: ON" : "Assistance: OFF");
+        assistance_button.updateTextSizeFit(0.9f);
+        return;
+    }
 
     exit_button.eventHandle(event, ui_cfg, event_respond);
     undo_button.eventHandle(event, ui_cfg, event_respond);
@@ -582,6 +604,7 @@ void InGame::draw() {
     reset_button.draw(ui_cfg.window);
     save_button.draw(ui_cfg.window);
     setting_button.draw(ui_cfg.window);
+    assistance_button.draw(ui_cfg.window);
 
     undo_button.draw(ui_cfg.window);
     redo_button.draw(ui_cfg.window);
@@ -594,18 +617,24 @@ void InGame::draw() {
     white_score_box.draw(ui_cfg.window);
     black_score_box.draw(ui_cfg.window);
 
-    if (history_preview_index != -1) {
-        board.draw(ui_cfg.window, game.getPreviewBoard(), game.getMoveAt(history_preview_index));
-    }
-    else {
-        board.draw(ui_cfg.window, game.getCurrentBoard(), game.getMoveAt(game.getMoveListSize() - 1),
-            game_playable && !ui_cfg.AI_in_turn);
-    }
+    const Board displayed_board = history_preview_index != -1 ? game.getPreviewBoard() : game.getCurrentBoard();
+    const bool modal_open = save_file_input.onScreen() || error_notification.onScreen() || win_notification.onScreen();
+    const bool allow_placement = history_preview_index == -1 && game_playable && !ui_cfg.AI_in_turn && !modal_open;
+    if (allow_placement) board.hoverStone(ui_cfg.mouse_pos, game);
+    board.draw(ui_cfg.window, displayed_board,
+        game.getMoveAt(history_preview_index == -1 ? game.getMoveListSize() - 1 : history_preview_index),
+        allow_placement);
+    const std::string help_text = assistance_enabled && !modal_open
+        ? board.drawAssistance(ui_cfg.window, displayed_board, ui_cfg.mouse_pos)
+        : (assistance_enabled ? "Hover stones | Red: atari" : "Assistance OFF");
+    assistance_info_box.updateStr(help_text);
+    assistance_info_box.updateTextSizeFit(0.9f);
 
     history_scroll.draw(ui_cfg.window);
     mode_box.draw(ui_cfg.window);
     updateMoveInfo();
     move_info_box.draw(ui_cfg.window);
+    assistance_info_box.draw(ui_cfg.window);
 
     playAnimation();
 
@@ -629,13 +658,16 @@ void InGame::mode_panel_resize(const float& _height) {
     mode_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2, 
         header_bar.getPos().y - status_bar_size_y / 2.f + _height /2.f});
 
-    mode_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y - _height * 0.22f });
-    mode_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.36f });
+    mode_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y - _height * 0.31f });
+    mode_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.27f });
     mode_box.updateTextSizeFit(1.f);
 
-    move_info_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y + _height * 0.22f });
-    move_info_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.36f });
+    move_info_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y });
+    move_info_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.27f });
     move_info_box.updateTextSizeFit(0.9f);
+    assistance_info_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y + _height * 0.31f });
+    assistance_info_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.27f });
+    assistance_info_box.updateTextSizeFit(0.9f);
 }
 
 void InGame::option_panel_resize(const float& _height) {
@@ -648,7 +680,7 @@ void InGame::option_panel_resize(const float& _height) {
     option_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
         mode_panel.getPosition().y + mode_panel.getSize().y / 2.f + option_panel.getSize().y / 2.f + inner_padding });
 
-    sf::Vector2f _button_size = { side_panel_size_x - _button_padding * 2, (_height - 2 * _button_padding - 3 * _inner_button_padding) / 4.f };
+    sf::Vector2f _button_size = { side_panel_size_x - _button_padding * 2, (_height - 2 * _button_padding - 4 * _inner_button_padding) / 5.f };
 
     new_button.updateSize(_button_size);
     new_button.updatePos({ option_panel.getPosition().x, option_panel.getPosition().y - _height/2.f + _button_size.y/2.f + _button_padding});
@@ -661,6 +693,8 @@ void InGame::option_panel_resize(const float& _height) {
     
     setting_button.updateSize(_button_size);
     setting_button.updatePos({ option_panel.getPosition().x, save_button.getPos().y + _button_size.y + _inner_button_padding });
+    assistance_button.updateSize(_button_size);
+    assistance_button.updatePos({ option_panel.getPosition().x, setting_button.getPos().y + _button_size.y + _inner_button_padding });
 
     float _ratio = 0.95;
     float _button_text_size = std::min({ new_button.getTextSizeFit(_ratio), reset_button.getTextSizeFit(_ratio), save_button.getTextSizeFit(_ratio), setting_button.getTextSizeFit(_ratio)});
@@ -669,6 +703,7 @@ void InGame::option_panel_resize(const float& _height) {
     reset_button.updateTextSize(_button_text_size);
     save_button.updateTextSize(_button_text_size);
     setting_button.updateTextSize(_button_text_size);
+    assistance_button.updateTextSizeFit(0.9f);
 }
 
 void InGame::history_panel_resize(const float& _height) {

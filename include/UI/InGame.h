@@ -38,10 +38,11 @@ private:
     BaseButton sound_button, music_button;
     TextureEffectButton new_button, save_button, reset_button, setting_button, exit_button;
     TextureEffectButton undo_button, redo_button, pass_button, resign_button, out_his_button;
+    TextureEffectButton assistance_button;
 
     TextBox white_score_box;
     TextBox black_score_box;
-    TextBox mode_box, move_info_box;
+    TextBox mode_box, move_info_box, assistance_info_box;
     sf::Sprite white_stone_image, black_stone_image;
 
     TextInputNotification save_file_input;
@@ -57,7 +58,8 @@ private:
     int history_preview_index = -1;
     std::string move_info_text = "Move 0: Start";
 
-    bool game_playable;
+    bool game_playable = false;
+    bool assistance_enabled = true;
 
     void resize(const sf::Vector2u& window_size);
 
