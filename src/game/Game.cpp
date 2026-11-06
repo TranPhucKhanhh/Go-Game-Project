@@ -225,6 +225,7 @@ void from_json(const json& j, GameCfg& config) {
 	config.komi = j.value("komi", 7.5f);
 	config.main_time_seconds = j.value("main_time_seconds", 0);
 	if (!std::isfinite(config.komi) || config.komi < -50.f || config.komi > 50.f ||
+		std::abs(config.komi * 2.f - std::round(config.komi * 2.f)) > 0.0001f ||
 		config.main_time_seconds < 0 || config.main_time_seconds > 86400)
 		throw std::invalid_argument("Invalid saved komi or time limit");
 }
@@ -270,6 +271,8 @@ bool Game::loadGame(const std::string& name) {
 	double loaded_black = loaded_config.main_time_seconds;
 	double loaded_white = loaded_config.main_time_seconds;
 	CellState loaded_timeout = CellState::Empty;
+	const CellState loaded_resignation = json_config.value("resigned_player", CellState::Empty);
+	const bool loaded_end = json_config.value("game_end", false);
 	if (json_config.contains("clock")) {
 		const auto& clock = json_config.at("clock");
 		loaded_black = clock.at("black_seconds").get<double>();
@@ -278,7 +281,10 @@ bool Game::loadGame(const std::string& name) {
 	}
 	if (!std::isfinite(loaded_black) || !std::isfinite(loaded_white) || loaded_black < 0 || loaded_white < 0 ||
 		loaded_black > loaded_config.main_time_seconds || loaded_white > loaded_config.main_time_seconds ||
-		(loaded_timeout != CellState::Empty && loaded_timeout != CellState::Black && loaded_timeout != CellState::White))
+		(loaded_timeout != CellState::Empty && loaded_timeout != CellState::Black && loaded_timeout != CellState::White) ||
+		(loaded_resignation != CellState::Empty && loaded_resignation != CellState::Black && loaded_resignation != CellState::White) ||
+		(loaded_timeout == CellState::Black && (loaded_black > 0 || loaded_config.main_time_seconds == 0)) ||
+		(loaded_timeout == CellState::White && (loaded_white > 0 || loaded_config.main_time_seconds == 0)))
 		return false;
 	game_config = loaded_config;
 	state.initializer(game_config.board_size);
@@ -286,9 +292,9 @@ bool Game::loadGame(const std::string& name) {
 	black_seconds = loaded_black;
 	white_seconds = loaded_white;
 	timed_out_player = loaded_timeout;
-	resigned_player = json_config.value("resigned_player", CellState::Empty);
+	resigned_player = loaded_resignation;
 	history.loadFromMoveList(move_history, state.current_board, state.current_player);
-	game_end = json_config.value("game_end", false) || history.checkConsecutivePass() ||
+	game_end = loaded_end || history.checkConsecutivePass() ||
 		resigned_player != CellState::Empty || timed_out_player != CellState::Empty;
 	// Timed saves with a zero active clock cannot resume play, even if an old result field is missing.
 	if (!game_end && game_config.main_time_seconds > 0 && getRemainingSeconds(state.current_player) <= 0) {
