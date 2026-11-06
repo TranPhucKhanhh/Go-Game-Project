@@ -5,6 +5,11 @@
 #include<model/GameState.h>
 #include<model/CellState.h>
 #include<algorithm>
+#include<cmath>
+#include<iomanip>
+#include<sstream>
+#include<initializer_list>
+#include<stdexcept>
 
 void GameOption::drawNewPanel() {
 	ui_cfg.window.draw(game_mode_title);
@@ -65,10 +70,44 @@ void GameOption::drawNewPanel() {
 	board_size_9_button.draw(ui_cfg.window);
 	board_size_13_button.draw(ui_cfg.window);
 	board_size_19_button.draw(ui_cfg.window);
+	ui_cfg.window.draw(time_control_title);
+	untimed_button.updateForceTex(main_time_chosen == 0 ? 2 : 0);
+	minute_1_button.updateForceTex(main_time_chosen == 60 ? 2 : 0);
+	minute_5_button.updateForceTex(main_time_chosen == 300 ? 2 : 0);
+	minute_10_button.updateForceTex(main_time_chosen == 600 ? 2 : 0);
+	untimed_button.draw(ui_cfg.window);
+	minute_1_button.draw(ui_cfg.window);
+	minute_5_button.draw(ui_cfg.window);
+	minute_10_button.draw(ui_cfg.window);
+	std::ostringstream komi_text;
+	komi_text << std::fixed << std::setprecision(1) << komi_chosen;
+	komi_button.updateStr("Komi: " + komi_text.str() + " (edit)");
+	komi_button.updateTextSizeFit(0.85f);
+	komi_button.draw(ui_cfg.window);
 }
 
 void GameOption::eventHandleNewPanel(const sf::Event& event, std::string& respond) {
 	std::string event_respond = "";
+	if (komi_input.onScreen()) {
+		komi_input.eventHandle(event, ui_cfg, event_respond);
+		if (event_respond == "ApplyKomi") {
+			try {
+				const std::string input = komi_input.getInputStr();
+				std::size_t used = 0;
+				const float value = std::stof(input, &used);
+				if (used != input.size() || !std::isfinite(value) || value < -50.f || value > 50.f ||
+					std::abs(value * 2.f - std::round(value * 2.f)) > 0.0001f)
+					throw std::invalid_argument("Invalid komi");
+				komi_chosen = value;
+				komi_input.updateOnScreen(false);
+			}
+			catch (const std::exception&) {
+				komi_input.updateTitleStr("Invalid komi");
+				komi_input.updateNotificationStr("Enter -50 to 50, in steps of 0.5");
+			}
+		}
+		return;
+	}
 
 	if (game_mode != GameMode::PvP) {
 		black_side_button.eventHandle(event, ui_cfg, event_respond);
@@ -83,6 +122,21 @@ void GameOption::eventHandleNewPanel(const sf::Event& event, std::string& respon
 	board_size_9_button.eventHandle(event, ui_cfg, event_respond);
 	board_size_13_button.eventHandle(event, ui_cfg, event_respond);
 	board_size_19_button.eventHandle(event, ui_cfg, event_respond);
+	untimed_button.eventHandle(event, ui_cfg, event_respond);
+	minute_1_button.eventHandle(event, ui_cfg, event_respond);
+	minute_5_button.eventHandle(event, ui_cfg, event_respond);
+	minute_10_button.eventHandle(event, ui_cfg, event_respond);
+	komi_button.eventHandle(event, ui_cfg, event_respond);
+	if (event_respond == "Time0") main_time_chosen = 0;
+	else if (event_respond == "Time60") main_time_chosen = 60;
+	else if (event_respond == "Time300") main_time_chosen = 300;
+	else if (event_respond == "Time600") main_time_chosen = 600;
+	else if (event_respond == "EditKomi") {
+		komi_input.clearStr();
+		komi_input.updateTitleStr("Edit komi");
+		komi_input.updateNotificationStr("Enter -50 to 50, in steps of 0.5");
+		komi_input.updateOnScreen(true);
+	}
 
 	if (event_respond == "pvpMode") {
 		game_mode = GameMode::PvP;
@@ -118,72 +172,33 @@ void GameOption::eventHandleNewPanel(const sf::Event& event, std::string& respon
 }
 
 void GameOption::resizeNewPanel() {
-	float _margin = canvas_size.x / 15.f;
-	float _inner_margin = _margin / 2.f;
-	float _component_size_y = _margin / 2.f;
-
-	sf::Vector2f _mode_button_size = { (canvas_size.x - _margin * 2 - _inner_margin * 3) / 4.f , _component_size_y * 2 };
-
-	game_mode_title.setCharacterSize(_component_size_y);
-	//game_mode_title.setOrigin(game_mode_title.getLocalBounds().getCenter());
-	game_mode_title.setPosition({ canvas.getPosition().x - canvas_size.x / 2.f + _margin, new_game_panel.getPos().y + new_game_panel.getSize().y / 2.f + _margin });
-
-	pvp_mode_button.updateSize(_mode_button_size);
-	pvp_mode_button.updatePos({ canvas.getPosition().x - canvas_size.x / 2.f + _mode_button_size.x / 2.f + _margin, game_mode_title.getPosition().y + _component_size_y + _margin });
-
-	ai_easy_button.updateSize(_mode_button_size);
-	ai_easy_button.updatePos({ canvas.getPosition().x - canvas_size.x / 2.f + _mode_button_size.x / 2.f + _margin + _inner_margin + _mode_button_size.x, game_mode_title.getPosition().y + _component_size_y + _margin });
-
-	ai_medium_button.updateSize(_mode_button_size);
-	ai_medium_button.updatePos({ canvas.getPosition().x + canvas_size.x / 2.f - _mode_button_size.x / 2.f - _margin - _inner_margin - _mode_button_size.x, game_mode_title.getPosition().y + _component_size_y + _margin });
-
-	ai_hard_button.updateSize(_mode_button_size);
-	ai_hard_button.updatePos({ canvas.getPosition().x + canvas_size.x / 2.f - _mode_button_size.x / 2.f - _margin , game_mode_title.getPosition().y + _component_size_y + _margin });
-
-	float _ratio = 0.9;
-	float _min_button_text_size = std::min({ pvp_mode_button.getTextSizeFit(_ratio),ai_easy_button.getTextSizeFit(_ratio),
-		ai_medium_button.getTextSizeFit(_ratio),ai_hard_button.getTextSizeFit(_ratio) });
-
-	pvp_mode_button.updateTextSize(_min_button_text_size);
-	ai_easy_button.updateTextSize(_min_button_text_size);
-	ai_medium_button.updateTextSize(_min_button_text_size);
-	ai_hard_button.updateTextSize(_min_button_text_size);
-
-	float _start_tmp;
-	if (game_mode != GameMode::PvP) {
-		choose_side_title.setCharacterSize(_component_size_y);
-		choose_side_title.setPosition({ canvas.getPosition().x - canvas_size.x / 2.f + _margin, ai_hard_button.getPos().y + ai_hard_button.getSize().y / 2.f + _inner_margin });
-
-		white_side_button.updateSize(_mode_button_size);
-		white_side_button.updatePos({ canvas.getPosition().x - canvas_size.x / 2.f + _mode_button_size.x / 2.f + _margin, choose_side_title.getPosition().y + _component_size_y + _margin });
-
-		black_side_button.updateSize(_mode_button_size);
-		black_side_button.updatePos({ canvas.getPosition().x - canvas_size.x / 2.f + _mode_button_size.x / 2.f + _margin + _inner_margin + _mode_button_size.x, choose_side_title.getPosition().y + _component_size_y + _margin });
-
-		_min_button_text_size = std::min(white_side_button.getTextSizeFit(_ratio), black_side_button.getTextSizeFit(_ratio));
-		white_side_button.updateTextSize(_min_button_text_size);
-		black_side_button.updateTextSize(_min_button_text_size);
-
-		_start_tmp = white_side_button.getPos().y + _mode_button_size.y / 2.f + _inner_margin;
-	}
-	else {
-		_start_tmp = ai_easy_button.getPos().y + _mode_button_size.y / 2.f + _inner_margin;
-	}
-
-	choose_board_size_title.setCharacterSize(_component_size_y);
-	choose_board_size_title.setPosition({ canvas.getPosition().x - canvas_size.x / 2.f + _margin , _start_tmp });
-
-	board_size_9_button.updateSize(_mode_button_size);
-	board_size_9_button.updatePos({ canvas.getPosition().x - canvas_size.x / 2.f + _mode_button_size.x / 2.f + _margin, choose_board_size_title.getPosition().y + _component_size_y + _margin });
-
-	board_size_13_button.updateSize(_mode_button_size);
-	board_size_13_button.updatePos({ canvas.getPosition().x - canvas_size.x / 2.f + _mode_button_size.x * 1.5f + _margin + _inner_margin, choose_board_size_title.getPosition().y + _component_size_y + _margin });
-
-	board_size_19_button.updateSize(_mode_button_size);
-	board_size_19_button.updatePos({ canvas.getPosition().x - canvas_size.x / 2.f + _mode_button_size.x * 2.5f + _margin + _inner_margin * 2, choose_board_size_title.getPosition().y + _component_size_y + _margin });
-
-	_min_button_text_size = std::min({ board_size_9_button.getTextSizeFit(_ratio), board_size_13_button.getTextSizeFit(_ratio), board_size_19_button.getTextSizeFit(_ratio)});
-	board_size_9_button.updateTextSize(_min_button_text_size);
-	board_size_13_button.updateTextSize(_min_button_text_size);
-	board_size_19_button.updateTextSize(_min_button_text_size);
+	const float pad = canvas_size.x * 0.055f;
+	const float gap = pad * 0.5f;
+	const float left = canvas.getPosition().x - canvas_size.x / 2.f + pad;
+	const float top = canvas.getPosition().y - canvas_size.y / 2.f + canvas_size.y * 0.14f;
+	const int row_count = game_mode == GameMode::PvP ? 4 : 5;
+	const float row_height = canvas_size.y * 0.72f / row_count;
+	int row = 0;
+	auto layout_row = [&](sf::Text& title, std::initializer_list<TextureEffectButton*> buttons) {
+		const float y = top + row++ * row_height;
+		title.setCharacterSize(static_cast<unsigned int>(canvas_size.y * 0.027f));
+		title.setPosition({ left, y });
+		const float width = (canvas_size.x - 2.f * pad - gap * (buttons.size() - 1)) / buttons.size();
+		int index = 0;
+		for (auto* button : buttons) {
+			button->updateSize({ width, row_height * 0.40f });
+			button->updatePos({ left + width / 2.f + index++ * (width + gap), y + row_height * 0.58f });
+			button->updateTextSizeFit(0.85f);
+		}
+	};
+	layout_row(game_mode_title, { &pvp_mode_button, &ai_easy_button, &ai_medium_button, &ai_hard_button });
+	if (game_mode != GameMode::PvP)
+		layout_row(choose_side_title, { &black_side_button, &white_side_button });
+	layout_row(choose_board_size_title, { &board_size_9_button, &board_size_13_button, &board_size_19_button });
+	layout_row(time_control_title, { &untimed_button, &minute_1_button, &minute_5_button, &minute_10_button });
+	komi_button.updateSize({ (canvas_size.x - 2.f * pad) * 0.65f, row_height * 0.45f });
+	komi_button.updatePos({ canvas.getPosition().x, top + row * row_height + row_height * 0.45f });
+	komi_button.updateTextSizeFit(0.85f);
+	komi_input.updateSize({ canvas_size.x * 0.80f, canvas_size.y * 0.38f });
+	komi_input.updatePos(canvas.getPosition());
 }

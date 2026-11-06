@@ -25,6 +25,13 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	board_size_9_button("9 x 9", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	board_size_13_button("13 x 13", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
 	board_size_19_button("19 x 19", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
+	time_control_title(asset_manager.getFont("RobotoSlab-Bold"), "Main time per player:"),
+	untimed_button("Untimed", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
+	minute_1_button("1 min", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
+	minute_5_button("5 min", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
+	minute_10_button("10 min", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
+	komi_button("Komi: 7.5 (edit)", asset_manager.getFont("StackSansNotch-Bold"), ui_cfg),
+	komi_input(asset_manager.getFont("RobotoSlab-Bold")),
 
 	load_game_panel("Load game", asset_manager.getFont("RobotoSlab-Bold"), ui_cfg),
 	refresh_button("Refresh", asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
@@ -72,6 +79,31 @@ GameOption::GameOption(const AssetManager& _asset_manager, Game& _game, UICfg& u
 	go_back_button.updateRespondStr("GoBack");
 	delete_button.updateRespondStr("Delete");
 	exit_button.updateRespondStr("Exit");
+	untimed_button.updateRespondStr("Time0");
+	minute_1_button.updateRespondStr("Time60");
+	minute_5_button.updateRespondStr("Time300");
+	minute_10_button.updateRespondStr("Time600");
+	komi_button.updateRespondStr("EditKomi");
+	time_control_title.setFillColor(sf::Color::Black);
+	for (auto* button : { &untimed_button, &minute_1_button, &minute_5_button, &minute_10_button, &komi_button }) {
+		button->updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+		button->updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+		button->updateHoverTex(asset_manager.getTexture("button_rectangle_flat-yellow"));
+		button->updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+	}
+	komi_input.updateTitleStr("Edit komi");
+	komi_input.updateNotificationStr("Enter -50 to 50, in steps of 0.5");
+	komi_input.updateMaxInputLength(7);
+	TextureEffectButton komi_cancel("Cancel", asset_manager.getFont("StackSansNotch-Regular"), ui_cfg);
+	komi_cancel.updateRespondStr("CloseNoti");
+	komi_cancel.updateTextEffectColor(sf::Color::Black);
+	komi_cancel.updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+	komi_cancel.updateHoverTex(asset_manager.getTexture("button_rectangle_flat-yellow"));
+	komi_cancel.updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+	komi_input.addSelection(komi_cancel);
+	komi_cancel.updateStr("Apply");
+	komi_cancel.updateRespondStr("ApplyKomi");
+	komi_input.addSelection(komi_cancel);
 
 	// Initialzize the basic color and outline
 	canvas.setFillColor({ 221,221,221 });
@@ -249,6 +281,9 @@ void GameOption::enter() {
 	game_mode = GameMode::PvP;
 	side_chosen = CellState::White;
 	board_size_chosen = 19;
+	main_time_chosen = game.getGameCfg().main_time_seconds;
+	komi_chosen = game.getGameCfg().komi;
+	komi_input.updateOnScreen(false);
 	board_design_chosen = ui_cfg.board_design; 
 	stone_design_chosen = ui_cfg.stone_design;
 	music_scroll.updateIndex(0);
@@ -300,11 +335,17 @@ void GameOption::draw() {
 	load_game_panel.draw(ui_cfg.window);
 	setting_panel.draw(ui_cfg.window);
 	customize_panel.draw(ui_cfg.window);
+	if (komi_input.onScreen()) komi_input.draw(ui_cfg.window);
 }
 
 void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 	if (event.is<sf::Event::Resized>()) {
 		resize();
+	}
+	if (komi_input.onScreen()) {
+		std::string input_response;
+		eventHandleNewPanel(event, input_response);
+		return;
 	}
 	std::string event_respond = "";
 	start_game_button.eventHandle(event, ui_cfg, event_respond);
@@ -344,13 +385,20 @@ void GameOption::eventHandle(const sf::Event& event, std::string& respond) {
 		game.getGameCfg().board_size = board_size_chosen;
 		game.getGameCfg().game_mode = game_mode;
 		game.getGameCfg().AI_side = side_chosen;
+		game.getGameCfg().komi = komi_chosen;
+		game.getGameCfg().main_time_seconds = main_time_chosen;
 		game.start();
 		respond = "StartNewGame";
 	}
 	else if (event_respond == "LoadNewGame") {
 		if (board_preview_show) {
-			game.loadGame(file_to_load);
-			respond = "LoadNewGame";
+			try {
+				if (game.loadGame(file_to_load)) respond = "LoadNewGame";
+				else board_preview_title.updateStr("Unable to load this save");
+			}
+			catch (const std::exception&) {
+				board_preview_title.updateStr("Invalid saved game");
+			}
 		}
 	}
 	else if (event_respond == "GoBack") {

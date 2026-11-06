@@ -38,6 +38,9 @@ private:
     TextureEffectButton black_side_button, white_side_button;
     sf::Text choose_board_size_title;
     TextureEffectButton board_size_9_button, board_size_13_button, board_size_19_button;
+    sf::Text time_control_title;
+    TextureEffectButton untimed_button, minute_1_button, minute_5_button, minute_10_button, komi_button;
+    TextInputNotification komi_input;
 
     // Load game panel components
     TextureEffectButton load_game_panel;
@@ -64,9 +67,11 @@ private:
     float margin;
     sf::Vector2f canvas_size;
     SettingPanel panel = SettingPanel::NewGame;
-    GameMode game_mode;
-    CellState side_chosen;
-    unsigned int board_size_chosen;
+    GameMode game_mode = GameMode::PvP;
+    CellState side_chosen = CellState::White;
+    unsigned int board_size_chosen = 19;
+    int main_time_chosen = 0;
+    float komi_chosen = 7.5f;
 
     void resizeNewPanel();
     void drawNewPanel();
