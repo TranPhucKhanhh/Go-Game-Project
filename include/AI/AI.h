@@ -6,11 +6,11 @@
 class AI {
 public:
 	AI();
-	void loadSavedGame(const std::vector<Move>& move_history, const int init_board_size, const GameMode init_level);
+	void loadSavedGame(const std::vector<Move>& move_history, const int init_board_size, const GameMode init_level, float komi);
 	void undo();
 	void syncMove(const Move& v);
 	Move genMove(const CellState& current_player, CellState& resigned_player);
-	void startGame(const int init_board_size, const GameMode init_level);
+	void startGame(const int init_board_size, const GameMode init_level, float komi);
 	void resetGame();
 	//Return value
 	bool isThinking() const { return is_thinking; }
@@ -20,5 +20,6 @@ private:
 	KatagoLink katago;
 	int board_size;
 	GameMode level;
+	float game_komi = 7.5f;
 	bool is_thinking = 0;
 };

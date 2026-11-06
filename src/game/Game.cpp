@@ -5,31 +5,66 @@
 #include<JSON/json.hpp>
 #include<filesystem>
 #include<string.h>
+#include<algorithm>
+#include<cmath>
+#include<stdexcept>
 
 using json = nlohmann::json;
+
+void Game::initializeClock() {
+	black_seconds = white_seconds = game_config.main_time_seconds;
+	clock_paused = true;
+	timed_out_player = CellState::Empty;
+	clock_updated_at = std::chrono::steady_clock::now();
+}
+
+void Game::updateClock() {
+	const auto now = std::chrono::steady_clock::now();
+	const double elapsed = std::chrono::duration<double>(now - clock_updated_at).count();
+	clock_updated_at = now;
+	if (clock_paused || game_end || game_config.main_time_seconds <= 0) return;
+	double& remaining = state.current_player == CellState::Black ? black_seconds : white_seconds;
+	remaining = std::max(0.0, remaining - elapsed);
+	if (remaining <= 0.0) {
+		timed_out_player = state.current_player;
+		resigned_player = CellState::Empty;
+		game_end = true;
+	}
+}
+
+void Game::setClockPaused(bool paused) {
+	updateClock(); // Settle the old running interval before changing pause state.
+	clock_paused = paused;
+}
 
 void Game::start() {
 	//Init first state with board_size size, black to move
 	state.initializer(game_config.board_size);
 	resigned_player = CellState::Empty;
 	game_end = false;
+	initializeClock();
 	std::cout << "Game initializer\n";
 	history.clear();
 	if (game_config.game_mode != GameMode::PvP) {
 		GameMode level = game_config.game_mode;
-		AI.startGame(game_config.board_size, level);
+		AI.startGame(game_config.board_size, level, game_config.komi);
 		if (game_config.AI_side == CellState::Black) {
+			setClockPaused(false);
 			Game::placeStoneAI();
+			setClockPaused(true);
 		}
 	}
 }
 
 void Game::pass() {
+	updateClock();
+	if (game_end) return;
 	Move move(-1, -1, state.current_player, 1);
 	std::vector<Cell> capture;
 	if (game_config.game_mode != GameMode::PvP) AI.syncMove(move);
 	state.setNextPlayer();
 	history.addMove(move, state.current_board, capture);
+	clock_updated_at = std::chrono::steady_clock::now();
 	if (history.checkConsecutivePass()) game_end = true;
 	if (game_config.game_mode != GameMode::PvP && !game_end) {
 		Game::placeStoneAI();
@@ -37,19 +72,28 @@ void Game::pass() {
 }
 
 void Game::undo() {
+	updateClock();
+	if (game_end) return;
 	if (game_config.game_mode != GameMode::PvP) {
 		history.undoMoveAIMode(state.current_board, state.current_player, AI);
+		clock_updated_at = std::chrono::steady_clock::now();
 		return;
 	}
 	history.undoMove(state.current_board, state.current_player);
+	clock_updated_at = std::chrono::steady_clock::now();
 }
 
 void Game::redo() {
+	updateClock();
+	if (game_end) return;
 	if (game_config.game_mode != GameMode::PvP) {
 		history.redoMoveAIMode(state.current_board, state.current_player, AI);
+		clock_updated_at = std::chrono::steady_clock::now();
 		return;
 	}
 	history.redoMove(state.current_board, state.current_player);
+	clock_updated_at = std::chrono::steady_clock::now();
+	if (history.checkConsecutivePass()) game_end = true;
 }
 
 void Game::reset() {
@@ -59,16 +103,22 @@ void Game::reset() {
 	history.clear();   
 	resigned_player =  CellState::Empty;
 	game_end = false;
+	initializeClock();
 	if (game_config.game_mode != GameMode::PvP) {
 		GameMode level = game_config.game_mode;
-		AI.startGame(game_config.board_size, level);
+		AI.startGame(game_config.board_size, level, game_config.komi);
 		if (game_config.AI_side == CellState::Black) {
+			setClockPaused(false);
 			Game::placeStoneAI();
+			setClockPaused(true);
 		}
 	}
 }
 
 void Game::placeStone(int x, int y) {
+	updateClock();
+	last_move_verdict = MoveVerdict::Invalid;
+	if (game_end) return;
 	//std::cout << x << " " << y << "\n";
 	Move move(x, y, state.current_player, 0);
 	std::vector<Cell> capture;
@@ -87,12 +137,18 @@ void Game::placeStone(int x, int y) {
 	if (game_config.game_mode != GameMode::PvP) AI.syncMove(move);
 	history.addMove(move, state.current_board, capture);
 	state.setNextPlayer();
+	clock_updated_at = std::chrono::steady_clock::now();
 	//std::cout << "Placing stone in: " << x << " " << y << "\n";
 	//state.printPlayer();
 }
 
 void Game::placeStoneAI() {
+	updateClock();
+	if (game_end) return;
 	Move move = AI.genMove(state.current_player, resigned_player);
+	// Charge the full search interval before accepting the result, even when rendering was blocked.
+	updateClock();
+	if (game_end) return;
 	//std::cout << move.x << " " << move.y << "\n";
 	if (resigned_player != CellState::Empty) {
 		game_end = 1;
@@ -126,7 +182,7 @@ std::pair<float, float> Game::getScore() {
 std::pair<float, float> Game::getScoreFromBoard(Board board) {
 	int _black_score = 0;
 	int _white_score = 0;
-	const float KOMI = 7.5;
+	const float KOMI = game_config.komi;
 
 	board.calculateScore(board, _black_score, _white_score);
 	return std::make_pair(_black_score, _white_score + KOMI);
@@ -147,7 +203,9 @@ void to_json(json& j, const GameCfg& config) {
 		{"board_size", config.board_size},
 		{"prev_state", config.prev_state},
 		{"state", config.state},
-		{"game_mode", config.game_mode}
+		{"game_mode", config.game_mode},
+		{"komi", config.komi},
+		{"main_time_seconds", config.main_time_seconds}
 	};
 }
 
@@ -164,12 +222,22 @@ void from_json(const json& j, GameCfg& config) {
 	config.prev_state = j.at("prev_state").get<GameState>();
 	config.state = j.at("state").get<GameState>();
 	config.game_mode = j.at("game_mode").get<GameMode>();
+	config.komi = j.value("komi", 7.5f);
+	config.main_time_seconds = j.value("main_time_seconds", 0);
+	if (!std::isfinite(config.komi) || config.komi < -50.f || config.komi > 50.f ||
+		config.main_time_seconds < 0 || config.main_time_seconds > 86400)
+		throw std::invalid_argument("Invalid saved komi or time limit");
 }
 
 bool Game::saveGame(const std::string& name) {
+	updateClock();
 	std::vector<Move> move_history = history.getMoveHistory();
 	json j_move_history = move_history;
 	json j_config = Game::game_config;
+	j_config["clock"] = {{"black_seconds", black_seconds}, {"white_seconds", white_seconds},
+		{"timed_out_player", timed_out_player}};
+	j_config["game_end"] = game_end;
+	j_config["resigned_player"] = resigned_player;
 	namespace fs = std::filesystem;
 	if (!fs::exists(SAVEGAME_DIR)) {
 		fs::create_directories(SAVEGAME_DIR);
@@ -198,11 +266,37 @@ bool Game::loadGame(const std::string& name) {
 	fin >> json_config;
 	fin >> json_move_history;
 	std::vector<Move> move_history = json_move_history;
-	game_config = json_config;
-	Game::reset();
+	GameCfg loaded_config = json_config;
+	double loaded_black = loaded_config.main_time_seconds;
+	double loaded_white = loaded_config.main_time_seconds;
+	CellState loaded_timeout = CellState::Empty;
+	if (json_config.contains("clock")) {
+		const auto& clock = json_config.at("clock");
+		loaded_black = clock.at("black_seconds").get<double>();
+		loaded_white = clock.at("white_seconds").get<double>();
+		loaded_timeout = clock.value("timed_out_player", CellState::Empty);
+	}
+	if (!std::isfinite(loaded_black) || !std::isfinite(loaded_white) || loaded_black < 0 || loaded_white < 0 ||
+		loaded_black > loaded_config.main_time_seconds || loaded_white > loaded_config.main_time_seconds ||
+		(loaded_timeout != CellState::Empty && loaded_timeout != CellState::Black && loaded_timeout != CellState::White))
+		return false;
+	game_config = loaded_config;
+	state.initializer(game_config.board_size);
+	initializeClock();
+	black_seconds = loaded_black;
+	white_seconds = loaded_white;
+	timed_out_player = loaded_timeout;
+	resigned_player = json_config.value("resigned_player", CellState::Empty);
 	history.loadFromMoveList(move_history, state.current_board, state.current_player);
+	game_end = json_config.value("game_end", false) || history.checkConsecutivePass() ||
+		resigned_player != CellState::Empty || timed_out_player != CellState::Empty;
+	// Timed saves with a zero active clock cannot resume play, even if an old result field is missing.
+	if (!game_end && game_config.main_time_seconds > 0 && getRemainingSeconds(state.current_player) <= 0) {
+		timed_out_player = state.current_player;
+		game_end = true;
+	}
 	if (game_config.game_mode != GameMode::PvP) {
-		AI.loadSavedGame(move_history, game_config.board_size, game_config.game_mode);
+		AI.loadSavedGame(move_history, game_config.board_size, game_config.game_mode, game_config.komi);
 		//AI.showBoard();
 	}
 	fin.close();
@@ -274,6 +368,8 @@ std::string Game::getLastMove() {
 }
 
 void Game::resign() {
+	updateClock();
+	if (game_end) return;
 	resigned_player = state.current_player;
 	game_end = 1;
 }

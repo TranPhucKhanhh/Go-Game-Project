@@ -10,6 +10,7 @@
 #include<model/MoveVerdict.h>
 #include<AI/AI.h>
 #include<optional>
+#include<chrono>
 
 using json = nlohmann::json;
 
@@ -21,6 +22,7 @@ struct GameCfg {
 	CellState AI_side = CellState::White;
 	int board_size = 13;
 	float komi = 7.5;	
+	int main_time_seconds = 0; // 0 = untimed; simple main time, no increment.
 };
 
 void to_json(json& j, const Move& move);
@@ -73,6 +75,13 @@ public:
 	CellState getResignPlayer() const { return resigned_player; }
 
 	bool isGameEnd() const { return game_end; }
+	void updateClock();
+	void setClockPaused(bool paused);
+	bool isClockPaused() const { return clock_paused; }
+	double getRemainingSeconds(CellState player) const {
+		return player == CellState::Black ? black_seconds : white_seconds;
+	}
+	CellState getTimedOutPlayer() const { return timed_out_player; }
 
 	std::pair<float, float> getScore(); // First value is black score and second value is white score
 	std::pair<float, float> getScoreFromBoard(Board board);
@@ -98,5 +107,10 @@ private:
 
 	AI AI;
 
-	bool game_end;
+	bool game_end = false;
+	double black_seconds = 0, white_seconds = 0;
+	bool clock_paused = true;
+	CellState timed_out_player = CellState::Empty;
+	std::chrono::steady_clock::time_point clock_updated_at = std::chrono::steady_clock::now();
+	void initializeClock();
 };

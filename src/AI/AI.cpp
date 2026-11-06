@@ -2,6 +2,8 @@
 #include<algorithm>
 #include<string>
 #include<iostream>
+#include<sstream>
+#include<locale>
 
 static std::string conv[19] = { "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T" };
 
@@ -51,16 +53,21 @@ AI::AI() {
 	}
 }
 
-void AI::startGame(const int init_board_size, const GameMode init_level) {
+void AI::startGame(const int init_board_size, const GameMode init_level, float komi) {
 	board_size = init_board_size;
 	level = init_level;
-	katago.send("komi 7.5");
-	katago.readResponse();
+	game_komi = komi;
 	katago.send("kata-set-rules chinese");
 	katago.readResponse();
 	katago.send("boardsize " + intToString(board_size));
 	katago.readResponse();
 	katago.send("clear_board");
+	katago.readResponse();
+	// Send komi after rules/board setup so every new/reset/loaded game agrees locally.
+	std::ostringstream komi_text;
+	komi_text.imbue(std::locale::classic());
+	komi_text << game_komi;
+	katago.send("komi " + komi_text.str());
 	katago.readResponse();
 	katago.send("kata-set-rule ko POSITIONAL");
 	katago.readResponse();
@@ -71,20 +78,7 @@ void AI::startGame(const int init_board_size, const GameMode init_level) {
 }
 
 void AI::resetGame() {
-	katago.send("komi 7.5");
-	katago.readResponse();
-	katago.send("kata-set-rules chinese");
-	katago.readResponse();
-	katago.send("boardsize " + intToString(board_size));
-	katago.readResponse();
-	katago.send("clear_board");
-	katago.readResponse(); 
-	katago.send("kata-set-rule ko POSITIONAL");
-	katago.readResponse();
-	if (level == GameMode::AIEasy) katago.send("kata-set-param maxVisits 1");
-	if (level == GameMode::AIMedium) katago.send("kata-set-param maxVisits 10");
-	if (level == GameMode::AIHard) katago.send("kata-set-param maxVisits 100");
-	katago.readResponse();
+	startGame(board_size, level, game_komi);
 }
 
 static std::string moveToString(const Move& m, const int board_size) {
@@ -149,8 +143,8 @@ void AI::undo() {
 	katago.readResponse();
 }
 
-void AI::loadSavedGame(const std::vector<Move>& move_history, const int init_board_size, const GameMode init_level) {
-	AI::startGame(init_board_size, init_level);
+void AI::loadSavedGame(const std::vector<Move>& move_history, const int init_board_size, const GameMode init_level, float komi) {
+	AI::startGame(init_board_size, init_level, komi);
 	for (const Move& m : move_history) {
 		AI::syncMove(m);
 		//AI::showBoard();
