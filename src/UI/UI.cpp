@@ -60,6 +60,8 @@ void UI::stopAIThread()
 }
 
 void UI::switchGameState(const std::string &respond) {
+    // Settle elapsed playing time before opening any menu/settings screen.
+    game.setClockPaused(true);
     if (respond == "ToMenu") {
         game.getGameCfg().prev_state = game.getGameCfg().state;
         game.getGameCfg().state = GameState::Menu;
@@ -86,6 +88,11 @@ void UI::switchGameState(const std::string &respond) {
         game.getGameCfg().prev_state = game.getGameCfg().state;
         game.getGameCfg().state = GameState::Playing;
         in_game.enter();
+        if (!game.isGameEnd() && game.getGameCfg().game_mode != GameMode::PvP &&
+            game.getCurrentPlayer() == game.getGameCfg().AI_side) {
+            ui_cfg.AI_in_turn = true;
+            startAIAsync();
+        }
     }
     else if (respond == "GoBack") {
         std::swap(game.getGameCfg().prev_state, game.getGameCfg().state);
@@ -191,5 +198,3 @@ void UI::run() {
         window.display();   
     }
 }
-
-    

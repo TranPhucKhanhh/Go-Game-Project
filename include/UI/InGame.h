@@ -24,6 +24,7 @@ public:
     void updateHeaderBar();
     void updateScoreBox(const std::pair<float, float>& _score);
     void updateHistoryScroll();
+    void tick();
 
 private:
     BoardUI board;
@@ -43,6 +44,7 @@ private:
     TextBox white_score_box;
     TextBox black_score_box;
     TextBox mode_box, move_info_box, assistance_info_box;
+    TextBox black_clock_box, white_clock_box, komi_box;
     sf::Sprite white_stone_image, black_stone_image;
 
     TextInputNotification save_file_input;
@@ -60,11 +62,14 @@ private:
 
     bool game_playable = false;
     bool assistance_enabled = true;
+    bool result_announced = false;
 
     void resize(const sf::Vector2u& window_size);
 
     void updateSoundMusic();
     void updateMoveInfo();
+    void updateClockBoxes();
+    void announceResult();
     void mode_panel_resize(const float& _height);
     void control_panel_resize(const float& _height);
     void option_panel_resize(const float& _height);

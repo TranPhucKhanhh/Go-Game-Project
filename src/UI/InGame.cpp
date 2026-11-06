@@ -10,6 +10,8 @@
 #include<cmath>
 #include <cstdlib>
 #include <ctime>
+#include <sstream>
+#include <iomanip>
 
 static const std::string win_mess[] = {"Winner winner chicken dinner", "Your the Champion!", "We've got a WINNER!!", "EZ Game Amirite?"};
 
@@ -24,15 +26,9 @@ static void updateSpriteSize(sf::Sprite& _sprite, const float& _size) {
 }
 
 static std::string convert_to_string(const float& num) {
-    int val = floor(num);
-    float epsilon = 0.3;
-
-    std::string _re = std::to_string(val);
-    if (num - val > epsilon) {
-        _re += '.';
-        _re += '5';
-    }
-    return _re;
+    std::ostringstream text;
+    text << std::fixed << std::setprecision(num == std::floor(num) ? 0 : 1) << num;
+    return text.str();
 }
 
 InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) : 
@@ -60,6 +56,9 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     mode_box(_asset_manager.getFont("StackSansNotch-Bold")),
     move_info_box(_asset_manager.getFont("StackSansNotch-Regular")),
     assistance_info_box(_asset_manager.getFont("StackSansNotch-Regular")),
+    black_clock_box(_asset_manager.getFont("StackSansNotch-Bold")),
+    white_clock_box(_asset_manager.getFont("StackSansNotch-Bold")),
+    komi_box(_asset_manager.getFont("StackSansNotch-Regular")),
     board(_asset_manager),
     white_stone_image(_asset_manager.getTexture("dummy")),
     black_stone_image(_asset_manager.getTexture("dummy")),
@@ -94,6 +93,13 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     assistance_info_box.updateBoxColor(sf::Color::Transparent);
     assistance_info_box.updateTextColor(sf::Color::Black);
     assistance_info_box.updateStr("Hover stones | Red: atari");
+    komi_box.updateBoxColor(sf::Color::Transparent);
+    komi_box.updateTextColor(sf::Color::Black);
+    komi_box.updateStr("Komi: 7.5");
+    black_clock_box.updateStr("Black: Untimed");
+    white_clock_box.updateStr("White: Untimed");
+    black_clock_box.updateOutlineThickness(2.f);
+    white_clock_box.updateOutlineThickness(2.f);
 
     resize();
 
@@ -233,6 +239,8 @@ void InGame::enter() {
     updateScoreBox(game.getScore());
 
     resize();
+    result_announced = false;
+    tick();
 }
 
 void InGame::playAnimation() {
@@ -263,6 +271,15 @@ void InGame::updateSoundMusic() {
 }
 
 void InGame::updateHeaderBar() {
+    const CellState loser = game.getTimedOutPlayer() != CellState::Empty
+        ? game.getTimedOutPlayer() : game.getResignPlayer();
+    if (game.isGameEnd() && loser != CellState::Empty) {
+        const bool white_wins = loser == CellState::Black;
+        header_bar.updateStr(white_wins ? "WHITE WINS" : "BLACK WINS");
+        header_bar.updateBoxColor(white_wins ? sf::Color::White : sf::Color::Black);
+        header_bar.updateTextColor(white_wins ? sf::Color::Black : sf::Color::White);
+        return;
+    }
     if (game.isGameEnd()) {
         std::pair<float, float> _score = game.getScore();
 
@@ -326,6 +343,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     if (event.is<sf::Event::Resized>()) {
         resize();
     }
+    tick(); // Timeouts must precede any queued placement/pass event.
 
     if (error_notification.onScreen()) {
         error_notification.eventHandle(event, ui_cfg, event_respond);
@@ -487,6 +505,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         game.reset();
 		history_scroll.clearContent();
         game_playable = true; 
+        result_announced = false;
         history_preview_index = -1;
         updateHeaderBar();
         updateScoreBox(game.getScore());
@@ -494,7 +513,7 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     else if (event_respond == "New") {
         respond = "GameNewOption";
     }
-    else if (event_respond == "Save" && game_playable && !game.isGameEnd()) {
+    else if (event_respond == "Save" && history_preview_index == -1) {
         save_file_input.clearStr();
         save_file_input.updateOnScreen(true);
 	}
@@ -541,8 +560,12 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     }
     
 
-    // Check if the game reach the end stage
-    if (game.isGameEnd() && game_playable) {
+    tick();
+}
+
+void InGame::announceResult() {
+    if (game.isGameEnd() && !result_announced) {
+        result_announced = true;
         game_playable = false;
 
         updateHeaderBar();
@@ -550,7 +573,15 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         int random_num = (std::rand() % std::size(win_mess));
         win_notification.updateOnScreen(true);
         win_notification.updateTitleStr(win_mess[random_num]);
-        if (game.getResignPlayer() == CellState::White) {
+        if (game.getTimedOutPlayer() == CellState::Black) {
+            win_notification.updateTitleStr("Time expired");
+            win_notification.updateNotificationStr("White wins - Black ran out of time");
+        }
+        else if (game.getTimedOutPlayer() == CellState::White) {
+            win_notification.updateTitleStr("Time expired");
+            win_notification.updateNotificationStr("Black wins - White ran out of time");
+        }
+        else if (game.getResignPlayer() == CellState::White) {
             win_notification.updateNotificationStr("Black wins - White resigned");
         }
         else if (game.getResignPlayer() == CellState::Black) {
@@ -571,6 +602,38 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     }
 }
 
+void InGame::tick() {
+    game.setClockPaused(game.getGameState() != GameState::Playing || !ui_cfg.window.hasFocus() ||
+        history_preview_index != -1 || save_file_input.onScreen() || error_notification.onScreen() ||
+        win_notification.onScreen());
+    announceResult();
+}
+
+void InGame::updateClockBoxes() {
+    const bool timed = game.getGameCfg().main_time_seconds > 0;
+    auto update = [&](TextBox& box, CellState player, const std::string& name) {
+        const int seconds = static_cast<int>(std::ceil(game.getRemainingSeconds(player)));
+        const bool active = !game.isGameEnd() && game.getCurrentPlayer() == player;
+        const bool running = active && !game.isClockPaused();
+        const bool low = timed && seconds <= 30;
+        std::string time = "Untimed";
+        if (timed) time = std::to_string(seconds / 60) + ":" +
+            (seconds % 60 < 10 ? "0" : "") + std::to_string(seconds % 60);
+        box.updateStr(name + ": " + time + (timed && active ? (running ? " *" : " ||") : ""));
+        box.updateBoxColor(low ? sf::Color(255, 205, 195) :
+            (active ? sf::Color(195, 245, 205) : sf::Color(245, 245, 245)));
+        box.updateTextColor(low ? sf::Color(150, 20, 15) : sf::Color::Black);
+        box.updateOutlineColor(active ? sf::Color(30, 110, 55) : sf::Color(150, 150, 150));
+        box.updateTextSizeFit(0.85f);
+    };
+    update(black_clock_box, CellState::Black, "Black");
+    update(white_clock_box, CellState::White, "White");
+    std::ostringstream komi_text;
+    komi_text << std::fixed << std::setprecision(1) << game.getGameCfg().komi;
+    komi_box.updateStr("Komi: " + komi_text.str());
+    komi_box.updateTextSizeFit(0.9f);
+}
+
 void InGame::updateMoveInfo() {
     const int move_number = history_preview_index == -1 ? game.getMoveListSize() : history_preview_index + 1;
     std::string description = move_number == 0 ? "Start" : game.getKthMove(move_number);
@@ -587,6 +650,8 @@ void InGame::updateMoveInfo() {
 }
 
 void InGame::draw() {
+    tick(); // Keep clocks and the result dialog live even when no input arrives.
+    updateClockBoxes();
     ui_cfg.window.clear(sf::Color(240, 217, 181));
 
     //ui_cfg.window.draw(side_panel);
@@ -638,6 +703,9 @@ void InGame::draw() {
     updateMoveInfo();
     move_info_box.draw(ui_cfg.window);
     assistance_info_box.draw(ui_cfg.window);
+    black_clock_box.draw(ui_cfg.window);
+    white_clock_box.draw(ui_cfg.window);
+    komi_box.draw(ui_cfg.window);
 
     playAnimation();
 
@@ -661,16 +729,13 @@ void InGame::mode_panel_resize(const float& _height) {
     mode_panel.setPosition({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2, 
         header_bar.getPos().y - status_bar_size_y / 2.f + _height /2.f});
 
-    mode_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y - _height * 0.31f });
-    mode_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.27f });
-    mode_box.updateTextSizeFit(1.f);
-
-    move_info_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y });
-    move_info_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.27f });
-    move_info_box.updateTextSizeFit(0.9f);
-    assistance_info_box.updateBoxPos({ mode_panel.getPosition().x, mode_panel.getPosition().y + _height * 0.31f });
-    assistance_info_box.updateBoxSize({ mode_panel.getSize().x * 0.9f, _height * 0.27f });
-    assistance_info_box.updateTextSizeFit(0.9f);
+    TextBox* rows[] = { &mode_box, &move_info_box, &komi_box, &black_clock_box, &white_clock_box, &assistance_info_box };
+    for (int i = 0; i < 6; ++i) {
+        rows[i]->updateBoxSize({ side_panel_size_x * 0.9f, _height * 0.13f });
+        rows[i]->updateBoxPos({ mode_panel.getPosition().x,
+            mode_panel.getPosition().y - _height / 2.f + _height * (i + 0.5f) / 6.f });
+        rows[i]->updateTextSizeFit(0.9f);
+    }
 }
 
 void InGame::option_panel_resize(const float& _height) {
@@ -812,9 +877,9 @@ void InGame::resize() {
     music_button.updatePos({ sound_button.getPos().x - sound_button.getSize().x - inner_padding, sound_button.getPos().y});
 
     // Resize other component
-    mode_panel_resize( (_total_height_panel-inner_padding*2) * 1/7  );
+    mode_panel_resize( (_total_height_panel-inner_padding*2) * 2/7  );
     option_panel_resize((_total_height_panel - inner_padding * 2) * 3 / 7 );
-    history_panel_resize((_total_height_panel - inner_padding * 2) * 3 / 7);
+    history_panel_resize((_total_height_panel - inner_padding * 2) * 2 / 7);
     
     control_panel_resize(_total_height_panel * 0.5);
     score_bar_resize(_total_height_panel * 0.3);
