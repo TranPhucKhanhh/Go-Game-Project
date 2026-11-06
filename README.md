@@ -48,6 +48,16 @@ Assistance is on by default. Use **Assistance: ON/OFF** in the game side panel t
 - Assistance follows the displayed position, including captures, undo/redo and history previews. It does not play a move or change the rules.
 - Rejected suicide and superko moves open an English explanation. Close it to continue playing; these explanations remain available when assistance is off.
 
+## Timed games and komi
+
+The New Game screen offers **Untimed**, **1 min**, **5 min** and **10 min** of main time per player, without increments or overtime. Click **Komi: ... (edit)** to enter a value from -50 to 50 in half-point steps; komi is added to White's area score. The selected value is shared by live scoring, history review and KataGo.
+
+Both clocks appear in the game side panel. A green outline identifies the active player, `*` marks a running timed clock and `||` marks a paused clock. A clock turns red at 30 seconds or less. Playing a move or passing changes the active clock; reaching zero ends the match with a timeout result.
+
+This is a practice-game clock policy: settings/menus, dialogs, history review and an unfocused window pause the clocks. Undo/redo keeps time already spent; reset starts both clocks from the selected limit. Saving preserves both remaining times, komi and the outcome. Loading resumes without charging time spent outside the application. Legacy saves without timing fields load untimed with 7.5 komi. After closing the result dialog, completed games can also be saved.
+
+AI search time counts even if the existing engine bridge temporarily blocks window updates during the search.
+
 ## Full repository on Github
 
 The Github link to the full project with instruction is: https://github.com/TranPhucKhanhh/Go-Game-Project.git
