@@ -1,6 +1,7 @@
 #include<SFML/Graphics.hpp>
 #include<UI/Component.h>
 #include<algorithm>
+#include<limits>
 
 BaseNotification::BaseNotification(const sf::Font& font) :
 	title(font), notification(font) {
@@ -51,14 +52,19 @@ void BaseNotification::updateState() {
 	float _tmp = (selection.size() == 0 ? 1 : selection.size());
 	_selection_size = { std::min(size.x / 3.f, (size.x - 2 * _margin - (_tmp - 1) * _inner_margin) / _tmp), title.getSize().y };
 	float _delta_pos_x = (size.x - _selection_size.x * _tmp - (_tmp-1) * _inner_margin) / 2.f + _selection_size.x / 2.f;
+	float shared_text_size = _selection_size.x > 0.f && _selection_size.y > 0.f
+		? std::numeric_limits<float>::max() : 0.f;
 	for (int i = 0; i < selection.size(); i++) {
 		selection[i].updateSize(_selection_size);
 		selection[i].updatePos({position.x-size.x/2.f+ _delta_pos_x +i*(_selection_size.x+_inner_margin),position.y+size.y/2.f- selection[i].getSize().y/2.f - _inner_margin});
-		selection[i].updateTextSizeFit(0.9f);
+		if (shared_text_size > 0.f)
+			shared_text_size = std::min(shared_text_size, selection[i].getTextSizeFit(0.9f));
 	}
+	for (auto& button : selection) button.updateTextSize(shared_text_size);
 
 	notification.updateBoxSize({size.x - _margin, (size.y - 2 * _margin - title.getSize().y - _selection_size.y) / 2.f });
 	notification.updateBoxPos({position.x, title.getPos().y + title.getSize().y / 2.f + _inner_margin + notification.getSize().y/2.f});
+	notification.updateTextSize(notification.getSize().y);
 	notification.updateTextSizeFitWithScale(0.9f);
 }
 
@@ -81,6 +87,8 @@ void TextInputNotification::updateState() {
 	input_box.updateTextColor(input_text_color);
 	input_box.updateBoxSize(notification.getSize());
 	input_box.updateBoxPos({ position.x, notification.getPos().y + notification.getSize().y / 2.f + input_box.getSize().y / 2.f + _inner_margin});
+	input_box.updateTextSize(input_box.getSize().y);
+	input_box.updateTextSizeFitWithScale(0.9f);
 }
 
 void TextInputNotification::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
