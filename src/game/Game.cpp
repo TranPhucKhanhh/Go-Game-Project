@@ -286,6 +286,12 @@ bool Game::saveGame(const std::string& name) {
 		{"timed_out_player", timed_out_player}};
 	j_config["game_end"] = game_end;
 	j_config["resigned_player"] = resigned_player;
+	json marked = json::array();
+	for (int x = 0; x < state.current_board.size(); ++x)
+		for (int y = 0; y < state.current_board.size(); ++y)
+			if (dead_stones[x][y]) marked.push_back({{"x", x}, {"y", y}});
+	j_config["scoring"] = {{"active", scoring_active}, {"confirmed", score_confirmed},
+		{"pass_floor", scoring_pass_floor}, {"dead_stones", marked}};
 	namespace fs = std::filesystem;
 	if (!fs::exists(SAVEGAME_DIR)) {
 		fs::create_directories(SAVEGAME_DIR);
@@ -315,6 +321,12 @@ bool Game::loadGame(const std::string& name) {
 	fin >> json_move_history;
 	std::vector<Move> move_history = json_move_history;
 	GameCfg loaded_config = json_config;
+	if (loaded_config.board_size != 9 && loaded_config.board_size != 13 && loaded_config.board_size != 19) return false;
+	for (const Move& move : move_history) {
+		if (move.player != CellState::Black && move.player != CellState::White) return false;
+		if (!move.pass && (move.x < 0 || move.y < 0 || move.x >= loaded_config.board_size || move.y >= loaded_config.board_size))
+			return false;
+	}
 	double loaded_black = loaded_config.main_time_seconds;
 	double loaded_white = loaded_config.main_time_seconds;
 	CellState loaded_timeout = CellState::Empty;
@@ -333,19 +345,62 @@ bool Game::loadGame(const std::string& name) {
 		(loaded_timeout == CellState::Black && (loaded_black > 0 || loaded_config.main_time_seconds == 0)) ||
 		(loaded_timeout == CellState::White && (loaded_white > 0 || loaded_config.main_time_seconds == 0)))
 		return false;
+	bool loaded_scoring = false, loaded_confirmed = false;
+	int loaded_floor = 0;
+	std::vector<std::vector<bool>> loaded_dead(loaded_config.board_size,
+		std::vector<bool>(loaded_config.board_size, false));
+	if (json_config.contains("scoring")) {
+		const auto& scoring = json_config.at("scoring");
+		loaded_scoring = scoring.at("active").get<bool>();
+		loaded_confirmed = scoring.at("confirmed").get<bool>();
+		loaded_floor = scoring.at("pass_floor").get<int>();
+		if (loaded_floor < 0 || loaded_floor > static_cast<int>(move_history.size()) ||
+			(loaded_scoring && (loaded_confirmed || loaded_end)) || (loaded_confirmed && !loaded_end)) return false;
+		const auto& marked = scoring.at("dead_stones");
+		if (!marked.is_array()) return false;
+		for (const auto& point : marked) {
+			const int x = point.at("x").get<int>(), y = point.at("y").get<int>();
+			if (x < 0 || y < 0 || x >= loaded_config.board_size || y >= loaded_config.board_size ||
+				loaded_dead[x][y] || (!loaded_scoring && !loaded_confirmed)) return false;
+			loaded_dead[x][y] = true;
+		}
+	}
+	// Reconstruct and check the scoring mask before replacing the current match.
+	Board loaded_board(loaded_config.board_size);
+	CellState loaded_player = CellState::Black;
+	GameHistory loaded_history;
+	loaded_history.loadFromMoveList(move_history, loaded_board, loaded_player);
+	if ((loaded_scoring || loaded_confirmed) &&
+		(!loaded_history.checkConsecutivePass() || static_cast<int>(move_history.size()) - loaded_floor < 2 ||
+		 loaded_timeout != CellState::Empty || loaded_resignation != CellState::Empty)) return false;
+	for (int x = 0; x < loaded_board.size(); ++x) {
+		for (int y = 0; y < loaded_board.size(); ++y) {
+			if (!loaded_dead[x][y]) continue;
+			const GroupInfo group = loaded_board.inspectGroup(x, y);
+			if (group.stones.empty()) return false;
+			for (const Cell& stone : group.stones)
+				if (!loaded_dead[stone.x][stone.y]) return false;
+		}
+	}
 	game_config = loaded_config;
-	state.initializer(game_config.board_size);
+	state.current_board = std::move(loaded_board);
+	state.current_player = loaded_player;
+	history = std::move(loaded_history);
 	initializeClock();
 	initializeScoring();
+	scoring_active = loaded_scoring;
+	score_confirmed = loaded_confirmed;
+	scoring_pass_floor = loaded_floor;
+	dead_stones = std::move(loaded_dead);
 	black_seconds = loaded_black;
 	white_seconds = loaded_white;
 	timed_out_player = loaded_timeout;
 	resigned_player = loaded_resignation;
-	history.loadFromMoveList(move_history, state.current_board, state.current_player);
-	game_end = loaded_end || history.checkConsecutivePass() ||
+	game_end = loaded_end ||
 		resigned_player != CellState::Empty || timed_out_player != CellState::Empty;
+	beginScoringIfNeeded();
 	// Timed saves with a zero active clock cannot resume play, even if an old result field is missing.
-	if (!game_end && game_config.main_time_seconds > 0 && getRemainingSeconds(state.current_player) <= 0) {
+	if (!game_end && !scoring_active && game_config.main_time_seconds > 0 && getRemainingSeconds(state.current_player) <= 0) {
 		timed_out_player = state.current_player;
 		game_end = true;
 	}
