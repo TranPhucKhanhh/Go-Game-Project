@@ -1,6 +1,7 @@
 #include<UI/Component.h>
 #include<UI/UI.h>
 #include<iostream>
+#include<UI/TextSizing.h>
 
 // BaseButton function definition
 
@@ -134,21 +135,13 @@ void TextureEffectButton::updateEffect() {
 // TextButton function definition
 
 void TextButton::updateTextSizeFit(const float _ratio) {
-	sf::Vector2f _size = button.getLocalBounds().size;
-	text.setCharacterSize(_size.y);
-	sf::FloatRect bound = text.getLocalBounds();
-	float ratio = std::min(1.f, _size.x / bound.size.x) * bound.size.y * _ratio;
-
-	updateTextSize(ratio);
+	text_fit_ratio = _ratio;
+	auto_fit_text = true;
+	updateState();
 }
 
 float TextButton::getTextSizeFit(const float _ratio) {
-	sf::Vector2f _size = button.getLocalBounds().size;
-	text.setCharacterSize(_size.y);
-	sf::FloatRect bound = text.getLocalBounds();
-	float ratio = std::min(1.f, _size.x / bound.size.x) * bound.size.y * _ratio;
-
-	return ratio;
+	return static_cast<float>(ui_detail::fittedCharacterSize(text, size, _ratio));
 }
 
 TextButton::TextButton(const std::string& str, const sf::Font& font, UICfg& _ui_cfg)
@@ -168,7 +161,9 @@ void TextButton::updateState() {
 	button.setOrigin(size / 2.f);
 	button.setPosition(position);
 
-	text.setCharacterSize(text_size);
+	text.setScale({ 1.f, 1.f });
+	const unsigned int fitted = ui_detail::fittedCharacterSize(text, size, text_fit_ratio);
+	text.setCharacterSize(auto_fit_text ? fitted : std::min(text_size, fitted));
 	text.setOrigin(text.getLocalBounds().getCenter());
 	text.setPosition(position);
 }

@@ -87,7 +87,7 @@ public:
 	std::string getString() const { return text.getString(); };
 
 	// update value
-	void updateTextSize(unsigned int _text_size) { text_size = _text_size; updateState(); };
+	void updateTextSize(unsigned int _text_size) { text_size = _text_size; auto_fit_text = false; updateState(); };
 	void updateStr(const std::string& _text) { text.setString(_text); updateState(); }
 	void updateTextSizeFit(const float _ratio);
 	void updateState() override;
@@ -98,6 +98,8 @@ public:
 protected:
 	sf::Text text;
 	unsigned int text_size = 0;
+	bool auto_fit_text = true;
+	float text_fit_ratio = 0.9f;
 };
 
 class TextureEffectButton : public TextButton {
@@ -219,7 +221,7 @@ public:
 	void updateOutlineColor(const sf::Color& color) { box.setOutlineColor(color); };
 
 	void updateTextColor(const sf::Color& color) { text.setFillColor(color); }
-	void updateTextSize(const float& size) { text.setCharacterSize(size); update(); }
+	void updateTextSize(const float& size) { manual_text_size = size > 0.f ? static_cast<unsigned int>(size) : 0; auto_fit_text = false; update(); }
 	void updateTextSizeFit(const float _ratio);
 	void updateStr(const std::string& _text) { text.setString(_text); update(); }
 	void update();
@@ -233,6 +235,10 @@ private:
 	sf::Text text;
 
 	sf::Vector2f position;
+	bool auto_fit_text = true;
+	bool scale_text_to_fit = false;
+	float text_fit_ratio = 0.9f;
+	unsigned int manual_text_size = 30;
 };
 
 class Slider {
@@ -354,6 +360,7 @@ protected:
 
 	sf::Vector2f size, position, _selection_size;
 	bool on_screen = false;
+	bool reserve_input_space = false;
 };
 
 class TextInputNotification : public BaseNotification {

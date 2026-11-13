@@ -679,7 +679,6 @@ void InGame::updateScoringSummary() {
         " territory\n+ " + convert_to_string(game.getGameCfg().komi) + " komi = " + convert_to_string(totals.second) +
         "\n\nNeutral: " + std::to_string(score.neutral_points) +
         "\n\nClick groups: mark/restore\nSquares: territory\nGray dots: neutral\nRed crosses: dead");
-    scoring_summary.updateTextSize(18.f);
     scoring_summary.updateTextSizeFitWithScale(0.9f);
 }
 
