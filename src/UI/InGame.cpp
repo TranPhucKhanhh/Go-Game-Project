@@ -679,7 +679,7 @@ void InGame::updateScoringSummary() {
         " territory\n+ " + convert_to_string(game.getGameCfg().komi) + " komi = " + convert_to_string(totals.second) +
         "\n\nNeutral: " + std::to_string(score.neutral_points) +
         "\n\nClick groups: mark/restore\nSquares: territory\nGray dots: neutral\nRed crosses: dead");
-    scoring_summary.updateTextSize(18.f);
+    scoring_summary.updateTextSize(scoring_summary.getSize().y);
     scoring_summary.updateTextSizeFitWithScale(0.9f);
 }
 
@@ -880,8 +880,10 @@ void InGame::resizeScoringPanel() {
     for (int i = 0; i < 3; ++i) {
         buttons[i]->updateSize({ side_panel_size_x * 0.95f, height * 0.085f });
         buttons[i]->updatePos({ x, top + height * (0.71f + i * 0.11f) });
-        buttons[i]->updateTextSizeFit(0.85f);
     }
+    const float shared_text_size = std::min({ confirm_score_button.getTextSizeFit(0.85f),
+        resume_play_button.getTextSizeFit(0.85f), save_button.getTextSizeFit(0.85f) });
+    for (auto* button : buttons) button->updateTextSize(shared_text_size);
 }
 
 void InGame::control_panel_resize(const float& _height) {
