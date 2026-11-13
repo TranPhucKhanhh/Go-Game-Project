@@ -44,9 +44,9 @@ void BaseNotification::updateState() {
 	background.setSize({30000.f,30000.f});
 	background.setPosition({0.f,0.f});
 
-	title.updateBoxSize({size.x, size.y / 5.f });
+	title.updateBoxSize({std::max(0.f, size.x - 2.f * _margin), size.y / 5.f });
 	title.updateBoxPos({position.x, position.y - size.y/2.f + title.getSize().y/2.f + _inner_margin / 2.f});
-	title.updateTextSizeFit(1.f);
+	title.updateTextSizeFit(0.9f);
 	
 	float _tmp = (selection.size() == 0 ? 1 : selection.size());
 	_selection_size = { std::min(size.x / 3.f, (size.x - 2 * _margin - (_tmp - 1) * _inner_margin) / _tmp), title.getSize().y };
@@ -57,12 +57,17 @@ void BaseNotification::updateState() {
 		selection[i].updateTextSizeFit(0.9f);
 	}
 
-	notification.updateBoxSize({size.x - _margin, (size.y - 2 * _margin - title.getSize().y - _selection_size.y) / 2.f });
-	notification.updateBoxPos({position.x, title.getPos().y + title.getSize().y / 2.f + _inner_margin + notification.getSize().y/2.f});
+	const float body_top = title.getPos().y + title.getSize().y / 2.f + _inner_margin;
+	const float body_bottom = position.y + size.y / 2.f - _inner_margin - _selection_size.y - _inner_margin;
+	const float body_height = std::max(0.f, body_bottom - body_top);
+	const float message_height = reserve_input_space ? std::max(0.f, (body_height - _inner_margin) / 2.f) : body_height;
+	notification.updateBoxSize({std::max(0.f, size.x - 2.f * _margin), message_height });
+	notification.updateBoxPos({position.x, body_top + message_height / 2.f});
 	notification.updateTextSizeFitWithScale(0.9f);
 }
 
 TextInputNotification::TextInputNotification(const sf::Font& font) : BaseNotification(font), input_box(font) {
+	reserve_input_space = true;
 	input_box.updateOutlineColor(sf::Color::Black);
 }
 
@@ -81,6 +86,7 @@ void TextInputNotification::updateState() {
 	input_box.updateTextColor(input_text_color);
 	input_box.updateBoxSize(notification.getSize());
 	input_box.updateBoxPos({ position.x, notification.getPos().y + notification.getSize().y / 2.f + input_box.getSize().y / 2.f + _inner_margin});
+	input_box.updateTextSizeFitWithScale(0.9f);
 }
 
 void TextInputNotification::eventHandle(const sf::Event& event, const UICfg& ui_cfg, std::string& respond) {
