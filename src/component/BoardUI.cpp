@@ -203,6 +203,64 @@ std::string BoardUI::drawAssistance(sf::RenderWindow& window, const Board& curre
         (group.liberties.size() == 1 ? " | ATARI" : "");
 }
 
+void BoardUI::drawScoring(sf::RenderWindow& window, const AreaScore& score,
+    const std::vector<std::vector<bool>>& dead_stones) const {
+    if (score.ownership.size() != static_cast<std::size_t>(board_cell_number) ||
+        dead_stones.size() != score.ownership.size()) return;
+    for (int x = 0; x < board_cell_number; ++x) {
+        for (int y = 0; y < board_cell_number; ++y) {
+            const sf::Vector2f center{ start_position.x + x * grid_size, start_position.y + y * grid_size };
+            if (dead_stones[x][y]) {
+                const float radius = grid_size * 0.43f;
+                sf::CircleShape veil(radius);
+                veil.setOrigin({ radius, radius });
+                veil.setPosition(center);
+                veil.setFillColor(sf::Color(150, 150, 150, 160));
+                window.draw(veil);
+                sf::RectangleShape cross({ grid_size * 0.65f, grid_size * 0.075f });
+                cross.setOrigin(cross.getSize() / 2.f);
+                cross.setPosition(center);
+                cross.setFillColor(sf::Color(245, 55, 45));
+                cross.setOutlineColor(sf::Color::Black);
+                cross.setOutlineThickness(std::max(1.f, grid_size * 0.025f));
+                for (float angle : { 45.f, -45.f }) {
+                    cross.setRotation(sf::degrees(angle));
+                    window.draw(cross);
+                }
+            }
+            const CellState owner = score.ownership[x][y];
+            if (owner == CellState::Invalid) continue;
+            // Offset markers on dead stones so their cross and identity stay readable.
+            const sf::Vector2f marker_pos = center + (dead_stones[x][y]
+                ? sf::Vector2f{ grid_size * 0.28f, grid_size * 0.28f } : sf::Vector2f{});
+            if (owner == CellState::Empty) {
+                const float radius = grid_size * 0.09f;
+                sf::CircleShape neutral(radius);
+                neutral.setOrigin({ radius, radius });
+                neutral.setPosition(marker_pos);
+                neutral.setFillColor(sf::Color(150, 150, 150));
+                neutral.setOutlineColor(sf::Color::Black);
+                neutral.setOutlineThickness(1.f);
+                window.draw(neutral);
+            }
+            else {
+                sf::RectangleShape territory({ grid_size * 0.24f, grid_size * 0.24f });
+                territory.setOrigin(territory.getSize() / 2.f);
+                territory.setPosition(marker_pos);
+                territory.setFillColor(owner == CellState::Black ? sf::Color::Black : sf::Color::White);
+                territory.setOutlineColor(owner == CellState::Black ? sf::Color::White : sf::Color::Black);
+                territory.setOutlineThickness(std::max(1.f, grid_size * 0.025f));
+                window.draw(territory);
+            }
+        }
+    }
+}
+
+void BoardUI::scoringClick(const sf::Vector2i& mouse_pos, Game& game) const {
+    const auto point = intersectionAt(mouse_pos);
+    if (point) game.toggleDeadGroup(point->x, point->y);
+}
+
 void BoardUI::hoverStone(const sf::Vector2i& mouse_pos, const Game& game) {
     hoverOnStone = false;
     const auto point = intersectionAt(mouse_pos);

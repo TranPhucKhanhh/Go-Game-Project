@@ -132,6 +132,9 @@ public:
 		const std::optional<Move>& last_move = std::nullopt, bool show_hover = false);
 	std::string drawAssistance(sf::RenderWindow& window, const Board& current_board,
 		const sf::Vector2i& mouse_pos) const;
+	void drawScoring(sf::RenderWindow& window, const AreaScore& score,
+		const std::vector<std::vector<bool>>& dead_stones) const;
+	void scoringClick(const sf::Vector2i& mouse_pos, Game& game) const;
 
 	// Return value
 	sf::Vector2f getPos() const { return position; }
