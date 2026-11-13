@@ -58,6 +58,16 @@ This is a practice-game clock policy: settings/menus, dialogs, history review an
 
 AI search time counts even if the existing engine bridge temporarily blocks window updates during the search.
 
+## Interactive endgame scoring
+
+Two consecutive passes now open a scoring view and pause the clocks. Click a stone to mark its entire connected group as dead; click it again to restore it. Red crosses mark dead stones, black/white squares show territory ownership, and gray dots show neutral points. The side panel displays remaining stones, territory, White's komi and the resulting totals.
+
+Scoring uses Chinese area: remaining stones plus owned empty intersections, with komi added to White. Removed dead stones make empty intersections; prisoners are not added as separate points. During play and history review, the `Area:` values are raw area counts with komi, not an AI prediction.
+
+Choose **Confirm Result** to finish the match, or **Resume Play** to clear the dead-group marks and continue from the unchanged played position. Passes remain in history; two new consecutive passes are needed to open scoring again. AI turns stop during scoring and resume when appropriate after Resume Play.
+
+**Save game** is available while scoring. Saves preserve pending/confirmed scoring, whole-group markings and clocks. Confirmed territory remains visible at the latest position; older history positions show their own boards. Earlier completed saves remain completed when loaded.
+
 ## Full repository on Github
 
 The Github link to the full project with instruction is: https://github.com/TranPhucKhanhh/Go-Game-Project.git
