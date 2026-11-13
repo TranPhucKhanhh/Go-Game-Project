@@ -44,6 +44,8 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     resign_button("Resign", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     out_his_button("Close history", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     assistance_button("Assistance: ON", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    confirm_score_button("Confirm Result", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    resume_play_button("Resume Play", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     setting_button("Setting", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     sound_button(ui_cfg),
@@ -59,6 +61,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     black_clock_box(_asset_manager.getFont("StackSansNotch-Bold")),
     white_clock_box(_asset_manager.getFont("StackSansNotch-Bold")),
     komi_box(_asset_manager.getFont("StackSansNotch-Regular")),
+    scoring_summary(_asset_manager.getFont("StackSansNotch-Regular")),
     board(_asset_manager),
     white_stone_image(_asset_manager.getTexture("dummy")),
     black_stone_image(_asset_manager.getTexture("dummy")),
@@ -79,6 +82,17 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     sound_button.updateRespondStr("Toggle Sound");
     music_button.updateRespondStr("Toggle Music");
     assistance_button.updateRespondStr("Toggle Assistance");
+    confirm_score_button.updateRespondStr("Confirm Score");
+    resume_play_button.updateRespondStr("Resume Play");
+    for (auto* button : { &confirm_score_button, &resume_play_button }) {
+        button->updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+        button->updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+        button->updateHoverTex(asset_manager.getTexture("button_rectangle_flat-yellow"));
+        button->updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+    }
+    scoring_summary.updateBoxColor(sf::Color(225, 240, 230));
+    scoring_summary.updateTextColor(sf::Color::Black);
+    scoring_summary.updateStr("Chinese area scoring");
 
     white_score_box.updateTextColor(sf::Color::Black);
     black_score_box.updateBoxColor(sf::Color::Black);
@@ -271,6 +285,13 @@ void InGame::updateSoundMusic() {
 }
 
 void InGame::updateHeaderBar() {
+    if (game.isScoring()) {
+        header_bar.updateStr("SCORING - click dead groups");
+        header_bar.updateBoxColor(sf::Color(210, 240, 220));
+        header_bar.updateTextColor(sf::Color::Black);
+        header_bar.updateTextSizeFit(0.9f);
+        return;
+    }
     const CellState loser = game.getTimedOutPlayer() != CellState::Empty
         ? game.getTimedOutPlayer() : game.getResignPlayer();
     if (game.isGameEnd() && loser != CellState::Empty) {
@@ -278,6 +299,7 @@ void InGame::updateHeaderBar() {
         header_bar.updateStr(white_wins ? "WHITE WINS" : "BLACK WINS");
         header_bar.updateBoxColor(white_wins ? sf::Color::White : sf::Color::Black);
         header_bar.updateTextColor(white_wins ? sf::Color::Black : sf::Color::White);
+        header_bar.updateTextSizeFit(0.9f);
         return;
     }
     if (game.isGameEnd()) {
@@ -312,8 +334,10 @@ void InGame::updateHeaderBar() {
 }
 
 void InGame::updateScoreBox(const std::pair<float, float>& _score) {
-    white_score_box.updateStr(convert_to_string(_score.second));
-    black_score_box.updateStr(convert_to_string(_score.first));
+    const std::string label = history_preview_index == -1 && (game.isScoring() || game.isScoreConfirmed())
+        ? "Total: " : "Area: ";
+    white_score_box.updateStr(label + convert_to_string(_score.second));
+    black_score_box.updateStr(label + convert_to_string(_score.first));
 
     float _tmp = std::min(white_score_box.getTextSizeFit(0.9f), black_score_box.getTextSizeFit(0.9f));
     white_score_box.updateTextSize(_tmp);
@@ -370,6 +394,35 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         win_notification.eventHandle(event, ui_cfg, event_respond);
         if (event_respond == "New") {
             respond = "GameNewOption";
+        }
+        return;
+    }
+
+    if (game.isScoring()) {
+        confirm_score_button.eventHandle(event, ui_cfg, event_respond);
+        resume_play_button.eventHandle(event, ui_cfg, event_respond);
+        save_button.eventHandle(event, ui_cfg, event_respond);
+        exit_button.eventHandle(event, ui_cfg, event_respond);
+        if (event_respond == "Confirm Score") game.confirmScore();
+        else if (event_respond == "Resume Play") {
+            game.resumePlay();
+            result_announced = false;
+        }
+        else if (event_respond == "Save") {
+            save_file_input.clearStr();
+            save_file_input.updateOnScreen(true);
+        }
+        else if (event_respond == "Exit") respond = "GameExit";
+        else if (const auto* click = event.getIf<sf::Event::MouseButtonReleased>()) {
+            if (click->button == sf::Mouse::Button::Left) board.scoringClick(ui_cfg.mouse_pos, game);
+        }
+        tick();
+        updateHeaderBar();
+        updateScoreBox(game.getScore());
+        if (event_respond == "Resume Play" && !game.isGameEnd() &&
+            game.getGameCfg().game_mode != GameMode::PvP && game.getCurrentPlayer() == game.getGameCfg().AI_side) {
+            ui_cfg.AI_in_turn = true;
+            respond = "StartAI";
         }
         return;
     }
@@ -603,17 +656,38 @@ void InGame::announceResult() {
 }
 
 void InGame::tick() {
-    game.setClockPaused(game.getGameState() != GameState::Playing || !ui_cfg.window.hasFocus() ||
+    game.setClockPaused(game.isScoring() || game.getGameState() != GameState::Playing || !ui_cfg.window.hasFocus() ||
         history_preview_index != -1 || save_file_input.onScreen() || error_notification.onScreen() ||
         win_notification.onScreen());
+    if (scoring_layout != game.isScoring()) {
+        scoring_layout = game.isScoring();
+        history_preview_index = -1;
+        game_playable = !scoring_layout && !game.isGameEnd();
+        resize();
+        updateHeaderBar();
+        updateScoreBox(game.getScore());
+    }
     announceResult();
+}
+
+void InGame::updateScoringSummary() {
+    const AreaScore score = game.getScoringBreakdown();
+    const auto totals = game.getScore();
+    scoring_summary.updateStr("Chinese area scoring\n\nBlack: " + std::to_string(score.black_stones) +
+        " stones\n+ " + std::to_string(score.black_territory) + " territory = " + convert_to_string(totals.first) +
+        "\n\nWhite: " + std::to_string(score.white_stones) + " stones\n+ " + std::to_string(score.white_territory) +
+        " territory\n+ " + convert_to_string(game.getGameCfg().komi) + " komi = " + convert_to_string(totals.second) +
+        "\n\nNeutral: " + std::to_string(score.neutral_points) +
+        "\n\nClick groups: mark/restore\nSquares: territory\nGray dots: neutral\nRed crosses: dead");
+    scoring_summary.updateTextSize(18.f);
+    scoring_summary.updateTextSizeFitWithScale(0.9f);
 }
 
 void InGame::updateClockBoxes() {
     const bool timed = game.getGameCfg().main_time_seconds > 0;
     auto update = [&](TextBox& box, CellState player, const std::string& name) {
         const int seconds = static_cast<int>(std::ceil(game.getRemainingSeconds(player)));
-        const bool active = !game.isGameEnd() && game.getCurrentPlayer() == player;
+        const bool active = !game.isGameEnd() && !game.isScoring() && game.getCurrentPlayer() == player;
         const bool running = active && !game.isClockPaused();
         const bool low = timed && seconds <= 30;
         std::string time = "Untimed";
@@ -664,20 +738,26 @@ void InGame::draw() {
     ui_cfg.window.draw(black_stone_image);
     ui_cfg.window.draw(white_stone_image);
 
-    sound_button.draw(ui_cfg.window);
-    music_button.draw(ui_cfg.window);
-
     exit_button.draw(ui_cfg.window);
-    new_button.draw(ui_cfg.window);
-    reset_button.draw(ui_cfg.window);
     save_button.draw(ui_cfg.window);
-    setting_button.draw(ui_cfg.window);
-    assistance_button.draw(ui_cfg.window);
-
-    undo_button.draw(ui_cfg.window);
-    redo_button.draw(ui_cfg.window);
-    pass_button.draw(ui_cfg.window);
-    resign_button.draw(ui_cfg.window);
+    if (!game.isScoring()) {
+        sound_button.draw(ui_cfg.window);
+        music_button.draw(ui_cfg.window);
+        new_button.draw(ui_cfg.window);
+        reset_button.draw(ui_cfg.window);
+        setting_button.draw(ui_cfg.window);
+        assistance_button.draw(ui_cfg.window);
+        undo_button.draw(ui_cfg.window);
+        redo_button.draw(ui_cfg.window);
+        pass_button.draw(ui_cfg.window);
+        resign_button.draw(ui_cfg.window);
+    }
+    else {
+        updateScoringSummary();
+        scoring_summary.draw(ui_cfg.window);
+        confirm_score_button.draw(ui_cfg.window);
+        resume_play_button.draw(ui_cfg.window);
+    }
     if (history_preview_index != -1) out_his_button.draw(ui_cfg.window);
 
     header_bar.draw(ui_cfg.window);
@@ -687,18 +767,20 @@ void InGame::draw() {
 
     const Board displayed_board = history_preview_index != -1 ? game.getPreviewBoard() : game.getCurrentBoard();
     const bool modal_open = save_file_input.onScreen() || error_notification.onScreen() || win_notification.onScreen();
-    const bool allow_placement = history_preview_index == -1 && game_playable && !ui_cfg.AI_in_turn && !modal_open;
+    const bool allow_placement = history_preview_index == -1 && game_playable && !game.isScoring() && !ui_cfg.AI_in_turn && !modal_open;
     if (allow_placement) board.hoverStone(ui_cfg.mouse_pos, game);
     board.draw(ui_cfg.window, displayed_board,
         game.getMoveAt(history_preview_index == -1 ? game.getMoveListSize() - 1 : history_preview_index),
         allow_placement);
-    const std::string help_text = assistance_enabled && !modal_open
+    const bool show_scoring = history_preview_index == -1 && (game.isScoring() || game.isScoreConfirmed());
+    if (show_scoring) board.drawScoring(ui_cfg.window, game.getScoringBreakdown(), game.getDeadStones());
+    const std::string help_text = show_scoring ? "Squares: area | X: dead" : assistance_enabled && !modal_open
         ? board.drawAssistance(ui_cfg.window, displayed_board, ui_cfg.mouse_pos)
         : (assistance_enabled ? "Hover stones | Red: atari" : "Assistance OFF");
     assistance_info_box.updateStr(help_text);
     assistance_info_box.updateTextSizeFit(0.9f);
 
-    history_scroll.draw(ui_cfg.window);
+    if (!game.isScoring()) history_scroll.draw(ui_cfg.window);
     mode_box.draw(ui_cfg.window);
     updateMoveInfo();
     move_info_box.draw(ui_cfg.window);
@@ -785,6 +867,21 @@ void InGame::history_panel_resize(const float& _height) {
     history_scroll.updateSize({ side_panel_size_x, _height });
     history_scroll.updatePos({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
         option_panel.getPosition().y + option_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
+}
+
+void InGame::resizeScoringPanel() {
+    const float top = mode_panel.getPosition().y + mode_panel.getSize().y / 2.f + inner_padding;
+    const float bottom = history_panel.getPosition().y + history_panel.getSize().y / 2.f;
+    const float height = bottom - top;
+    const float x = mode_panel.getPosition().x;
+    scoring_summary.updateBoxSize({ side_panel_size_x, height * 0.64f });
+    scoring_summary.updateBoxPos({ x, top + height * 0.32f });
+    TextureEffectButton* buttons[] = { &confirm_score_button, &resume_play_button, &save_button };
+    for (int i = 0; i < 3; ++i) {
+        buttons[i]->updateSize({ side_panel_size_x * 0.95f, height * 0.085f });
+        buttons[i]->updatePos({ x, top + height * (0.71f + i * 0.11f) });
+        buttons[i]->updateTextSizeFit(0.85f);
+    }
 }
 
 void InGame::control_panel_resize(const float& _height) {
@@ -880,6 +977,7 @@ void InGame::resize() {
     mode_panel_resize( (_total_height_panel-inner_padding*2) * 2/7  );
     option_panel_resize((_total_height_panel - inner_padding * 2) * 3 / 7 );
     history_panel_resize((_total_height_panel - inner_padding * 2) * 2 / 7);
+    if (scoring_layout) resizeScoringPanel();
     
     control_panel_resize(_total_height_panel * 0.5);
     score_bar_resize(_total_height_panel * 0.3);
