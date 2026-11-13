@@ -45,9 +45,10 @@ void BaseNotification::updateState() {
 	background.setSize({30000.f,30000.f});
 	background.setPosition({0.f,0.f});
 
-	title.updateBoxSize({size.x, size.y / 5.f });
+	title.updateBoxSize({std::max(0.f, size.x - 2.f * _margin), size.y * 0.16f });
 	title.updateBoxPos({position.x, position.y - size.y/2.f + title.getSize().y/2.f + _inner_margin / 2.f});
-	title.updateTextSizeFit(1.f);
+	title.updateTextSize(title.getSize().y);
+	title.updateTextSizeFitWithScale(0.9f);
 	
 	float _tmp = (selection.size() == 0 ? 1 : selection.size());
 	_selection_size = { std::min(size.x / 3.f, (size.x - 2 * _margin - (_tmp - 1) * _inner_margin) / _tmp), title.getSize().y };
@@ -62,13 +63,21 @@ void BaseNotification::updateState() {
 	}
 	for (auto& button : selection) button.updateTextSize(shared_text_size);
 
-	notification.updateBoxSize({size.x - _margin, (size.y - 2 * _margin - title.getSize().y - _selection_size.y) / 2.f });
-	notification.updateBoxPos({position.x, title.getPos().y + title.getSize().y / 2.f + _inner_margin + notification.getSize().y/2.f});
+	const float body_top = title.getPos().y + title.getSize().y / 2.f + _inner_margin;
+	const float body_bottom = position.y + size.y / 2.f - _inner_margin
+		- (selection.empty() ? 0.f : _selection_size.y + _inner_margin);
+	const float body_height = std::max(0.f, body_bottom - body_top);
+	// Only input dialogs need a second slot below their message.
+	const float message_height = reserve_input_space
+		? std::max(0.f, (body_height - _inner_margin) / 2.f) : body_height;
+	notification.updateBoxSize({std::max(0.f, size.x - 2.f * _margin), message_height});
+	notification.updateBoxPos({position.x, body_top + message_height / 2.f});
 	notification.updateTextSize(notification.getSize().y);
 	notification.updateTextSizeFitWithScale(0.9f);
 }
 
 TextInputNotification::TextInputNotification(const sf::Font& font) : BaseNotification(font), input_box(font) {
+	reserve_input_space = true;
 	input_box.updateOutlineColor(sf::Color::Black);
 }
 

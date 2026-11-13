@@ -354,6 +354,7 @@ protected:
 
 	sf::Vector2f size, position, _selection_size;
 	bool on_screen = false;
+	bool reserve_input_space = false;
 };
 
 class TextInputNotification : public BaseNotification {
