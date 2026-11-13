@@ -75,6 +75,13 @@ public:
 	CellState getResignPlayer() const { return resigned_player; }
 
 	bool isGameEnd() const { return game_end; }
+	bool isScoring() const { return scoring_active; }
+	bool isScoreConfirmed() const { return score_confirmed; }
+	const std::vector<std::vector<bool>>& getDeadStones() const { return dead_stones; }
+	AreaScore getScoringBreakdown() const { return state.current_board.calculateAreaScore(dead_stones); }
+	void toggleDeadGroup(int x, int y);
+	void confirmScore();
+	void resumePlay();
 	void updateClock();
 	void setClockPaused(bool paused);
 	bool isClockPaused() const { return clock_paused; }
@@ -113,4 +120,9 @@ private:
 	CellState timed_out_player = CellState::Empty;
 	std::chrono::steady_clock::time_point clock_updated_at = std::chrono::steady_clock::now();
 	void initializeClock();
+	bool scoring_active = false, score_confirmed = false;
+	int scoring_pass_floor = 0; // Passes at/before the last Resume Play do not trigger scoring again.
+	std::vector<std::vector<bool>> dead_stones;
+	void initializeScoring();
+	void beginScoringIfNeeded();
 };

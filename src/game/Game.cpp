@@ -22,7 +22,7 @@ void Game::updateClock() {
 	const auto now = std::chrono::steady_clock::now();
 	const double elapsed = std::chrono::duration<double>(now - clock_updated_at).count();
 	clock_updated_at = now;
-	if (clock_paused || game_end || game_config.main_time_seconds <= 0) return;
+	if (clock_paused || game_end || scoring_active || game_config.main_time_seconds <= 0) return;
 	double& remaining = state.current_player == CellState::Black ? black_seconds : white_seconds;
 	remaining = std::max(0.0, remaining - elapsed);
 	if (remaining <= 0.0) {
@@ -37,12 +37,50 @@ void Game::setClockPaused(bool paused) {
 	clock_paused = paused;
 }
 
+void Game::initializeScoring() {
+	scoring_active = score_confirmed = false;
+	scoring_pass_floor = 0;
+	dead_stones.assign(game_config.board_size, std::vector<bool>(game_config.board_size, false));
+}
+
+void Game::beginScoringIfNeeded() {
+	if (!game_end && history.getMoveListSize() - scoring_pass_floor >= 2 && history.checkConsecutivePass()) {
+		scoring_active = true;
+		clock_paused = true;
+		clock_updated_at = std::chrono::steady_clock::now();
+	}
+}
+
+void Game::toggleDeadGroup(int x, int y) {
+	if (!scoring_active) return;
+	const GroupInfo group = state.current_board.inspectGroup(x, y);
+	if (group.stones.empty()) return;
+	const bool marked = !dead_stones[x][y];
+	for (const Cell& cell : group.stones) dead_stones[cell.x][cell.y] = marked;
+}
+
+void Game::confirmScore() {
+	if (!scoring_active) return;
+	scoring_active = false;
+	score_confirmed = true;
+	game_end = true;
+}
+
+void Game::resumePlay() {
+	if (!scoring_active) return;
+	scoring_active = false;
+	scoring_pass_floor = history.getMoveListSize();
+	dead_stones.assign(game_config.board_size, std::vector<bool>(game_config.board_size, false));
+	clock_updated_at = std::chrono::steady_clock::now();
+}
+
 void Game::start() {
 	//Init first state with board_size size, black to move
 	state.initializer(game_config.board_size);
 	resigned_player = CellState::Empty;
 	game_end = false;
 	initializeClock();
+	initializeScoring();
 	std::cout << "Game initializer\n";
 	history.clear();
 	if (game_config.game_mode != GameMode::PvP) {
@@ -58,42 +96,45 @@ void Game::start() {
 
 void Game::pass() {
 	updateClock();
-	if (game_end) return;
+	if (game_end || scoring_active) return;
 	Move move(-1, -1, state.current_player, 1);
 	std::vector<Cell> capture;
 	if (game_config.game_mode != GameMode::PvP) AI.syncMove(move);
 	state.setNextPlayer();
 	history.addMove(move, state.current_board, capture);
 	clock_updated_at = std::chrono::steady_clock::now();
-	if (history.checkConsecutivePass()) game_end = true;
-	if (game_config.game_mode != GameMode::PvP && !game_end) {
+	beginScoringIfNeeded();
+	if (game_config.game_mode != GameMode::PvP && !game_end && !scoring_active) {
 		Game::placeStoneAI();
 	}
 }
 
 void Game::undo() {
 	updateClock();
-	if (game_end) return;
+	if (game_end || scoring_active) return;
 	if (game_config.game_mode != GameMode::PvP) {
 		history.undoMoveAIMode(state.current_board, state.current_player, AI);
+		scoring_pass_floor = std::min(scoring_pass_floor, history.getMoveListSize());
 		clock_updated_at = std::chrono::steady_clock::now();
 		return;
 	}
 	history.undoMove(state.current_board, state.current_player);
+	scoring_pass_floor = std::min(scoring_pass_floor, history.getMoveListSize());
 	clock_updated_at = std::chrono::steady_clock::now();
 }
 
 void Game::redo() {
 	updateClock();
-	if (game_end) return;
+	if (game_end || scoring_active) return;
 	if (game_config.game_mode != GameMode::PvP) {
 		history.redoMoveAIMode(state.current_board, state.current_player, AI);
 		clock_updated_at = std::chrono::steady_clock::now();
+		beginScoringIfNeeded();
 		return;
 	}
 	history.redoMove(state.current_board, state.current_player);
 	clock_updated_at = std::chrono::steady_clock::now();
-	if (history.checkConsecutivePass()) game_end = true;
+	beginScoringIfNeeded();
 }
 
 void Game::reset() {
@@ -104,6 +145,7 @@ void Game::reset() {
 	resigned_player =  CellState::Empty;
 	game_end = false;
 	initializeClock();
+	initializeScoring();
 	if (game_config.game_mode != GameMode::PvP) {
 		GameMode level = game_config.game_mode;
 		AI.startGame(game_config.board_size, level, game_config.komi);
@@ -118,7 +160,7 @@ void Game::reset() {
 void Game::placeStone(int x, int y) {
 	updateClock();
 	last_move_verdict = MoveVerdict::Invalid;
-	if (game_end) return;
+	if (game_end || scoring_active) return;
 	//std::cout << x << " " << y << "\n";
 	Move move(x, y, state.current_player, 0);
 	std::vector<Cell> capture;
@@ -144,7 +186,7 @@ void Game::placeStone(int x, int y) {
 
 void Game::placeStoneAI() {
 	updateClock();
-	if (game_end) return;
+	if (game_end || scoring_active) return;
 	Move move = AI.genMove(state.current_player, resigned_player);
 	// Charge the full search interval before accepting the result, even when rendering was blocked.
 	updateClock();
@@ -157,8 +199,8 @@ void Game::placeStoneAI() {
 	if (move.pass) {
 		std::vector<Cell> capture;
 		history.addMove(move, state.current_board, capture);
-		if (history.checkConsecutivePass()) game_end = true;
 		state.setNextPlayer();
+		beginScoringIfNeeded();
 		return;
 	}
 	std::vector<Cell> capture;
@@ -170,6 +212,11 @@ void Game::placeStoneAI() {
 }
 
 std::pair<float, float> Game::getScore() {
+	if (scoring_active || score_confirmed) {
+		const AreaScore score = getScoringBreakdown();
+		return { static_cast<float>(score.black_stones + score.black_territory),
+			score.white_stones + score.white_territory + game_config.komi };
+	}
 	int black_score = 0;
 	int white_score = 0;
 	float KOMI = game_config.komi;
@@ -289,6 +336,7 @@ bool Game::loadGame(const std::string& name) {
 	game_config = loaded_config;
 	state.initializer(game_config.board_size);
 	initializeClock();
+	initializeScoring();
 	black_seconds = loaded_black;
 	white_seconds = loaded_white;
 	timed_out_player = loaded_timeout;
@@ -375,7 +423,7 @@ std::string Game::getLastMove() {
 
 void Game::resign() {
 	updateClock();
-	if (game_end) return;
+	if (game_end || scoring_active) return;
 	resigned_player = state.current_player;
 	game_end = 1;
 }
