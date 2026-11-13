@@ -3,6 +3,7 @@
 #include <model/Cell.h>
 #include <vector>
 #include <iostream>
+#include <stdexcept>
 
 //Direction arrays, used in dfs and bfs
 static int dx[4] = { 1,-1,0,0 };
@@ -150,44 +151,57 @@ bool Board::validateMove(const Move& move, Board& board, std::vector<Cell>& capt
 	return 0;
 }
 
-static int getScore(const Board& board, int x, int y, int& mask) {
-	if (isOutOfRange(x, y, board.size())) return 0;
-	if (board[x][y] != CellState::Empty) {
-		if (board[x][y] == CellState::Black) mask |= 1;
-		else mask |= 2;
-		return 0;
+AreaScore Board::calculateAreaScore(const std::vector<std::vector<bool>>& dead_stones) const {
+	if (!dead_stones.empty()) {
+		if (dead_stones.size() != grid.size()) throw std::invalid_argument("Invalid dead-stone mask");
+		for (const auto& column : dead_stones)
+			if (column.size() != grid.size()) throw std::invalid_argument("Invalid dead-stone mask");
 	}
-	if (visited[x][y]) return 0;
-	visited[x][y] = 1;
-	int res = 1;
-	for (int i = 0; i < 4; i++) {
-		int u = x + dx[i];
-		int v = y + dy[i];
-		res += getScore(board, u, v, mask);
+	Board effective = *this;
+	AreaScore score;
+	score.ownership.assign(size(), std::vector<CellState>(size(), CellState::Invalid));
+	std::vector<std::vector<bool>> seen(size(), std::vector<bool>(size(), false));
+	for (int x = 0; x < size(); ++x) {
+		for (int y = 0; y < size(); ++y) {
+			if (!dead_stones.empty() && dead_stones[x][y]) effective[x][y] = CellState::Empty;
+			if (effective[x][y] == CellState::Black) ++score.black_stones;
+			else if (effective[x][y] == CellState::White) ++score.white_stones;
+		}
 	}
-	return res;
+	for (int x = 0; x < size(); ++x) {
+		for (int y = 0; y < size(); ++y) {
+			if (seen[x][y] || effective[x][y] != CellState::Empty) continue;
+			std::vector<Cell> region{ Cell(x, y, CellState::Empty) };
+			seen[x][y] = true;
+			int borders = 0;
+			for (std::size_t index = 0; index < region.size(); ++index) {
+				const Cell cell = region[index];
+				for (int direction = 0; direction < 4; ++direction) {
+					const int nx = cell.x + dx[direction], ny = cell.y + dy[direction];
+					if (isOutOfRange(nx, ny, size())) continue;
+					if (effective[nx][ny] == CellState::Black) borders |= 1;
+					else if (effective[nx][ny] == CellState::White) borders |= 2;
+					else if (effective[nx][ny] == CellState::Empty && !seen[nx][ny]) {
+						seen[nx][ny] = true;
+						region.emplace_back(nx, ny, CellState::Empty);
+					}
+				}
+			}
+			const CellState owner = borders == 1 ? CellState::Black :
+				(borders == 2 ? CellState::White : CellState::Empty);
+			for (const Cell& cell : region) score.ownership[cell.x][cell.y] = owner;
+			if (owner == CellState::Black) score.black_territory += static_cast<int>(region.size());
+			else if (owner == CellState::White) score.white_territory += static_cast<int>(region.size());
+			else score.neutral_points += static_cast<int>(region.size());
+		}
+	}
+	return score;
 }
 
 void Board::calculateScore(const Board& board, int& black_score, int& white_score) {
-	visited.assign(board.size(), std::vector<bool>(board.size(), 0));
-	for (int i = 0; i < board.size(); i++) {
-		for (int j = 0; j < board.size(); j++) {
-			if (board[i][j] == CellState::Black) {
-				black_score++;
-				continue;
-			}
-			if (board[i][j] == CellState::White) {
-				white_score++;
-				continue;
-			}
-			if (visited[i][j]) continue;
-			int mask = 0;
-			int score = getScore(board, i, j, mask);
-			if (mask == 3) continue;
-			if (mask == 1) black_score += score;
-			if (mask == 2) white_score += score;
-		}
-	}
+	const AreaScore score = board.calculateAreaScore();
+	black_score += score.black_stones + score.black_territory;
+	white_score += score.white_stones + score.white_territory;
 }
 
 void Board::loadPreviewFromMoveList(const std::vector<Move>& move_list, Board& current_board) {

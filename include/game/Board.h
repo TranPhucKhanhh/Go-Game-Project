@@ -11,6 +11,13 @@ struct GroupInfo {
 	std::vector<Cell> liberties;
 };
 
+struct AreaScore {
+	int black_stones = 0, white_stones = 0;
+	int black_territory = 0, white_territory = 0, neutral_points = 0;
+	// Black/White = owned empty point, Empty = neutral, Invalid = living stone.
+	std::vector<std::vector<CellState>> ownership;
+};
+
 class Board {
 public:
 	Board() = default;
@@ -52,6 +59,7 @@ public:
 	//ValidateMove, if move is valid update the board of InGameState
 	// Read-only inspection; every connected stone and empty neighbor is returned once.
 	GroupInfo inspectGroup(int x, int y) const;
+	AreaScore calculateAreaScore(const std::vector<std::vector<bool>>& dead_stones = {}) const;
 	//Super-KO is NOT check here
 	//Return the capture list for future use
 	bool validateMove(const Move& move, Board& board, std::vector<Cell>& capture, MoveVerdict& last_move_verdict);
