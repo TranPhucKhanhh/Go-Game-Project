@@ -1,9 +1,10 @@
 build
 out
 .cache
-.idea
+.idea/*
+!.idea/AGENTS.md
 .vs
 .vscode
 Katago/
-AGENTS.md
+/AGENTS.md
 .agents/
