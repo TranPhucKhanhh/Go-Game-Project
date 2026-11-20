@@ -41,6 +41,10 @@ add_executable(GoGame
     "src/AI/KatagoLink.cpp" "include/model/MoveVerdict.h")
 
 target_compile_features(GoGame PRIVATE cxx_std_17)
+if(WIN32)
+    # KatagoLink includes windows.h; keep its macros from replacing std::min/std::max.
+    target_compile_definitions(GoGame PRIVATE NOMINMAX)
+endif()
 target_link_libraries(GoGame PRIVATE SFML::Graphics SFML::Audio)
 target_include_directories(GoGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
