@@ -26,6 +26,7 @@ public:
 	std::vector<std::string> getFullMove(const int board_size);
 	int getMoveListSize();
 	Board getKthBoard(const int k);
+	std::vector<std::vector<int>> getMoveNumbers(int move_count, int board_size) const;
 private:
 	//Board history, use in checking Super-KO
 	//Planning to upgrade to Zobrist hashing later on to improve speed

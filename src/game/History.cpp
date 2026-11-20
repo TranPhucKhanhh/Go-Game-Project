@@ -198,3 +198,15 @@ int GameHistory::getMoveListSize() {
 Board GameHistory::getKthBoard(const int k) {
 	return board[k];
 }
+
+std::vector<std::vector<int>> GameHistory::getMoveNumbers(int move_count, int board_size) const {
+	std::vector<std::vector<int>> numbers(board_size, std::vector<int>(board_size, 0));
+	const int count = std::clamp(move_count, 0, static_cast<int>(move.size()));
+	for (int i = 0; i < count; ++i) {
+		const Move& played = move[i];
+		if (played.pass) continue; // Passes consume a move number but have no board label.
+		for (const Cell& removed : capture[i]) numbers[removed.x][removed.y] = 0;
+		numbers[played.x][played.y] = i + 1;
+	}
+	return numbers;
+}

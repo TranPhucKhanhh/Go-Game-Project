@@ -61,6 +61,9 @@ public:
 	std::string getLastMove();
 	std::string getKthMove(const int k);
 	std::optional<Move> getMoveAt(int index) const { return history.getMoveAt(index); }
+	std::vector<std::vector<int>> getMoveNumbers(int move_count) const {
+		return history.getMoveNumbers(move_count, game_config.board_size);
+	}
 
 	// Return value
 	std::string getAILastMove();
