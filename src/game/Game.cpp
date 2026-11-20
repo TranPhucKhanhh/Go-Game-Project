@@ -404,7 +404,7 @@ bool Game::loadGame(const std::string& name) {
 		timed_out_player = state.current_player;
 		game_end = true;
 	}
-	if (game_config.game_mode != GameMode::PvP) {
+	if (game_config.game_mode != GameMode::PvP && !game_end) {
 		AI.loadSavedGame(move_history, game_config.board_size, game_config.game_mode, game_config.komi);
 		//AI.showBoard();
 	}
