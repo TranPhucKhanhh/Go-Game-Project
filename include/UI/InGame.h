@@ -41,6 +41,8 @@ private:
     TextureEffectButton undo_button, redo_button, pass_button, resign_button, out_his_button;
     TextureEffectButton assistance_button;
     TextureEffectButton confirm_score_button, resume_play_button;
+    TextureEffectButton review_first_button, review_previous_button, review_next_button, review_latest_button;
+    TextureEffectButton move_numbers_button;
 
     TextBox white_score_box;
     TextBox black_score_box;
@@ -59,7 +61,10 @@ private:
 	UICfg& ui_cfg;
     const AssetManager& asset_manager;
 
-    int history_preview_index = -1;
+    int history_preview_index = -1; // -1 = live; 0..N = read-only board after that many moves.
+    bool move_numbers_enabled = false;
+    std::vector<std::vector<int>> displayed_move_numbers;
+    int numbered_move_count = -1;
     std::string move_info_text = "Move 0: Start";
 
     bool game_playable = false;
@@ -75,6 +80,9 @@ private:
     void announceResult();
     void updateScoringSummary();
     void resizeScoringPanel();
+    void selectReviewMove(int move_count);
+    void closeReview();
+    void resizeReviewToolbar();
     void mode_panel_resize(const float& _height);
     void control_panel_resize(const float& _height);
     void option_panel_resize(const float& _height);

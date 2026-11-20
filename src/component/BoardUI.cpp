@@ -134,6 +134,29 @@ void BoardUI::draw(sf::RenderWindow& window, const Board& current_board,
     }
 }
 
+void BoardUI::drawMoveNumbers(sf::RenderWindow& window, const Board& current_board,
+    const std::vector<std::vector<int>>& numbers, int selected_move) const {
+    if (numbers.size() != current_board.size()) return;
+    TextBox label(font);
+    label.updateBoxColor(sf::Color::Transparent);
+    label.updateBoxSize({ grid_size * 0.75f, grid_size * 0.55f });
+    for (int x = 0; x < current_board.size(); ++x) {
+        if (numbers[x].size() != current_board.size()) return;
+        for (int y = 0; y < current_board.size(); ++y) {
+            if (numbers[x][y] == 0 || current_board[x][y] == CellState::Empty) continue;
+            const bool black = current_board[x][y] == CellState::Black;
+            label.updateTextColor(numbers[x][y] == selected_move
+                ? (black ? sf::Color(255, 210, 75) : sf::Color(25, 80, 200))
+                : (black ? sf::Color::White : sf::Color::Black));
+            label.updateStr(std::to_string(numbers[x][y]));
+            label.updateBoxPos({ start_position.x + x * grid_size, start_position.y + y * grid_size });
+            label.updateTextSize(label.getSize().y);
+            label.updateTextSizeFitWithScale(0.95f);
+            label.draw(window);
+        }
+    }
+}
+
 std::optional<sf::Vector2i> BoardUI::intersectionAt(const sf::Vector2i& mouse_pos) const {
     if (grid_size <= 0.f || board_cell_number <= 0) return std::nullopt;
     const float x = (mouse_pos.x - start_position.x) / grid_size;

@@ -46,6 +46,11 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     assistance_button("Assistance: ON", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     confirm_score_button("Confirm Result", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     resume_play_button("Resume Play", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    review_first_button("First", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    review_previous_button("Previous", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    review_next_button("Next", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    review_latest_button("Latest", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
+    move_numbers_button("Numbers: OFF", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     save_button("Save game", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     setting_button("Setting", _asset_manager.getFont("StackSansNotch-Regular"), ui_cfg),
     sound_button(ui_cfg),
@@ -84,6 +89,18 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     assistance_button.updateRespondStr("Toggle Assistance");
     confirm_score_button.updateRespondStr("Confirm Score");
     resume_play_button.updateRespondStr("Resume Play");
+    review_first_button.updateRespondStr("Review First");
+    review_previous_button.updateRespondStr("Review Previous");
+    review_next_button.updateRespondStr("Review Next");
+    review_latest_button.updateRespondStr("Review Latest");
+    move_numbers_button.updateRespondStr("Toggle Move Numbers");
+    for (auto* button : { &review_first_button, &review_previous_button, &review_next_button,
+        &review_latest_button, &move_numbers_button }) {
+        button->updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
+        button->updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
+        button->updateHoverTex(asset_manager.getTexture("button_rectangle_border"));
+        button->updateHoldTex(asset_manager.getTexture("button_rectangle_depth_gloss"));
+    }
     for (auto* button : { &confirm_score_button, &resume_play_button }) {
         button->updateTextEffectColor(sf::Color::Black, sf::Color::Black, sf::Color::White);
         button->updateIdleTex(asset_manager.getTexture("button_rectangle_flat"));
@@ -155,7 +172,7 @@ InGame::InGame(const AssetManager& _asset_manager, Game& _game, UICfg& ui_cfg) :
     win_notification.addSelection(_new);
 
 	// initialize the history
-    history_scroll.updatePreviewSize(7);
+    history_scroll.updatePreviewSize(4);
 
     // update the random
     std::srand(std::time(0));
@@ -249,6 +266,7 @@ void InGame::enter() {
 	else if (game.getGameCfg().game_mode == GameMode::AIHard) mode_box.updateStr("Mode: AI hard");
 
     history_preview_index = -1;
+    numbered_move_count = -1;
     updateHeaderBar();
     updateScoreBox(game.getScore());
 
@@ -345,6 +363,7 @@ void InGame::updateScoreBox(const std::pair<float, float>& _score) {
 }
 
 void InGame::updateHistoryScroll() {
+    numbered_move_count = -1; // History may have changed even if its length is unchanged.
     while (history_scroll.getContentSize() > game.getMoveListSize()) {
         history_scroll.deleteLastContent();
     }
@@ -359,6 +378,47 @@ void InGame::updateHistoryScroll() {
         _move_btn.updateColor({ 91, 164, 252 });
         history_scroll.updateContent(_move_btn);
     }
+}
+
+void InGame::selectReviewMove(int move_count) {
+    if (ui_cfg.AI_in_turn || game.isScoring()) return;
+    // Settle time spent playing before moving the read-only review cursor.
+    game.setClockPaused(true);
+    announceResult();
+    if (win_notification.onScreen()) return;
+    history_scroll.updateContentColor(history_preview_index - 1, sf::Color(91, 164, 252));
+    history_preview_index = std::clamp(move_count, 0, game.getMoveListSize());
+    game_playable = false;
+    if (history_preview_index > 0) game.getKthBoard(history_preview_index - 1);
+    const Board preview = history_preview_index == 0 ? Board(game.getBoardSize()) : game.getPreviewBoard();
+    updateScoreBox(game.getScoreFromBoard(preview));
+    history_scroll.updateContentColor(history_preview_index - 1, sf::Color(255, 215, 90));
+    if (history_preview_index > 0) {
+        const int visible = history_scroll.getPreviewSize();
+        const int selected = history_preview_index - 1;
+        const int top = std::clamp(selected, 0, std::max(0, game.getMoveListSize() - visible));
+        if (selected < history_scroll.getIndex() || selected >= history_scroll.getIndex() + visible)
+            history_scroll.updateIndex(top);
+    }
+    header_bar.updateStr("REVIEW " + std::to_string(history_preview_index) + "/" + std::to_string(game.getMoveListSize())
+        + (history_preview_index == 0 ? ": Start" : ": " + game.getKthMove(history_preview_index)));
+    header_bar.updateBoxColor(sf::Color(255, 225, 120));
+    header_bar.updateTextColor(sf::Color::Black);
+    header_bar.updateTextSize(header_bar.getSize().y);
+    header_bar.updateTextSizeFitWithScale(0.9f);
+    updateMoveInfo();
+}
+
+void InGame::closeReview() {
+    history_scroll.updateContentColor(history_preview_index - 1, sf::Color(91, 164, 252));
+    history_preview_index = -1;
+    game_playable = !game.isGameEnd() && !game.isScoring();
+    updateHeaderBar();
+    header_bar.updateTextSize(header_bar.getSize().y);
+    header_bar.updateTextSizeFitWithScale(0.9f);
+    updateScoreBox(game.getScore());
+    updateMoveInfo();
+    tick();
 }
 
 void InGame::eventHandle(const sf::Event& event, std::string& respond) {
@@ -425,6 +485,38 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
             respond = "StartAI";
         }
         return;
+    }
+
+    // Handle review before placement and live-game commands. Dialogs above consume keys first.
+    if (!ui_cfg.AI_in_turn && ui_cfg.window.hasFocus()) {
+        const int cursor = history_preview_index == -1 ? game.getMoveListSize() : history_preview_index;
+        if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
+            if (key->code == sf::Keyboard::Key::Left) { selectReviewMove(cursor - 1); return; }
+            if (key->code == sf::Keyboard::Key::Right) { selectReviewMove(cursor + 1); return; }
+            if (key->code == sf::Keyboard::Key::Home) { selectReviewMove(0); return; }
+            if (key->code == sf::Keyboard::Key::End ||
+                (key->code == sf::Keyboard::Key::Escape && history_preview_index != -1)) {
+                closeReview(); return;
+            }
+        }
+        for (auto* button : { &review_first_button, &review_previous_button, &review_next_button,
+            &review_latest_button, &move_numbers_button }) button->eventHandle(event, ui_cfg, event_respond);
+        if (history_preview_index != -1) out_his_button.eventHandle(event, ui_cfg, event_respond);
+        history_scroll.eventHandle(event, ui_cfg, event_respond);
+        if (event_respond == "Review First") { selectReviewMove(0); return; }
+        if (event_respond == "Review Previous") { selectReviewMove(cursor - 1); return; }
+        if (event_respond == "Review Next") { selectReviewMove(cursor + 1); return; }
+        if (event_respond == "Review Latest" || event_respond == "Close History") { closeReview(); return; }
+        if (!event_respond.empty() && event_respond[0] == '|') {
+            selectReviewMove(std::stoi(event_respond.substr(1))); return;
+        }
+        if (event_respond == "Toggle Move Numbers") {
+            move_numbers_enabled = !move_numbers_enabled;
+            numbered_move_count = -1;
+            move_numbers_button.updateStr(move_numbers_enabled ? "Numbers: ON" : "Numbers: OFF");
+            resizeReviewToolbar();
+            return;
+        }
     }
 
     if (game_playable && !ui_cfg.AI_in_turn) {
@@ -502,9 +594,6 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
     redo_button.eventHandle(event, ui_cfg, event_respond);
     pass_button.eventHandle(event, ui_cfg, event_respond);
     resign_button.eventHandle(event, ui_cfg, event_respond);
-    if (history_preview_index != -1) out_his_button.eventHandle(event, ui_cfg, event_respond);
-
-	history_scroll.eventHandle(event, ui_cfg, event_respond);
 
     if (ui_cfg.AI_in_turn) return;
 
@@ -512,28 +601,6 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
 		std::cerr << "clicked: " << event_respond << std::endl;
 	}
 
-    if (event_respond.size() >= 1 && event_respond[0] == '|') {
-        // Clicked the move in the history
-        int k = std::stoi(event_respond.substr(1));
-
-        if (k < game.getMoveListSize()) {
-            game.getKthBoard(k-1);
-            game_playable = false;
-            history_preview_index = k-1;
-            updateScoreBox(game.getScoreFromBoard(game.getPreviewBoard()));
-
-            header_bar.updateStr(history_scroll.getContentStr(k-1));
-            header_bar.updateBoxColor(sf::Color::Yellow);
-            header_bar.updateTextColor(sf::Color::Black);
-            return;
-        }
-        else {
-            if (!game.isGameEnd()) game_playable = true;
-            history_preview_index = -1;
-            updateHeaderBar();
-            updateScoreBox(game.getScore());
-        }
-    }
     if (event_respond == "Undo" && game_playable && !game.isGameEnd()) {
         game.undo();
         updateHeaderBar();
@@ -554,19 +621,20 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         updateScoreBox(game.getScore());
         updateHistoryScroll();
     }
-    else if (event_respond == "Reset") {
+    else if (event_respond == "Reset" && history_preview_index == -1) {
         game.reset();
 		history_scroll.clearContent();
         game_playable = true; 
         result_announced = false;
         history_preview_index = -1;
+        updateHistoryScroll();
         updateHeaderBar();
         updateScoreBox(game.getScore());
     }
     else if (event_respond == "New") {
         respond = "GameNewOption";
     }
-    else if (event_respond == "Save" && history_preview_index == -1) {
+    else if (event_respond == "Save") {
         save_file_input.clearStr();
         save_file_input.updateOnScreen(true);
 	}
@@ -574,12 +642,9 @@ void InGame::eventHandle(const sf::Event& event, std::string& respond) {
         respond = "OpenSetting";
     }
     else if (event_respond == "Close History") {
-        if (!game.isGameEnd()) game_playable = true;
-        history_preview_index = -1;
-        updateHeaderBar();
-        updateScoreBox(game.getScore());
+        closeReview();
     }
-    else if (event_respond == "Resign") {
+    else if (event_respond == "Resign" && game_playable) {
         game.resign();
     }
     else if (event_respond == "Toggle Music") {
@@ -709,7 +774,7 @@ void InGame::updateClockBoxes() {
 }
 
 void InGame::updateMoveInfo() {
-    const int move_number = history_preview_index == -1 ? game.getMoveListSize() : history_preview_index + 1;
+    const int move_number = history_preview_index == -1 ? game.getMoveListSize() : history_preview_index;
     std::string description = move_number == 0 ? "Start" : game.getKthMove(move_number);
     if (!description.empty()) {
         if (description[0] == 'b') description[0] = 'B';
@@ -765,22 +830,35 @@ void InGame::draw() {
     white_score_box.draw(ui_cfg.window);
     black_score_box.draw(ui_cfg.window);
 
-    const Board displayed_board = history_preview_index != -1 ? game.getPreviewBoard() : game.getCurrentBoard();
+    const Board displayed_board = history_preview_index == 0 ? Board(game.getBoardSize())
+        : history_preview_index != -1 ? game.getPreviewBoard() : game.getCurrentBoard();
     const bool modal_open = save_file_input.onScreen() || error_notification.onScreen() || win_notification.onScreen();
     const bool allow_placement = history_preview_index == -1 && game_playable && !game.isScoring() && !ui_cfg.AI_in_turn && !modal_open;
     if (allow_placement) board.hoverStone(ui_cfg.mouse_pos, game);
+    const int displayed_count = history_preview_index == -1 ? game.getMoveListSize() : history_preview_index;
     board.draw(ui_cfg.window, displayed_board,
-        game.getMoveAt(history_preview_index == -1 ? game.getMoveListSize() - 1 : history_preview_index),
+        move_numbers_enabled ? std::nullopt : game.getMoveAt(displayed_count - 1),
         allow_placement);
     const bool show_scoring = history_preview_index == -1 && (game.isScoring() || game.isScoreConfirmed());
     if (show_scoring) board.drawScoring(ui_cfg.window, game.getScoringBreakdown(), game.getDeadStones());
+    if (move_numbers_enabled && !show_scoring) {
+        if (numbered_move_count != displayed_count) {
+            displayed_move_numbers = game.getMoveNumbers(displayed_count);
+            numbered_move_count = displayed_count;
+        }
+        board.drawMoveNumbers(ui_cfg.window, displayed_board, displayed_move_numbers, displayed_count);
+    }
     const std::string help_text = show_scoring ? "Squares: area | X: dead" : assistance_enabled && !modal_open
         ? board.drawAssistance(ui_cfg.window, displayed_board, ui_cfg.mouse_pos)
         : (assistance_enabled ? "Hover stones | Red: atari" : "Assistance OFF");
     assistance_info_box.updateStr(help_text);
     assistance_info_box.updateTextSizeFit(0.9f);
 
-    if (!game.isScoring()) history_scroll.draw(ui_cfg.window);
+    if (!game.isScoring()) {
+        history_scroll.draw(ui_cfg.window);
+        for (auto* button : { &review_first_button, &review_previous_button, &review_next_button,
+            &review_latest_button, &move_numbers_button }) button->draw(ui_cfg.window);
+    }
     mode_box.draw(ui_cfg.window);
     updateMoveInfo();
     move_info_box.draw(ui_cfg.window);
@@ -864,9 +942,35 @@ void InGame::history_panel_resize(const float& _height) {
         option_panel.getPosition().y + option_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
 
 
-    history_scroll.updateSize({ side_panel_size_x, _height });
-    history_scroll.updatePos({ board.getPos().x + board_size / 2 + inner_padding + side_panel_size_x / 2,
-        option_panel.getPosition().y + option_panel.getSize().y / 2.f + history_panel.getSize().y / 2.f + inner_padding });
+    resizeReviewToolbar();
+}
+
+void InGame::resizeReviewToolbar() {
+    const float width = history_panel.getSize().x;
+    const float height = history_panel.getSize().y;
+    const float gap = width * 0.025f;
+    const float left = history_panel.getPosition().x - width / 2.f;
+    const float top = history_panel.getPosition().y - height / 2.f;
+    const float row_height = height * 0.12f;
+    TextureEffectButton* buttons[] = { &review_first_button, &review_previous_button,
+        &review_next_button, &review_latest_button, &move_numbers_button };
+    for (int i = 0; i < 5; ++i) {
+        const bool toggle = i == 4;
+        const float button_width = toggle ? width - 2.f * gap : (width - 3.f * gap) / 2.f;
+        buttons[i]->updateSize({ button_width, row_height });
+        buttons[i]->updatePos({ left + gap + button_width / 2.f + (toggle ? 0.f : (i % 2) * (button_width + gap)),
+            top + gap + row_height / 2.f + (i / 2) * (row_height + gap) });
+    }
+    // Related navigation controls use the user's shared minimum text-size convention.
+    const float common_size = std::min({ review_first_button.getTextSizeFit(0.9f),
+        review_previous_button.getTextSizeFit(0.9f), review_next_button.getTextSizeFit(0.9f),
+        review_latest_button.getTextSizeFit(0.9f) });
+    for (int i = 0; i < 4; ++i) buttons[i]->updateTextSize(common_size);
+    move_numbers_button.updateTextSizeFit(0.9f);
+    const float list_top = top + 3.f * (row_height + gap) + gap;
+    const float list_height = std::max(1.f, top + height - gap - list_top);
+    history_scroll.updateSize({ width - 2.f * gap, list_height });
+    history_scroll.updatePos({ history_panel.getPosition().x, list_top + list_height / 2.f });
 }
 
 void InGame::resizeScoringPanel() {
@@ -966,7 +1070,8 @@ void InGame::resize() {
     
     header_bar.updateBoxSize({ board_size, status_bar_size_y });
     header_bar.updateBoxPos({ board.getPos().x, board.getPos().y - board_size / 2.f - inner_padding - status_bar_size_y / 2.f});
-	header_bar.updateTextSizeFit(0.9);
+    header_bar.updateTextSize(header_bar.getSize().y);
+    header_bar.updateTextSizeFitWithScale(0.9f);
 
     // Resize the sound and music button
     sound_button.updateSize({ padding * 0.9f, padding * 0.9f });

@@ -135,6 +135,8 @@ public:
 	void drawScoring(sf::RenderWindow& window, const AreaScore& score,
 		const std::vector<std::vector<bool>>& dead_stones) const;
 	void scoringClick(const sf::Vector2i& mouse_pos, Game& game) const;
+	void drawMoveNumbers(sf::RenderWindow& window, const Board& current_board,
+		const std::vector<std::vector<int>>& numbers, int selected_move) const;
 
 	// Return value
 	sf::Vector2f getPos() const { return position; }
@@ -294,6 +296,9 @@ public:
 	void updateIndex(const int& _index) { index = _index; updateState(); };
 	void updateThumbTexture(const sf::Texture& _t) { thumb.updateTexture(_t); }
 	void updateThumbColor(const sf::Color& _c) { thumb.updateColor(_c); };
+	void updateContentColor(int item, const sf::Color& color) {
+		if (item >= 0 && item < static_cast<int>(content.size())) content[item].updateColor(color);
+	}
 	void deleteLastContent();
 	void updateState();
 
