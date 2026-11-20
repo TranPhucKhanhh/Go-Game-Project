@@ -68,6 +68,18 @@ Choose **Confirm Result** to finish the match, or **Resume Play** to clear the d
 
 **Save game** is available while scoring. Saves preserve pending/confirmed scoring, whole-group markings and clocks. Confirmed territory remains visible at the latest position; older history positions show their own boards. Earlier completed saves remain completed when loaded.
 
+## Game review
+
+Use **First**, **Previous**, **Next** and **Latest** above the move list. First shows the empty starting board. Previous/Next step through individual moves, including passes; clicking a move selects it and highlights its row. The yellow header shows the selected move and the total number of moves. The board, last-move marker, assistance overlays and area counts follow the selected position.
+
+**Left/Right** step backward/forward, **Home** shows the start, and **End** or **Escape** returns to the latest live position. Reaching the final move with Next stays in review; choose Latest to leave review. Clocks pause during review, and board placement, undo/redo, passing, resignation and reset cannot change the match while reviewing. Review controls wait until an AI turn finishes and do not process shortcuts inside dialogs.
+
+Toggle **Numbers: ON/OFF** to label surviving stones with their original move numbers. Captures remove labels, passes consume a number without placing a label, and a later stone at the same point gets its own number. The selected move is colored when it is a stone; a pass is identified in the header and move list. Labels resize with the board, and the four navigation buttons share one fitted font size.
+
+**Save game** saves the full match even while an earlier position is displayed. Completed games retain their result, komi, clock settings and scoring choices when reopened from Load Game. Close the result dialog to review them; reopening a completed AI game does not require starting KataGo.
+
+Repository-specific contributor instructions are stored in `.idea/AGENTS.md`. Only that file is tracked from `.idea/`; private reports and scratch files stay ignored.
+
 ## Full repository on Github
 
 The Github link to the full project with instruction is: https://github.com/TranPhucKhanhh/Go-Game-Project.git
